@@ -1,41 +1,111 @@
-// import logo from './logo.svg';
-// import './App.css';
+  import React from 'react';
+  import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+  import { AuthProvider } from './context/AuthContext';
+  import AdminSidebar from './components/Sidebar/AdminSidebar';
+  import ManagerSidebar from './components/Sidebar/ManagerSidebar';
+  import EmployeeSidebar from './components/Sidebar/EmployeeSidebar';
+  import Login from './pages/LoginPage';
+  import 'bootstrap/dist/js/bootstrap.bundle.min';
+  import '@fortawesome/fontawesome-free/css/all.min.css';
+  import 'bootstrap/dist/css/bootstrap.min.css';
+  import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+  import $ from 'jquery';
+  import Popper from '@popperjs/core';
+  import "./App.css"
 
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <p>
-//           Edit <code>src/App.js</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
+  import Unauthorized from './Unauthorized';
+  import PrivateRoute from './PrivateRoute';
 
-// export default App;
-import React from 'react';
-import LeadsPage from './pages/LeadsPage';
-import { LeadProvider } from './context/LeadContext';
+  // Admin routes
+  import AdminDashboard from './pages/Admin/Dashboard';
+  import LeadDetail from './pages/Admin/LeadDetails';
+  import LeadList from './pages/Admin/LeadList';
+  import Settings from './pages/Admin/Settings';
+  import Reports from './pages/Admin/Reports';
+  import Leads from './pages/Admin/Leads';
+  import EmployeeAdd from './pages/Admin/EmployeeAdd';
+import EmployeeEdit from './pages/Admin/EmployeeEdit';
 
-const App = () => {
+  // Employee routes
+  import EmployeeDashboard from './pages/Employee/Dashboard';
+
+  // Manager routes
+  import ManagerDashboard from './pages/Manager/Dashboard';
+  import Header from './components/Header';
+import Employee from './pages/Admin/Employee';
+
+  const App = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    const renderSidebar = () => {
+      if (!user) return null;
+      if (user.role === 'ROLE_ADMIN') return <AdminSidebar />;
+      if (user.role === 'ROLE_MANAGER') return <ManagerSidebar />;
+      if (user.role === 'ROLE_EMPLOYEE') return <EmployeeSidebar />;
+      return null;
+    };
+
+    const getDefaultRoute = () => {
+      if (!user) return '/login';
+      switch (user.role) {
+        case 'ROLE_ADMIN':
+          return '/dashboard';
+        case 'ROLE_MANAGER':
+          return '/manager-dashboard';
+        case 'ROLE_EMPLOYEE':
+          return '/employee-dashboard';
+        default:
+          return '/login';
+      }
+    };
+
     return (
-        <LeadProvider>
-            <div>
-                <h1>CRM App</h1>
-                <LeadsPage />
-            </div>
-        </LeadProvider>
-    );
-};
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/*"
+              element={
+                <div>
+                  <Header/>
+                  {renderSidebar()}
+                  {/* <div className="content-wrapper"> */}
+                    <Routes>
+                      <Route path="/unauthorized" element={<Unauthorized />} />
 
-export default App;
+                      <Route element={<PrivateRoute allowedRoles={['ROLE_ADMIN']} />}>
+                        <Route path="/dashboard" element={<AdminDashboard />} />
+                        <Route path="/lead-list" element={<LeadList />} />
+                        <Route path="/lead-details" element={<LeadDetail/>}/>
+                        <Route path = "/employee" element={<Employee/>}/>
+                        <Route path="/employee-add" element={<EmployeeAdd />} />
+                        <Route path="/employee-edit/:id" element={<EmployeeEdit />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route path="/admin" element={<AdminSidebar/>}/>
+                        <Route path="/Leads" element={<Leads/>}/>
+                      </Route>
+
+                      <Route element={<PrivateRoute allowedRoles={['ROLE_MANAGER']} />}>
+                        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+                      </Route>
+
+                      <Route element={<PrivateRoute allowedRoles={['ROLE_EMPLOYEE']} />}>
+                        <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+                      </Route>
+
+                      {/* Redirect to default route based on role */}
+                      <Route path="/" element={<Navigate to={getDefaultRoute()} />} />
+                    </Routes>
+                  {/* </div> */}
+                </div>
+              }
+            />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    );
+  };
+
+  export default App;
