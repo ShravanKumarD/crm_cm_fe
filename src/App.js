@@ -75,7 +75,7 @@ import Employee from './pages/Admin/Employee';
                       <Route path="/unauthorized" element={<Unauthorized />} />
 
                       <Route element={<PrivateRoute allowedRoles={['ROLE_ADMIN']} />}>
-                        <Route path="/dashboard" element={<AdminDashboard />} />
+                        <Route path="/admin-dashboard" element={<AdminDashboard />} />
                         <Route path="/lead-list" element={<LeadList />} />
                         <Route path="/lead-details" element={<LeadDetail/>}/>
                         <Route path = "/employee" element={<Employee/>}/>
