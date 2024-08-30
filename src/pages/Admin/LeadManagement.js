@@ -7,7 +7,7 @@ export default function LeadManagement() {
     const [employees, setEmployees] = useState([]);
     const [leads, setLeads] = useState([]);
     const [error, setError] = useState(null);
-    const [adminId, setAdminId] = useState(18);
+    const [adminId, setAdminId] = useState(2);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedLeads, setSelectedLeads] = useState(new Set()); // State to keep track of selected leads

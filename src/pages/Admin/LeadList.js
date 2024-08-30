@@ -20,6 +20,7 @@ const LeadList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Fetch leads data on component mount
         fetchLeads();
         fetchEmployees();
     }, []);
@@ -73,7 +74,7 @@ const LeadList = () => {
             const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
                 leadIds: selectedLeads,
                  assignedToUserId:assignedTo,
-                 assignedBy:18
+                 assignedBy:2
             });
     
             if (response.status === 200) {
@@ -140,12 +141,12 @@ const LeadList = () => {
         navigate('/lead-details', { state: { lead } });
     };
 
-    // const handleRevertAssignments = () => {
-    //     setLeads(leads.map(lead =>
-    //         selectedLeads.includes(lead.id) ? { ...lead, assignedTo: null } : lead
-    //     ));
-    //     setSelectedLeads([]);
-    // };
+    const handleRevertAssignments = () => {
+        setLeads(leads.map(lead =>
+            selectedLeads.includes(lead.id) ? { ...lead, assignedTo: null } : lead
+        ));
+        setSelectedLeads([]);
+    };
 
     const handleCheckboxChange = (id) => {
         setSelectedLeads(prevSelected =>
@@ -300,13 +301,13 @@ const LeadList = () => {
                                     <option key={employee.id} value={employee.id}>{employee.name}</option>
                                 ))}
                             </select>
-                            {/* <button
+                            <button
                                 className="btn btn-danger"
                                 onClick={handleRevertAssignments}
                                 disabled={selectedLeads.length === 0}
                             >
                                 Revert
-                            </button> */}
+                            </button>
                         </div>
                     </div>
                     {/* File Upload Section */}
