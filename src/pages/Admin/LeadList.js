@@ -20,7 +20,6 @@ const LeadList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch leads data on component mount
         fetchLeads();
         fetchEmployees();
     }, []);
@@ -29,17 +28,20 @@ const LeadList = () => {
         try {
             const response = await axios.get('http://localhost:3000/lead/');
             if (response.status === 200) {
-                setLeads(response.data.leads);
+                console.log(response,"statu")
+                setLeads(response.data.leads.map(lead => ({
+                    ...lead,
+                    assignedTo: lead.assignedTo || "Not Assigned" // Ensure assignedTo is reflected correctly
+                })));
             }
         } catch (error) {
             console.error('Error fetching leads:', error.message);
         }
     };
-   
+    
     const fetchEmployees = async () => {
         try {
             const response = await axios.get('http://localhost:3000/user');
-            console.log(response.data);
             setEmployees(response.data);
             console.log(employees, "emp");
         } catch (err) {
@@ -60,14 +62,6 @@ const LeadList = () => {
             console.error('Error deleting lead:', error.message);
         }
     };
-    
-
-    // const handleAssignLeads = (assignedTo) => {
-    //     setLeads(leads.map(lead =>
-    //         selectedLeads.includes(lead.id) ? { ...lead, assignedTo } : lead
-    //     ));
-    //     setSelectedLeads([]);
-    // };
     const handleAssignLeads = async (assignedTo) => {
         if (!assignedTo) {
             console.error('No user selected for assignment.');
@@ -78,14 +72,17 @@ const LeadList = () => {
             // Send the request to assign leads
             const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
                 leadIds: selectedLeads,
-                userId: assignedTo
+                 assignedToUserId:assignedTo,
+                 assignedBy:18
             });
     
             if (response.status === 200) {
                 // Update local leads state after successful assignment
+                console.log(response,"dbdvg")
                 setLeads(prevLeads =>
                     prevLeads.map(lead =>
-                        selectedLeads.includes(lead.id) ? { ...lead, assignedTo } : lead
+                        selectedLeads.includes(lead.id) ? { ...lead, assignedTo:response.data.assignedTo.name
+                        } : lead
                     )
                 );
                 setSelectedLeads([]);
@@ -110,13 +107,13 @@ const LeadList = () => {
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
+                   console.log(jsonData,"jos")
                 const importedLeads = jsonData.map((item, index) => ({
                     id: leads.length + index + 1, // Generate a unique ID
                     name: item.name || item.Name || item.firstname + item.lastname || 'N/A',
                     email: item.email || item.Email || 'N/A',
                     status: item.status || item.Status || 'N/A',
-                    source: item.source || item.Source || 'N/A',
+                    source: item.source || item.Source || item.leadSource||'N/A',
                     phone: item.mobile || item.Mobile || item.Age || 'N/A',
                     dob: item.dob || item.dateOfBirth || item.dateofBirth || 'N/A',
                     company: item.company || item.organization || item.firm || 'N/A',
@@ -143,12 +140,12 @@ const LeadList = () => {
         navigate('/lead-details', { state: { lead } });
     };
 
-    const handleRevertAssignments = () => {
-        setLeads(leads.map(lead =>
-            selectedLeads.includes(lead.id) ? { ...lead, assignedTo: null } : lead
-        ));
-        setSelectedLeads([]);
-    };
+    // const handleRevertAssignments = () => {
+    //     setLeads(leads.map(lead =>
+    //         selectedLeads.includes(lead.id) ? { ...lead, assignedTo: null } : lead
+    //     ));
+    //     setSelectedLeads([]);
+    // };
 
     const handleCheckboxChange = (id) => {
         setSelectedLeads(prevSelected =>
@@ -177,14 +174,34 @@ const LeadList = () => {
     };
 
     const parseDate = (dateString) => {
-        const [day, month, year] = dateString.split('/');
-        return new Date(`${year}-${month}-${day}`);
+        if (!dateString || typeof dateString !== 'string') {
+            return null; // Return null for invalid inputs
+        }
+    
+        const parts = dateString.split('/');
+        if (parts.length !== 3) {
+            return null; // Return null for incorrect formats   
+        }
+    
+        const [day, month, year] = parts.map(part => parseInt(part, 10));
+        if (isNaN(day) || isNaN(month) || isNaN(year)) {
+            return null; // Return null for invalid date components
+        }
+    
+        // Check if the date is valid
+        const date = new Date(year, month - 1, day);
+        if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+            return null; // Return null for invalid dates
+        }
+    
+        return date;
     };
     
-    const isValidDate = (dateString) => {
-        const date = parseDate(dateString);
-        return !isNaN(date.getTime()); // Check if date is valid
-    };
+
+    
+    
+    const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
+
     
     const filteredLeads = leads.filter(lead => {
         const formattedAssignedDate = isValidDate(lead.assignedDate) 
@@ -202,15 +219,21 @@ const LeadList = () => {
     // Sorting function to push inactive leads to the end
     const sortLeads = (leadsList) => {
         return leadsList.sort((a, b) => {
-            if (a.status.toLowerCase() === 'inactive' && b.status.toLowerCase() !== 'inactive') {
+            // Check if status is a valid string, default to empty string if not
+            const statusA = a.status ? a.status.toLowerCase() : '';
+            const statusB = b.status ? b.status.toLowerCase() : '';
+    
+            // Compare statuses
+            if (statusA === 'inactive' && statusB !== 'inactive') {
                 return 1;
             }
-            if (a.status.toLowerCase() !== 'inactive' && b.status.toLowerCase() === 'inactive') {
+            if (statusA !== 'inactive' && statusB === 'inactive') {
                 return -1;
             }
             return 0;
         });
     };
+    
 
     const sortedLeads = sortLeads(filteredLeads);
 
@@ -277,13 +300,13 @@ const LeadList = () => {
                                     <option key={employee.id} value={employee.id}>{employee.name}</option>
                                 ))}
                             </select>
-                            <button
+                            {/* <button
                                 className="btn btn-danger"
                                 onClick={handleRevertAssignments}
                                 disabled={selectedLeads.length === 0}
                             >
                                 Revert
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                     {/* File Upload Section */}
@@ -358,7 +381,7 @@ const LeadList = () => {
                                     <td>{lead.phone}</td>
                                     <td>{lead.gender}</td>
                                     <td>{lead.status}</td>
-                                    <td>{lead.source}</td>
+                                    <td>{lead.leadSource}</td>
                                     <td>{lead.leadOwner}</td>
                                     <td>{lead.assignedDate}</td>
                                     <td>{lead.assignedTo || "Not Assigned"}</td>

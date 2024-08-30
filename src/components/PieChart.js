@@ -25,7 +25,6 @@ const LeadsPieChart = ({ leadsData }) => {
 
   return (
     <div className="chart-container">
-       <h1>Leads</h1>
       <Pie data={chartData} options={options} className='pie'/>
     </div>
   );

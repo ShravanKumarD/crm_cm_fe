@@ -94,7 +94,8 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className='global-container'>
+    <div className="container">
       <div className='row'>
       {/* <h2>Dashboard</h2> */}
       <div className="col-sm-4">
@@ -102,15 +103,14 @@ const AdminDashboard = () => {
     
       <TaskList tasks={tasks} />
     </div>
-
-    <div className='col-sm-4'></div>
     
 
       <div className='col-sm-2'>
-   
+      <h1>Leads</h1>
       <LeadsPieChart leadsData={leadsData} />
       </div>
     
+    </div>
     </div>
     </div>
   );

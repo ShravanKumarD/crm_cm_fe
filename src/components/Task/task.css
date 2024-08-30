@@ -1,31 +1,15 @@
 /* TaskList.css */
 
-.task-list {
-  width: max-content;
-  height: max-content
-  }
-  .task-list h1 {
-    font-size: 2rem; /* Example font size */
-    color: #333; /* Example color */
-  }
+
   .task {
-    margin-top: 100px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-    border-radius: 8px; 
-    padding: 80px;
+    border-radius: 10px; 
+    padding: 75px;
     background: radial-gradient(
       circle, 
       #b5b5c2,  /* Blue */
       #e8dfdf,  /* White */
-      #c2e2e7   /* Orange */
+      #e8ebec   /* Orange */
     );
-  }
-  
-  .task-header {
-    margin-bottom: 5px;
-  }
-  
-  .task-children {
-    margin-left: 20px;
   }
   

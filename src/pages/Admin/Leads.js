@@ -64,6 +64,10 @@ export default function Leads() {
     const handleNavigate = () => {
         window.location.href = "/lead-list";
     };
+    const handleNavigateManagement = () => {
+        window.location.href = "/manage-leads";
+    };
+
 
     const postData = async (data) => {
         try {
@@ -94,9 +98,11 @@ export default function Leads() {
                     <h1>Leads</h1>
                 </div>
                 <div className='mb-3'>
-                    <Button className="btn btn-primary btn-lg" onClick={handleShow}>Add Lead</Button>
+                    <Button className="btn btn-primary btn-lg" onClick={handleShow}>Add Leads</Button>
                     <Button className='btn btn-info btn-lg ms-2' onClick={handleNavigate}>View Leads</Button>
+                    <Button className='btn btn-danger btn-lg ms-2' onClick={handleNavigateManagement}>Manage Leads</Button>
                 </div>
+
 
                 {/* Modal */}
                 <Modal show={showModal} onHide={handleClose}>

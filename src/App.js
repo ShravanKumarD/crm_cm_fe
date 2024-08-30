@@ -25,7 +25,7 @@
   import Leads from './pages/Admin/Leads';
   import EmployeeAdd from './pages/Admin/EmployeeAdd';
 import EmployeeEdit from './pages/Admin/EmployeeEdit';
-
+import LeadManagement from './pages/Admin/LeadManagement';
   // Employee routes
   import EmployeeDashboard from './pages/Employee/Dashboard';
 
@@ -85,8 +85,10 @@ import Employee from './pages/Admin/Employee';
                         <Route path="/reports" element={<Reports />} />
                         <Route path="/admin" element={<AdminSidebar/>}/>
                         <Route path="/Leads" element={<Leads/>}/>
+                        <Route path="/manage-leads" element={<LeadManagement/>}/>
                         <Route path="/settings" element={<Settings/>}/>
                         <Route path="/reports" element={<Reports/>}/>
+
                       </Route>
 
                       <Route element={<PrivateRoute allowedRoles={['ROLE_MANAGER']} />}>
