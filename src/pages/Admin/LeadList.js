@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import axios from './../../components/axios'; // Assuming this is your axios instance
+import axios from './../../components/axios'; 
 import "./LeadList.css";
 import "./../../App.css";
 
 const LeadList = () => {
     const [leads, setLeads] = useState([]);
-    const [employees] = useState(["Alice", "Bob", "Charlie", "Dave", "Eve", "Frank"]);
+    const [error, setError] = useState(null);
+    const [employees, setEmployees] = useState([]);
     const [selectedLeads, setSelectedLeads] = useState([]);
     const [filters, setFilters] = useState({
         name: '',
@@ -15,11 +16,13 @@ const LeadList = () => {
         id: '',
         status: ''
     });
+    const [selectAll, setSelectAll] = useState(false); // State for "Select All"
     const navigate = useNavigate();
 
     useEffect(() => {
         // Fetch leads data on component mount
         fetchLeads();
+        fetchEmployees();
     }, []);
 
     const fetchLeads = async () => {
@@ -32,7 +35,69 @@ const LeadList = () => {
             console.error('Error fetching leads:', error.message);
         }
     };
+   
+    const fetchEmployees = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/user');
+            console.log(response.data);
+            setEmployees(response.data);
+            console.log(employees, "emp");
+        } catch (err) {
+            setError('Failed to fetch employees.');
+            console.error(err);
+        }
+    };
 
+    const handleDeleteLead = async (id) => {
+        try {
+            const response = await axios.delete(`http://localhost:3000/lead/${id}`);
+            if (response.status === 200) {
+                setLeads(prevLeads => prevLeads.filter(lead => lead.id !== id));
+            } else {
+                console.error(`Failed to delete lead with id ${id}. Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error deleting lead:', error.message);
+        }
+    };
+    
+
+    // const handleAssignLeads = (assignedTo) => {
+    //     setLeads(leads.map(lead =>
+    //         selectedLeads.includes(lead.id) ? { ...lead, assignedTo } : lead
+    //     ));
+    //     setSelectedLeads([]);
+    // };
+    const handleAssignLeads = async (assignedTo) => {
+        if (!assignedTo) {
+            console.error('No user selected for assignment.');
+            return;
+        }
+    
+        try {
+            // Send the request to assign leads
+            const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
+                leadIds: selectedLeads,
+                userId: assignedTo
+            });
+    
+            if (response.status === 200) {
+                // Update local leads state after successful assignment
+                setLeads(prevLeads =>
+                    prevLeads.map(lead =>
+                        selectedLeads.includes(lead.id) ? { ...lead, assignedTo } : lead
+                    )
+                );
+                setSelectedLeads([]);
+            } else {
+                console.error('Failed to assign leads:', response.data.error || 'Unknown error');
+            }
+        } catch (error) {
+            console.error('Error assigning leads:', error.message || 'Unknown error');
+        }
+    };
+    
+    
     // Handles file upload and processes data
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
@@ -78,13 +143,6 @@ const LeadList = () => {
         navigate('/lead-details', { state: { lead } });
     };
 
-    const handleAssignLeads = (assignedTo) => {
-        setLeads(leads.map(lead =>
-            selectedLeads.includes(lead.id) ? { ...lead, assignedTo } : lead
-        ));
-        setSelectedLeads([]);
-    };
-
     const handleRevertAssignments = () => {
         setLeads(leads.map(lead =>
             selectedLeads.includes(lead.id) ? { ...lead, assignedTo: null } : lead
@@ -98,6 +156,16 @@ const LeadList = () => {
                 ? prevSelected.filter(leadId => leadId !== id)
                 : [...prevSelected, id]
         );
+    };
+
+    const handleSelectAll = (e) => {
+        const isChecked = e.target.checked;
+        setSelectAll(isChecked);
+        if (isChecked) {
+            setSelectedLeads(leads.map(lead => lead.id));
+        } else {
+            setSelectedLeads([]);
+        }
     };
 
     const handleFilterChange = (e) => {
@@ -206,7 +274,7 @@ const LeadList = () => {
                             >
                                 <option value="">Assign to</option>
                                 {employees.map(employee => (
-                                    <option key={employee} value={employee}>{employee}</option>
+                                    <option key={employee.id} value={employee.id}>{employee.name}</option>
                                 ))}
                             </select>
                             <button
@@ -254,7 +322,13 @@ const LeadList = () => {
                     <table className="table table-striped">
                         <thead>
                             <tr>
-                                <th>Select</th>
+                                <th>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectAll}
+                                        onChange={handleSelectAll}
+                                    />
+                                </th>
                                 <th>Lead No.</th>
                                 <th>Name</th>
                                 <th>Email</th>
@@ -294,6 +368,12 @@ const LeadList = () => {
                                             onClick={() => handleViewLead(lead)}
                                         >
                                             View
+                                        </button>
+                                        <button
+                                            className="btn btn-danger"
+                                            onClick={() => handleDeleteLead(lead.id)}
+                                        >
+                                            Delete
                                         </button>
                                     </td>
                                 </tr>

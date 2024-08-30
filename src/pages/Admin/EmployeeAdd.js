@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 import axios from './../../components/axios';
+import { Modal, Button } from 'react-bootstrap';
 
 export default function EmployeeAdd() {
     // State to manage form field values
@@ -17,7 +17,7 @@ export default function EmployeeAdd() {
         role: '',
         status: ''
     });
-
+    const [showModal, setShowModal] = useState(false);
     // Handle change in form fields
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -27,6 +27,9 @@ export default function EmployeeAdd() {
         }));
     };
 
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
 
 
     const handleSubmit = async (e) => {
@@ -35,7 +38,7 @@ export default function EmployeeAdd() {
             const response = await axios.post('http://localhost:3000/user/', formData);
             if (response) {
                 console.log('Success:', response.data);
-                alert('Form submitted successfully!');
+                setShowModal(true);
             } else {
                 console.log('Error:', response.statusText);
                 alert('Form submission failed. Please try again.');
@@ -213,6 +216,19 @@ export default function EmployeeAdd() {
                     </form>
                 </div>
             </div>
+            <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Employee Created</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Employee has been created successfully!
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={handleCloseModal}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
         </div>
 

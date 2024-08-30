@@ -85,14 +85,20 @@ import Employee from './pages/Admin/Employee';
                         <Route path="/reports" element={<Reports />} />
                         <Route path="/admin" element={<AdminSidebar/>}/>
                         <Route path="/Leads" element={<Leads/>}/>
+                        <Route path="/settings" element={<Settings/>}/>
+                        <Route path="/reports" element={<Reports/>}/>
                       </Route>
 
                       <Route element={<PrivateRoute allowedRoles={['ROLE_MANAGER']} />}>
                         <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+                        <Route path="/settings" element={<Settings/>}/>
+                        <Route path="/reports" element={<Reports/>}/>
                       </Route>
 
                       <Route element={<PrivateRoute allowedRoles={['ROLE_EMPLOYEE']} />}>
                         <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+                        <Route path="/settings" element={<Settings/>}/>
+                        <Route path="/reports" element={<Reports/>}/>
                       </Route>
 
                       {/* Redirect to default route based on role */}

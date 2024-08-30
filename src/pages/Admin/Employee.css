@@ -1,0 +1,13 @@
+.card-custom {
+    height: 300px; /* Adjust the height as needed */
+}
+
+.card-custom .card-body {
+    max-height: 150px; /* Adjust the height of the body if needed */
+    overflow: hidden;  /* Hide overflow to prevent content from spilling */
+}
+
+.card-custom img {
+    height: 150px; /* Adjust the height of the image if needed */
+    object-fit: fill; /* Ensure the image covers the area properly */
+}

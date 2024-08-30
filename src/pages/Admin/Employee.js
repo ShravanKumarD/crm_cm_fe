@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Alert } from 'react-bootstrap'; 
 import { Link } from 'react-router-dom';
+import './Employee.css'; // Import the CSS file with custom styles
 
 export default function Employee() {
     const [employees, setEmployees] = useState([]);
@@ -12,6 +13,7 @@ export default function Employee() {
             try {
                 const response = await axios.get('http://localhost:3000/user');
                 setEmployees(response.data);
+                console.log(employees,"emp")
             } catch (err) {
                 setError('Failed to fetch employees.');
                 console.error(err);
@@ -19,6 +21,20 @@ export default function Employee() {
         };
         fetchEmployees();
     }, []);
+
+    const handleDeleteUser = async (id) => {
+        try {
+            const response = await axios.delete(`http://localhost:3000/user/${id}`);
+            if (response.status === 200 || response.status === 204) { // Accept 200 or 204 status
+                setEmployees(prevEmployees => prevEmployees.filter(employee => employee.id !== id));
+            } else {
+                console.error(`Failed to delete employee with id ${id}. Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error deleting employee:', error.message);
+        }
+    };
+    
 
     const handleNavigate = () => {
         window.location.href = "/employee-add";
@@ -29,7 +45,6 @@ export default function Employee() {
             <div className='container'>
                 <h1>Employee List</h1>
                 <Button className="btn btn-primary btn-lg" onClick={handleNavigate}>Add Employee</Button>
-                {/* <Button className='btn btn-info btn-lg ms-2' onClick={handleNavigate}>View Employees</Button> */}
 
                 {error && <Alert variant='danger' className='mt-3'>{error}</Alert>}
 
@@ -37,13 +52,13 @@ export default function Employee() {
                     {employees.length > 0 ? (
                         employees.map(employee => (
                             <div key={employee.id} className='col-md-4 mb-4'>
-                                <div className='card position-relative'>
+                                <div className='card position-relative card-custom'>
                                     <Link to={`/employee-edit/${employee.id}`} className='text-decoration-none'>
                                         <button className='btn btn-warning edit-button position-absolute top-0 end-0 m-2'>
                                             <i className='fas fa-edit'></i> Edit
                                         </button>
                                         <img 
-                                            src={`https://images.generated.photos/UYdk4oblUnCyHqZrIA1IAT33aMM2h28npFZ20fpxYl8/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92M18w/OTUzOTM5LmpwZw.jpg`} 
+                                            src={`https://cdn.pixabay.com/photo/2024/03/31/05/00/ai-generated-8665996_1280.jpg`} 
                                             className='card-img-top' 
                                             alt={`${employee.name}'s avatar`} 
                                         />
@@ -54,6 +69,12 @@ export default function Employee() {
                                             <p className='card-text'>{employee.department}</p>
                                         </div>
                                     </Link>
+                                    <button 
+                                        className='btn btn-danger delete-button position-absolute top-0 start-0 m-2'
+                                        onClick={() => handleDeleteUser(employee.id)}
+                                    >
+                                        <i className='fas fa-trash'></i> Delete
+                                    </button>
                                 </div>
                             </div>
                         ))
