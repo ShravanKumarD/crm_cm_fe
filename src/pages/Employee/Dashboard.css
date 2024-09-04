@@ -1,0 +1,51 @@
+.dashboard-container {
+    padding: 20px;
+  }
+  
+  .dashboard-card {
+    margin: 10px;
+  }
+  
+  .overview-card {
+    background-color: #f8f9fa;
+    padding: 20px;
+  }
+  
+  .metric-card {
+    border: none;
+    border-radius: 10px;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .metric-icon {
+    color: #b377e3;
+  }
+  
+  .activity-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .activity-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .quick-actions {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .quick-actions li {
+    margin-bottom: 10px;
+  }
+  
+  .quick-actions .btn {
+    width: 100%;
+  }
+  .readMore{
+    color: #b377e3;
+    text-decoration: none;
+  }

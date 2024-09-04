@@ -8,7 +8,7 @@
     background: radial-gradient(
       circle, 
       #b5b5c2,  /* Blue */
-      #e8dfdf,  /* White */
+        /* White */
       #e8ebec   /* Orange */
     );
   }

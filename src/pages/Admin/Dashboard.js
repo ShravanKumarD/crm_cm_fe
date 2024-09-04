@@ -8,7 +8,6 @@ import { Chart, ArcElement } from 'chart.js';
 import TaskList from '../../components/Task/TaskList';
 
 
-
 Chart.register(ArcElement);
 
 const tasks = [
@@ -109,7 +108,6 @@ const AdminDashboard = () => {
       <h1>Leads</h1>
       <LeadsPieChart leadsData={leadsData} />
       </div>
-    
     </div>
     </div>
     </div>

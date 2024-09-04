@@ -9,5 +9,5 @@
 
 .card-custom img {
     height: 150px; /* Adjust the height of the image if needed */
-    object-fit: fill; /* Ensure the image covers the area properly */
+    object-fit:contain; /* Ensure the image covers the area properly */
 }

@@ -6,11 +6,12 @@ export default function EmployeeSidebar() {
   return (
     <aside className="main-sidebar elevation-4 fixed">
     <div className="sidebar">
-      <a href="/" className="brand-link">
-        <span className="brand-text font-weight-light">
+      <a href="# " className="brand-link">
+        <span className="brand-text font-weight-light ">
           <strong>Employee</strong>
         </span>
       </a>
+      <div className="sidebar-scroll">
       <nav className="mt-2">
         <ul
           className="nav nav-pills nav-sidebar flex-column"
@@ -29,8 +30,8 @@ export default function EmployeeSidebar() {
           </li>
           <li className="nav-item has-treeview">
             <NavLink
-              to="/"
-              className="nav-link"
+              to="/emp-leads"
+              className="nav-link"  
               activeClassName="active"
             >
               <i className="nav-icon fa fa-rocket" />
@@ -40,22 +41,21 @@ export default function EmployeeSidebar() {
               </p>
             </NavLink>
           </li>
-          <li className="nav-item has-treeview">
-            <NavLink
-              to="/"
-              className="nav-link"
-              activeClassName="active"
-            >
-              <i className="nav-icon fa fa-users" />
-              <p>
-                Employees
-                {/* <i className="" /> */}
-              </p>
-            </NavLink>
-          </li>
+          {/* <li className="nav-item has-treeview">
+              <NavLink
+                to="/employee"
+                className="nav-link"
+                activeClassName="active"
+              >
+                <i className="nav-icon fa fa-users" />
+                <p>
+                  Employees
+                </p>
+              </NavLink>
+            </li> */}
           <li className="nav-item">
             <NavLink
-              to="/"
+              to="/employee-settings"
               className="nav-link"
               activeClassName="active"
             >
@@ -63,18 +63,19 @@ export default function EmployeeSidebar() {
               <p>Settings</p>
             </NavLink>
           </li>
-          <li className="nav-item">
-            <NavLink
-              to="/"
-              className="nav-link"
-              activeClassName="active"
-            >
-              <i className="nav-icon fa fa-chart-bar" />
-              <p>Reports</p>
-            </NavLink>
-          </li>
+          {/* <li className="nav-item">
+              <NavLink
+                to="/reports"
+                className="nav-link"
+                activeClassName="active"
+              >
+                <i className="nav-icon fa fa-chart-bar" />
+                <p>Reports</p>
+              </NavLink>
+            </li> */}
         </ul>
       </nav>
+      </div>
     </div>
   </aside>
   )

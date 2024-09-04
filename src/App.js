@@ -4,7 +4,7 @@
   import AdminSidebar from './components/Sidebar/AdminSidebar';
   import ManagerSidebar from './components/Sidebar/ManagerSidebar';
   import EmployeeSidebar from './components/Sidebar/EmployeeSidebar';
-  import Login from './pages/LoginPage';
+  import Login from './pages/Auth/AuthPage';
   import 'bootstrap/dist/js/bootstrap.bundle.min';
   import '@fortawesome/fontawesome-free/css/all.min.css';
   import 'bootstrap/dist/css/bootstrap.min.css';
@@ -12,6 +12,7 @@
   import $ from 'jquery';
   import Popper from '@popperjs/core';
   import "./App.css"
+  import {jwtDecode} from 'jwt-decode';
 
   import Unauthorized from './Unauthorized';
   import PrivateRoute from './PrivateRoute';
@@ -28,28 +29,56 @@ import EmployeeEdit from './pages/Admin/EmployeeEdit';
 import LeadManagement from './pages/Admin/LeadManagement';
   // Employee routes
   import EmployeeDashboard from './pages/Employee/Dashboard';
+  import EmpLeads from './pages/Employee/Leads';
+  import EmployeeViewLeadDetails from './pages/Employee/LeadDetails';
+  import TaskViewEmployee  from './pages/Employee/Task';
+  import ScheduledTasks from './pages/Employee/ScheduledTasks';
+  import EmployeeSettings from  './pages/Employee/Settings';
+  import UpdateTaskForm  from './pages/Employee/UpdateTaskForm';
 
   // Manager routes
   import ManagerDashboard from './pages/Manager/Dashboard';
   import Header from './components/Header';
 import Employee from './pages/Admin/Employee';
 
+
   const App = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
+  
+    // console.log(localStorage.setItem('user', JSON.stringify({ role: 'ROLE_ADMIN', name: 'John Doe' }))    ,'token in app')
+    // const user = JSON.parse(localStorage.getItem('user'));
+    let token = localStorage.getItem('token');
+    let user;
+    
+    if (token) {
+        try {
+            const decodedToken = jwtDecode(token);
+            user = decodedToken.user;
+            console.log(decodedToken.user,'decodedTokens'
+            )
+            localStorage.setItem('user', JSON.stringify(user));
+        } catch (error) {
+            console.error('Invalid token:', error);
+            user = null; // Ensure user is null if token is invalid
+        }
+    } else {
+        user = null;
+    }
+    
     
     const renderSidebar = () => {
+      console.log(user.role,'role')
       if (!user) return null;
       if (user.role === 'ROLE_ADMIN') return <AdminSidebar />;
       if (user.role === 'ROLE_MANAGER') return <ManagerSidebar />;
       if (user.role === 'ROLE_EMPLOYEE') return <EmployeeSidebar />;
-      return null;
+      return null; 
     };
 
     const getDefaultRoute = () => {
       if (!user) return '/login';
       switch (user.role) {
         case 'ROLE_ADMIN':
-          return '/dashboard';
+          return '/admin-dashboard';
         case 'ROLE_MANAGER':
           return '/manager-dashboard';
         case 'ROLE_EMPLOYEE':
@@ -72,7 +101,7 @@ import Employee from './pages/Admin/Employee';
                   {renderSidebar()}
                   {/* <div className="content-wrapper"> */}
                     <Routes>
-                      <Route path="/unauthorized" element={<Unauthorized />} />
+                      <Route path="/unauthorized" element={<Unauthorized/>} />
 
                       <Route element={<PrivateRoute allowedRoles={['ROLE_ADMIN']} />}>
                         <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -95,15 +124,20 @@ import Employee from './pages/Admin/Employee';
                         <Route path="/manager-dashboard" element={<ManagerDashboard />} />
                         <Route path="/settings" element={<Settings/>}/>
                         <Route path="/reports" element={<Reports/>}/>
+                        <Route path="/lead-details" element={<LeadDetail/>}/>
                       </Route>
 
                       <Route element={<PrivateRoute allowedRoles={['ROLE_EMPLOYEE']} />}>
                         <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
-                        <Route path="/settings" element={<Settings/>}/>
-                        <Route path="/reports" element={<Reports/>}/>
+                        <Route path="/emp-leads" element={<EmpLeads/>}/>
+                        <Route path="/emp-lead-details" element={<EmployeeViewLeadDetails/>}/>
+                        <Route path="/add-task-employee" element={<TaskViewEmployee />}/>
+                        <Route path="/scheduled-tasks" element={<ScheduledTasks/>}/>
+                        <Route path="/employee-settings" element={<EmployeeSettings/>}/>
+                        <Route path="/update-task-form" element={<UpdateTaskForm/>}/>
                       </Route>
 
-                      {/* Redirect to default route based on role */}
+                     
                       <Route path="/" element={<Navigate to={getDefaultRoute()} />} />
                     </Routes>
                   {/* </div> */}

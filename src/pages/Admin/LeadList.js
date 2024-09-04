@@ -64,26 +64,34 @@ const LeadList = () => {
         }
     };
     const handleAssignLeads = async (assignedTo) => {
+        if (selectedLeads.length === 0) {
+            alert('Please select leads to assign.');
+            return;
+        }
+    
         if (!assignedTo) {
             console.error('No user selected for assignment.');
             return;
+        }
+    
+        const confirmed = window.confirm(`Are you sure you want to assign the selected leads to this user?`);
+        if (!confirmed) {
+            return; // Exit the function if the user cancels the action
         }
     
         try {
             // Send the request to assign leads
             const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
                 leadIds: selectedLeads,
-                 assignedToUserId:assignedTo,
-                 assignedBy:2
+                assignedToUserId: assignedTo,
+                assignedBy: 2
             });
     
             if (response.status === 200) {
                 // Update local leads state after successful assignment
-                console.log(response,"dbdvg")
                 setLeads(prevLeads =>
                     prevLeads.map(lead =>
-                        selectedLeads.includes(lead.id) ? { ...lead, assignedTo:response.data.assignedTo.name
-                        } : lead
+                        selectedLeads.includes(lead.id) ? { ...lead, assignedTo: response.data.assignedTo.name } : lead
                     )
                 );
                 setSelectedLeads([]);
@@ -94,7 +102,6 @@ const LeadList = () => {
             console.error('Error assigning leads:', error.message || 'Unknown error');
         }
     };
-    
     
     // Handles file upload and processes data
     const handleFileUpload = (e) => {
@@ -353,7 +360,7 @@ const LeadList = () => {
                                         onChange={handleSelectAll}
                                     />
                                 </th>
-                                <th>Lead No.</th>
+                                <th>Lead Id.</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>

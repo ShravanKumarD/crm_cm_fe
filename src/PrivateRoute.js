@@ -1,15 +1,21 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import {jwtDecode} from 'jwt-decode';
+
 
 const PrivateRoute = ({ allowedRoles }) => {
-  const user = JSON.parse(localStorage.getItem('user'));
-
-  if (!user) {
-    return <Navigate to="/login" />;
+  let token = localStorage.getItem('token');
+  let user;
+  if (token) {
+      try {
+          const decodedToken = jwtDecode(token);
+          user = decodedToken.user;
+      } catch (error) { 
+          console.error('Invalid token:', error);
+          return <Navigate to="/login" />;
+      }
   }
-
-  // Check if the user has one of the allowed roles
-  return allowedRoles.includes(user.role) ? <Outlet /> : <Navigate to="/unauthorized" />;
+  return allowedRoles.includes(user?.role) ? <Outlet /> : <Navigate to="/unauthorized" />;
 };
 
 export default PrivateRoute;

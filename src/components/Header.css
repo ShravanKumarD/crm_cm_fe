@@ -1,9 +1,9 @@
 .header {
   position: fixed;
-  width: calc(100% - 250px); /* Full width minus sidebar width */
-  height: 60px;
+  width: calc(100% - 200px); /* Full width minus sidebar width */
+  height: 40px;
   top: 0;
-  left: 250px; /* Positioned to the right of the sidebar */
+  left: 200px; /* Positioned to the right of the sidebar */
   background-color: #eae7e7;
   color: #333;
   display: flex;

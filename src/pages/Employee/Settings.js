@@ -19,7 +19,6 @@ export default function Settings() {
     const [employee, setEmployee] = useState(null);
     const [error, setError] = useState('');
     let user = JSON.parse(localStorage.getItem('user'));
-    console.log(user.id,'user')
 
     useEffect(() => {
         const fetchEmployees = async () => {

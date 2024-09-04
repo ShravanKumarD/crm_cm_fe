@@ -1,11 +1,10 @@
-.sidebar {
+/* .sidebar {
     width: 250px;
-    /* background-color: #c5ccdee6; */
     background: radial-gradient(
       circle, 
-      #7e7eaa,  /* Blue */
-      #d2aaaa,  /* White */
-      #ddd1bb   /* Orange */
+      #7e7eaa, 
+      #d2aaaa,  
+      #ddd1bb   
     );
     color: #fff;
     height: 100%;
@@ -16,9 +15,41 @@
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.66);
     overflow: hidden;
-    /* Ensure sidebar stretches from top of the screen */
+  } */
+  .sidebar{
+    width: 200px;
+    /* background: radial-gradient(circle, #7e7eaa, #d2aaaa, #ddd1bb); */
+    background:radial-gradient(circle, #bcbcca, #e4c5ff, #ebd1ef);
+    height: 100%;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.66);
+    overflow: hidden;
+    align-items: normal;
+    justify-content: space-evenly;
+    padding: 10px;
+  }
+  .sidebar-scroll {
+    height: calc(100vh - 60px); /* Adjust this value based on the header height if any */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding-right: 10px; /* Optional: add some padding to the right to avoid scrollbar overlap */
   }
   
+  /* Optional: Customize scrollbar appearance */
+.sidebar-scroll::-webkit-scrollbar {
+  display: none; /* Hide scrollbar in WebKit browsers (Chrome, Safari) */
+}
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: #888; /* Scrollbar thumb color */
+    border-radius: 4px; /* Scrollbar thumb rounded corners */
+  }
+  
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Scrollbar thumb color on hover */
+  }
+  
+
   .sidebar h2 {
     margin-top: 0;
   }
@@ -41,4 +72,15 @@
   .sidebar ul li a:hover {
     text-decoration: underline;
   }
+  .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    color: var(--bs-nav-pills-link-active-color);
+    background-color: #b377e3 !important;
+}
   
+.brand-text {
+  color: black;
+  text-decoration: none;
+}
+.brand-link{
+  text-decoration: none;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Col, Row, Container, Button } from 'react-bootstrap';
+import { Card, Col, Row, Container } from 'react-bootstrap';
 import { FaTasks, FaUserAlt, FaCalendarAlt, FaChartBar } from 'react-icons/fa';
 import axios from './../../components/axios'; 
 import './Dashboard.css';
@@ -15,7 +15,6 @@ const Dashboard = () => {
   const [upcomingMeetings, setUpcomingMeetings] = useState(0);
   const [performanceScore, setPerformanceScore] = useState(0);
   const [showAll, setShowAll] = useState(false); // State to manage visibility of all tasks
-  const [leadsByDay, setLeadsByDay] = useState({});
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
 
@@ -40,22 +39,23 @@ const Dashboard = () => {
     try {
       const response = await axios.get('http://localhost:3000/task/');
       const filteredTasks = response.data.filter(task => task.userId === user.id);
-  
-      // Calculate completed tasks and walk-ins
-      const completed = filteredTasks.filter(task => task.status === 'Completed').length;
-      const walkins = filteredTasks.filter(task => task.status === 'Walk-ins').length;
-      const upcoming = filteredTasks.filter(task => new Date(task.dueDate) > new Date()).length;
-  
-      setCompletedTasks(completed);
-      setUpcomingMeetings(walkins);  // If 'Walk-ins' refers to upcoming meetings
       setTasks(filteredTasks);
-  
+
+      // Calculate completed tasks and upcoming meetings
+      const completed = filteredTasks.filter(task => task.status === 'Completed').length;
+      setCompletedTasks(completed);
+
+      // Assuming 'dueDate' is a field in tasks, calculate upcoming meetings
+      const today = new Date();
+      const upcoming = filteredTasks.filter(task => new Date(task.dueDate) > today).length;
+      setUpcomingMeetings(upcoming);
+      
     } catch (err) {
       console.error('Failed to fetch tasks:', err.message);
       setError('Failed to fetch tasks.');
     }
   };
-    
+
   const fetchAssignedLeads = async () => {
     try {
       const response = await axios.get(`http://localhost:3000/leadAssignment/user-leads/${user.id}`);
@@ -79,15 +79,6 @@ const Dashboard = () => {
           ...lead,
           assignedTo: lead.assignedTo || "Not Assigned"
         })));
-
-
-        const leadsCountByDay = filteredLeads.reduce((acc, lead) => {
-          const date = new Date(lead.createdDate).toDateString(); // Adjust as needed
-          acc[date] = (acc[date] || 0) + 1;
-          console.log(leadsByDay,"")
-          return acc;
-        }, {});
-        setLeadsByDay(leadsCountByDay);
       }
     } catch (error) {
       console.error('Error fetching lead details:', error.message);
@@ -136,7 +127,7 @@ const Dashboard = () => {
                       <Card.Body>
                         <FaCalendarAlt size={40} className="metric-icon" />
                         <h3>{upcomingMeetings}</h3>
-                        <p>Walk-ins</p>
+                        <p>Upcoming Meetings</p>
                       </Card.Body>
                     </Card>
                   </Col>
@@ -145,7 +136,7 @@ const Dashboard = () => {
                       <Card.Body>
                         <FaUserAlt size={40} className="metric-icon" />
                         <h3>{performanceScore}%</h3>
-                        <p>Performance</p>
+                        <p>Performance Score</p>
                       </Card.Body>
                     </Card>
                   </Col>
@@ -162,14 +153,14 @@ const Dashboard = () => {
                 <ul className="activity-list">
                   {tasks.slice(0, 3).map(task => (
                     <li key={task.id}>
-                      {task.title}: {task.description} ( {task.status})
+                      {task.title}: {task.description} (Due: {task.dueDate})
                     </li>
                   ))}
                 </ul>
                 {tasks.length > 3 && (
-                  <Button variant="link" onClick={() => setShowAll(!showAll)} className='readMore'>
+                  <button className="btn btn-link" onClick={() => setShowAll(!showAll)}>
                     {showAll ? 'Show Less' : 'Read More'}
-                  </Button>
+                  </button>
                 )}
                 {showAll && (
                   <ul className="activity-list">
@@ -183,36 +174,19 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-                    {/* Quick Actions Section */}
-                    <Col md={4} className="mb-4">
+
+          {/* Quick Actions Section */}
+          <Col md={4} className="mb-4">
             <Card className="dashboard-card">
               <Card.Body>
                 <h3>Quick Actions</h3>
                 <ul className="quick-actions">
-                  <li><Button variant="primary" onClick={() => handleAddTask(leads)}>Create New Task</Button></li>
-                  <li><Button variant="secondary" onClick={handleScheduleTask}>View Upcoming Meetings</Button></li>
+                  <li><button className="btn btn-primary" onClick={() => handleAddTask(leads)}>Create New Task</button></li>
+                  <li><button className="btn btn-secondary" onClick={handleScheduleTask}>View Upcoming Meetings</button></li>
                 </ul>
               </Card.Body>
             </Card>
           </Col>
-
-
-          {/* Leads by Day Section */}
-          <Col md={4} className="mb-4">
-            <Card className="dashboard-card">
-              <Card.Body>
-                <h3>Leads by Day</h3>
-                <ul className="activity-list">
-                  {Object.entries(leadsByDay).map(([date, count]) => (
-                    <li key={date}>
-                      {date}: {count} leads
-                    </li>
-                  ))}
-                </ul>
-              </Card.Body>
-            </Card>
-          </Col>
-
         </Row>
       </div>
     </Container>

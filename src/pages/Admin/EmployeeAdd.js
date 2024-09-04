@@ -8,6 +8,7 @@ export default function EmployeeAdd() {
         employeeId: '',
         name: '',
         email: '',
+        mobile:'',
         address: '',
         password: '',
         designation: '',
@@ -94,6 +95,19 @@ export default function EmployeeAdd() {
                                 name="email"
                                 placeholder="Enter Email"
                                 value={formData.email}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group mb-3">
+                            <label htmlFor="mobile">Mobile</label>
+                            <input
+                                type="mobile"
+                                className="form-control"
+                                id="mobile"
+                                name="mobile"
+                                placeholder="Enter mobile"
+                                value={formData.mobile}
                                 onChange={handleChange}
                                 required
                             />
