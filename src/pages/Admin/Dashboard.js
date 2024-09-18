@@ -9,9 +9,17 @@ import { Chart, ArcElement } from 'chart.js';
 Chart.register(ArcElement);
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#b377e3'];
+const user = JSON.parse(localStorage.getItem('user'));
 
 const AdminDashboard = () => {
   const [leadsData, setLeadsData] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [error, setError] = useState(null);
+  const [leads, setLeads] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [totalLeads, setTotalLeads] = useState(0);
+  const [completedTasks, setCompletedTasks] = useState(0);
+  const [upcomingMeetings, setUpcomingMeetings] = useState(0);
 
   useEffect(() => {
     const fetchLeadsData = async () => {
@@ -20,6 +28,8 @@ const AdminDashboard = () => {
         if (response.status === 200) {
           const processedData = processLeadsData(response.data.leads);
           setLeadsData(processedData);
+          setLeads(response.data.leads);
+          setTotalLeads(response.data.leads.length); // Total leads count
         } else {
           console.error('Error: Response not OK', response.status);
         }
@@ -30,6 +40,37 @@ const AdminDashboard = () => {
     fetchLeadsData();
   }, []);
 
+  useEffect(() => {
+    fetchEmployee();
+    fetchTasks();
+  }, []);
+
+  const fetchEmployee = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/user/${user.id}`);
+      setEmployees(response.data);
+    } catch (err) {
+      console.error('Failed to fetch employees:', err.message);
+      setError('Failed to fetch employees.');
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/task/');
+      const filteredTasks = response.data.filter(task => task.userId === user.id);
+      const completed = filteredTasks.filter(task => task.status === 'Completed').length;
+      const walkins = filteredTasks.filter(task => task.status === 'Walk-ins').length;
+  
+      setCompletedTasks(completed);
+      setUpcomingMeetings(walkins);
+      setTasks(filteredTasks);
+    } catch (err) {
+      console.error('Failed to fetch tasks:', err.message);
+      setError('Failed to fetch tasks.');
+    }
+  };
+    
   const processLeadsData = (data) => {
     const statusCounts = data.reduce((acc, lead) => {
       acc[lead.status] = (acc[lead.status] || 0) + 1;
@@ -48,10 +89,10 @@ const AdminDashboard = () => {
         {/* Lead Summary Cards */}
         <Row className="mb-4">
           {[
-            { title: 'Total Leads', count: 99 },
-            { title: 'New Leads', count: 25 },
-            { title: 'Contacted Leads', count: 15 },
-            { title: 'Converted Leads', count: 60 },
+            { title: 'Total Leads', count: totalLeads },
+            { title: 'New Leads', count: leads.filter(lead => lead.status === 'New').length },
+            { title: 'Contacted Leads', count: leads.filter(lead => lead.status === 'Contacted').length },
+            { title: 'Converted Leads', count: leads.filter(lead => lead.status === 'Converted').length },
           ].map(({ title, count }, index) => (
             <Col md={3} key={index}>
               <Card className="lead-summary-card">
@@ -91,14 +132,14 @@ const AdminDashboard = () => {
             </Card>
           </Col>
 
-          <Col md={6}>
+          {/* <Col md={6}>
             <Card className="dashboard-chart-card">
               <Card.Body>
                 <h1>Lead Conversion Progress</h1>
-                <ProgressBar now={60} label={`${60}%`} />
+                <ProgressBar now={0} label={`${60}%`} />
               </Card.Body>
             </Card>
-          </Col>
+          </Col> */}
         </Row>
 
         {/* Recent Lead Activities */}
@@ -117,16 +158,12 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { name: 'John Doe', status: 'New', assignedTo: 'Jane Smith', lastActivity: '2 days ago' },
-                      { name: 'Mary Johnson', status: 'Qualified', assignedTo: 'Tom Brown', lastActivity: '5 hours ago' },
-                      { name: 'Michael Williams', status: 'Contacted', assignedTo: 'Sara Lee', lastActivity: '1 week ago' },
-                    ].map((lead, index) => (
+                    {leads.map((lead, index) => (
                       <tr key={index}>
                         <td>{lead.name}</td>
                         <td>{lead.status}</td>
-                        <td>{lead.assignedTo}</td>
-                        <td>{lead.lastActivity}</td>
+                        <td>{lead.assignedTo || 'Not Assigned'}</td>
+                        <td>{lead.lastActivity || 'N/A'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -141,14 +178,10 @@ const AdminDashboard = () => {
               <Card.Body>
                 <h1>Upcoming Tasks</h1>
                 <ul className="task-list">
-                  {[
-                    { task: 'Follow up with John Doe', due: 'Tomorrow' },
-                    { task: 'Send proposal to Mary Johnson', due: '2 days' },
-                    { task: 'Schedule meeting with Michael Williams', due: '5 days' },
-                  ].map((task, index) => (
+                  {tasks.map((task, index) => (
                     <li key={index}>
-                      {task.task} <br />
-                      <span>Due: {task.due}</span>
+                      {task.title} <br />
+                      <span>Due: {task.dueDate}</span>
                     </li>
                   ))}
                 </ul>

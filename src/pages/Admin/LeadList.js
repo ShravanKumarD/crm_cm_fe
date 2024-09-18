@@ -34,7 +34,7 @@ const LeadList = () => {
                 console.log(response,"statu")
                 setLeads(response.data.leads.map(lead => ({
                     ...lead,
-                    assignedTo: lead.assignedTo || "Not Assigned" // Ensure assignedTo is reflected correctly
+                    assignedTo: lead.assignedTo || "Not Assigned"
                 })));
             }
         } catch (error) {
@@ -142,6 +142,7 @@ const LeadList = () => {
                     leadOwner: item.leadOwner || item.LeadOwner || 'N/A',
                     leadSource: item.leadSource || item.LeadSource || 'N/A',
                     assignedTo: item.assignedTo || 'N/A',
+                    dateImported: item.dateImported || new Date().toISOString(),
                 }));
 
                 setLeads(prevLeads => [...prevLeads, ...importedLeads]);
@@ -219,20 +220,19 @@ const LeadList = () => {
     
     const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
 
-    
+  
+  
     const filteredLeads = leads.filter(lead => {
-        const formattedAssignedDate = isValidDate(lead.assignedDate) 
-            ? parseDate(lead.assignedDate).toISOString().split('T')[0] 
-            : '';
-    
+        const formattedDate = lead.dateImported ? moment(lead.dateImported).format('YYYY-MM-DD') : '';
         return (
             (filters.name ? lead.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
-            (filters.date ? formattedAssignedDate === filters.date : true) &&
+            (filters.date ? formattedDate === filters.date : true) &&
             (filters.id ? lead.id.toString() === filters.id : true) &&
-            (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true)
+            (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true) &&
+            (filters.phone ? lead.phone.includes(filters.phone) : true) &&
+            (filters.email ? lead.email.toLowerCase().includes(filters.email.toLowerCase()) : true)
         );
     });
-
     // Sorting function to push inactive leads to the end
     const sortLeads = (leadsList) => {
         return leadsList.sort((a, b) => {
@@ -299,6 +299,26 @@ const LeadList = () => {
                                     className="form-control"
                                     placeholder="Filter by Status"
                                     value={filters.status}
+                                    onChange={handleFilterChange}
+                                />
+                            </div>
+                            <div className="col-md-3">
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    className="form-control"
+                                    placeholder="Filter by Phone"
+                                    value={filters.phone}
+                                    onChange={handleFilterChange}
+                                />
+                            </div>
+                            <div className="col-md-3">
+                                <input
+                                    type="text"
+                                    name="email"
+                                    className="form-control"
+                                    placeholder="Filter by Email"
+                                    value={filters.email}
                                     onChange={handleFilterChange}
                                 />
                             </div>

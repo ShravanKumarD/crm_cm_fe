@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Col, Row, Container, Button } from 'react-bootstrap';
-import { FaTasks, FaUserAlt, FaCalendarAlt, FaChartBar } from 'react-icons/fa';
+import { FaTasks, FaCalendarAlt, FaChartBar } from 'react-icons/fa';
 import axios from './../../components/axios'; 
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  console.log("employee")
+  console.log('amdin dash')
   const [employees, setEmployees] = useState([]);
   const [error, setError] = useState(null);
   const [leads, setLeads] = useState([]);
@@ -14,17 +14,19 @@ const Dashboard = () => {
   const [totalLeads, setTotalLeads] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
   const [upcomingMeetings, setUpcomingMeetings] = useState(0);
-  const [performanceScore, setPerformanceScore] = useState(0);
-  const [showAll, setShowAll] = useState(false);
   const [leadsByDay, setLeadsByDay] = useState({});
   const navigate = useNavigate();
+  const [showAll, setShowAll] = useState(false);
+
+
   const user = JSON.parse(localStorage.getItem('user'));
+
 
   useEffect(() => {
     fetchAssignedLeads();
     fetchEmployee();
-    fetchLeadDetails();
     fetchTasks();
+    fetchLeads();
   }, []);
 
   const fetchEmployee = async () => {
@@ -37,18 +39,31 @@ const Dashboard = () => {
     }
   };
 
+  const fetchLeads = async () => {
+    try {
+        const response = await axios.get('http://localhost:3000/lead/');
+        if (response.status === 200) {
+            console.log(response,"statu")
+            setLeads(response.data.leads.map(lead => ({
+                ...lead,
+                assignedTo: lead.assignedTo || "Not Assigned"
+            })));
+        }
+    } catch (error) {
+        console.error('Error fetching leads:', error.message);
+    }
+};
+
   const fetchTasks = async () => {
     try {
       const response = await axios.get('http://localhost:3000/task/');
       const filteredTasks = response.data.filter(task => task.userId === user.id);
-  
-      // Calculate completed tasks and walk-ins
+  console.log(response,"response")
       const completed = filteredTasks.filter(task => task.status === 'Completed').length;
       const walkins = filteredTasks.filter(task => task.status === 'Walk-ins').length;
-      const upcoming = filteredTasks.filter(task => new Date(task.dueDate) > new Date()).length;
   
       setCompletedTasks(completed);
-      setUpcomingMeetings(walkins);  // If 'Walk-ins' refers to upcoming meetings
+      setUpcomingMeetings(walkins);
       setTasks(filteredTasks);
   
     } catch (err) {
@@ -81,11 +96,9 @@ const Dashboard = () => {
           assignedTo: lead.assignedTo || "Not Assigned"
         })));
 
-
         const leadsCountByDay = filteredLeads.reduce((acc, lead) => {
-          const date = new Date(lead.createdDate).toDateString(); // Adjust as needed
+          const date = new Date(lead.createdDate).toDateString();
           acc[date] = (acc[date] || 0) + 1;
-          console.log(leadsByDay,"")
           return acc;
         }, {});
         setLeadsByDay(leadsCountByDay);
@@ -96,17 +109,16 @@ const Dashboard = () => {
     }
   };
 
-  const handleAddTask = (lead) => {
-    navigate('/add-task-employee', { state: { lead } });
+  const handleAddTask = () => {
+    navigate('/add-task-employee', { state: { leads } });
   };
 
-  const handleScheduleTask = () => {
-    navigate('/scheduled-tasks');
-  };
+  const today = new Date().toDateString();
+  const leadsToday = leadsByDay[today] || 0;
 
   return (
     <Container fluid className="global-container">
-      <div className='container'>
+      <div className="container">
         <Row>
           {/* Overview Section */}
           <Col md={12} className="mb-4">
@@ -120,6 +132,10 @@ const Dashboard = () => {
                         <FaTasks size={40} className="metric-icon" />
                         <h3>{totalLeads}</h3>
                         <p>Total Leads</p>
+                        <p></p>
+                        <div className="text-right">
+                          <small>{leadsToday} leads today</small>
+                        </div>
                       </Card.Body>
                     </Card> 
                   </Col>
@@ -141,21 +157,12 @@ const Dashboard = () => {
                       </Card.Body>
                     </Card>
                   </Col>
-                  {/* <Col md={3}>
-                    <Card className="metric-card">
-                      <Card.Body>
-                        <FaUserAlt size={40} className="metric-icon" />
-                        <h3>{performanceScore}%</h3>
-                        <p>Performance</p>
-                      </Card.Body>
-                    </Card>
-                  </Col> */}
                 </Row>
               </Card.Body>
             </Card>
           </Col>
 
-          {/* Recent Activities Section */}
+          {/* Recent Tasks Section */}
           <Col md={8} className="mb-4">
             <Card className="dashboard-card">
               <Card.Body>
@@ -163,12 +170,12 @@ const Dashboard = () => {
                 <ul className="activity-list">
                   {tasks.slice(0, 3).map(task => (
                     <li key={task.id}>
-                      {task.title}: {task.createdDate.slice()} ( {task.followUp})
+                      {task.title}: {task.followUp} (Due: {new Date(task.dueDate).toLocaleDateString()})
                     </li>
                   ))}
                 </ul>
                 {tasks.length > 3 && (
-                  <Button variant="link" onClick={() => setShowAll(!showAll)} className='readMore'>
+                  <Button variant="link" onClick={() => setShowAll(!showAll)} className="readMore">
                     {showAll ? 'Show Less' : 'Read More'}
                   </Button>
                 )}
@@ -176,7 +183,7 @@ const Dashboard = () => {
                   <ul className="activity-list">
                     {tasks.slice(3).map(task => (
                       <li key={task.id}>
-                        {task.title}: {task.followUp} (Due: {task.dueDate})
+                        {task.title}: {task.followUp} (Due: {new Date(task.dueDate).toLocaleDateString()})
                       </li>
                     ))}
                   </ul>
@@ -184,19 +191,18 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-                    {/* Quick Actions Section */}
-                    <Col md={4} className="mb-4">
+
+          {/* Quick Actions Section */}
+          <Col md={4} className="mb-4">
             <Card className="dashboard-card">
               <Card.Body>
                 <h3>Quick Actions</h3>
                 <ul className="quick-actions">
-                  <li><Button variant="primary" onClick={() => handleAddTask(leads)}>Create New Task</Button></li>
-                  {/* <li><Button variant="secondary" onClick={handleScheduleTask}>View Upcoming Meetings</Button></li> */}
+                  <li><Button variant="primary" onClick={handleAddTask}>Create New Task</Button></li>
                 </ul>
               </Card.Body>
             </Card>
           </Col>
-
 
           {/* Leads by Day Section */}
           <Col md={4} className="mb-4">
@@ -213,7 +219,6 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-
         </Row>
       </div>
     </Container>

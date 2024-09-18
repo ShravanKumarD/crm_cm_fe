@@ -2,22 +2,28 @@ import React, { useState, useEffect } from 'react';
 import axios from './../../components/axios'; 
 import { Modal, Button, Alert } from 'react-bootstrap'; 
 
+let user;
 export default function LeadManagement() {
     const [leadAssignments, setLeadAssignments] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [leads, setLeads] = useState([]);
     const [error, setError] = useState(null);
-    const [adminId, setAdminId] = useState(2);
+    const [adminId, setAdminId] = useState();
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedLeads, setSelectedLeads] = useState(new Set()); // State to keep track of selected leads
+    const [showConfirmModal, setShowConfirmModal] = useState(false); // State for modal
+    const [leadToRevert, setLeadToRevert] = useState(null); // Store the lead ID to revert
+
     const recordsPerPage = 10;
     const maxPageNumbers = 5;
 
     useEffect(() => {
-        fetchLeadAssignmentList(adminId);
-        fetchEmployees();
-        fetchLeads();
+       user = JSON.parse(localStorage.getItem('user'));
+       setAdminId(user.id);
+       fetchLeadAssignmentList(adminId);
+       fetchEmployees();
+       fetchLeads();
     }, [adminId]);
 
     useEffect(() => {
@@ -48,7 +54,7 @@ export default function LeadManagement() {
 
     const fetchLeadAssignmentList = async (id) => {
         try {
-            const response = await axios.get(`http://localhost:3000/leadAssignment/asignedbyadmin/${id}`);
+            const response = await axios.get(`http://localhost:3000/leadAssignment/asignedbyadmin/${user.id}`);
             setLeadAssignments(response.data.leadAssignments);
         } catch (err) {
             setError('Failed to fetch lead assignments.');
@@ -59,7 +65,7 @@ export default function LeadManagement() {
     const revertLeadAssigned = async (id) => {
         try {
             await axios.delete(`http://localhost:3000/leadAssignment/revertlead/${id}`);
-            fetchLeadAssignmentList(adminId);
+            fetchLeadAssignmentList();
         } catch (err) {
             setError('Failed to revert lead assignment.');
             console.error(err);
@@ -71,7 +77,7 @@ export default function LeadManagement() {
             for (const id of selectedLeads) {
                 await axios.delete(`http://localhost:3000/leadAssignment/revertlead/${id}`);
             }
-            fetchLeadAssignmentList(adminId);
+            fetchLeadAssignmentList();
             setSelectedLeads(new Set()); // Clear selected leads after reverting
         } catch (err) {
             setError('Failed to revert lead assignments.');
@@ -107,6 +113,24 @@ export default function LeadManagement() {
             }
             return newSelected;
         });
+    };
+
+    const handleRevertClick = (id) => {
+        setLeadToRevert(id); // Store the lead ID
+        setShowConfirmModal(true); // Show confirmation modal
+    };
+
+    const handleConfirmRevert = async () => {
+        if (leadToRevert) {
+            await revertLeadAssigned(leadToRevert);
+            setShowConfirmModal(false); // Hide modal
+            setLeadToRevert(null); // Clear lead to revert
+        }
+    };
+
+    const handleCloseModal = () => {
+        setShowConfirmModal(false);
+        setLeadToRevert(null); // Clear lead to revert if modal is closed
     };
 
     const filteredAssignments = leadAssignments.filter(assignment => {
@@ -156,7 +180,7 @@ export default function LeadManagement() {
                     <table className="table">
                         <thead>
                             <tr>
-                                <th>Select</th> {/* New column for checkboxes */}
+                                <th>Select</th>
                                 <th>Lead ID</th>
                                 <th>Lead Name</th>
                                 <th>Assigned To</th>
@@ -184,7 +208,7 @@ export default function LeadManagement() {
                                         <td>
                                             <button
                                                 className="btn btn-warning"
-                                                onClick={() => revertLeadAssigned(assignment.leadId)}
+                                                onClick={() => handleRevertClick(assignment.leadId)}
                                             >
                                                <i className="fas fa-undo me-2"></i> Revert
                                             </button>
@@ -218,6 +242,22 @@ export default function LeadManagement() {
                     </nav>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <Modal show={showConfirmModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Revert</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Are you sure you want to revert this lead assignment?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Cancel
+                    </Button>
+                    <Button variant="warning" onClick={handleConfirmRevert}>
+                        Revert
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 }

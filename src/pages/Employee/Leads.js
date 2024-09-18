@@ -93,16 +93,20 @@ const LeadList = () => {
             [name]: value
         }));
     };
+    console.log(leads,"filteredLeads")
 
-    const filteredLeads = leads.filter(lead => {
-        const formattedAssignedDate = new Date(lead.assignedDate).toISOString().split('T')[0]; // Format date to YYYY-MM-DD
-        return (
-            (filters.name ? lead.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
-            (filters.date ? formattedAssignedDate === filters.date : true) &&
-            (filters.id ? lead.id.toString() === filters.id : true) &&
-            (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true)
-        );
-    });
+ const filteredLeads = leads.filter(lead => {
+    const formattedAssignedDate = new Date(lead.assignedDate); // Format date to YYYY-MM-DD
+    return (
+        (filters.name ? lead.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
+        (filters.date ? formattedAssignedDate === filters.date : true) &&
+        (filters.id ? lead.id.toString() === filters.id : true) &&
+        (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true) &&
+        (filters.email ? lead.email.toLowerCase().includes(filters.email.toLowerCase()) : true) &&
+        (filters.phone ? lead.phone.includes(filters.phone) : true)
+    );
+});
+
     
     const sortLeads = (leadsList) => {
         return leadsList.sort((a, b) => {
@@ -188,6 +192,27 @@ const LeadList = () => {
                                     onChange={handleFilterChange}
                                 />
                             </div>
+                            <div className="col-md-3">
+    <input
+        type="text"
+        name="email"
+        className="form-control"
+        placeholder="Filter by Email"
+        value={filters.email}
+        onChange={handleFilterChange}
+    />
+</div>
+<div className="col-md-3">
+    <input
+        type="text"
+        name="phone"
+        className="form-control"
+        placeholder="Filter by Phone"
+        value={filters.phone}
+        onChange={handleFilterChange}
+    />
+</div>
+
                         </div>
                     </div>
                 </div>
@@ -228,7 +253,7 @@ const LeadList = () => {
                                 <th>Status</th>
                                 <th>Lead Source</th>
                                 {/* <th>Lead Owner</th> */}
-                                <th>Assigned Date</th>
+                                {/* <th>Assigned Date</th> */}
                                 {/* <th>Assigned To</th> */}
                                 <th>Activity</th>
                                 <th>Action</th>
@@ -257,7 +282,7 @@ const LeadList = () => {
                                         </span>
                                         <td>{lead.leadSource}</td>
                                         {/* <td>{lead.assignedTo}</td> */}
-                                        <td>{lead.assignedDate.split('T')[0]}</td>
+                                        {/* <td>{lead.assignedDate.split('T')[0]}</td> */}
                                         {/* <td>{lead.assignedTo}</td> */}
                                         <td>
                                             <button className="btn btn-secondary btn-sm" onClick={() => handleCreateTask(lead)}>Add</button>
