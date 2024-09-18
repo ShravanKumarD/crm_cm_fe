@@ -9,6 +9,8 @@
   import '@fortawesome/fontawesome-free/css/all.min.css';
   import 'bootstrap/dist/css/bootstrap.min.css';
   import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+  import $ from 'jquery';
+  import Popper from '@popperjs/core';
   import "./App.css"
   import {jwtDecode} from 'jwt-decode';
 
@@ -42,7 +44,7 @@ import Employee from './pages/Admin/Employee';
 
   const App = () => {
   
-    // console.log(localStorage.setItem('user', JSON.stringify({ role: 'ROLE_EMPLOYEE', name: 'EMP' }))    ,'token in app')
+    // console.log(localStorage.setItem('user', JSON.stringify({ role: 'ROLE_ADMIN', name: 'John Doe' }))    ,'token in app')
     // const user = JSON.parse(localStorage.getItem('user'));
     let token = localStorage.getItem('token');
     let user;

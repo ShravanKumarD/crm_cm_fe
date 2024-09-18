@@ -66,7 +66,7 @@ const LeadList = () => {
         navigate('/emp-lead-details', { state: { lead } });
     };
    const handleCreateTask=(lead)=>{
-    navigate('/', { state: { lead } });
+    navigate('/add-task-employee', { state: { lead } });
    }
     const handleCheckboxChange = (id) => {
         setSelectedLeads(prevSelected =>
@@ -95,7 +95,7 @@ const LeadList = () => {
     };
 
     const filteredLeads = leads.filter(lead => {
-        const formattedAssignedDate = lead.assignedDate.split('T')[0]; // Assuming `assignedDate` is in ISO format
+        const formattedAssignedDate = new Date(lead.assignedDate).toISOString().split('T')[0]; // Format date to YYYY-MM-DD
         return (
             (filters.name ? lead.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
             (filters.date ? formattedAssignedDate === filters.date : true) &&
@@ -103,7 +103,7 @@ const LeadList = () => {
             (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true)
         );
     });
-
+    
     const sortLeads = (leadsList) => {
         return leadsList.sort((a, b) => {
             const statusA = a.status?.toLowerCase() || '';
@@ -192,7 +192,7 @@ const LeadList = () => {
                     </div>
                 </div>
 
-                <div className="mb-3 col-3">
+                {/* <div className="mb-3 col-3">
                     <select
                         className="form-select"
                         onChange={(e) => handleBulkStatusUpdate(e.target.value)}
@@ -207,7 +207,7 @@ const LeadList = () => {
                         <option value="notconnected">Not Connected</option>
                         <option value="walkins">Walkins</option>
                     </select>   
-                </div>
+                </div> */}
                 {/* Table Section */}
                 <div className="table-responsive">
                     <table className="table table-striped">
@@ -227,10 +227,10 @@ const LeadList = () => {
 
                                 <th>Status</th>
                                 <th>Lead Source</th>
-                                <th>Lead Owner</th>
+                                {/* <th>Lead Owner</th> */}
                                 <th>Assigned Date</th>
                                 {/* <th>Assigned To</th> */}
-                                <th>Task</th>
+                                <th>Activity</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -256,14 +256,14 @@ const LeadList = () => {
                                             {lead.status}
                                         </span>
                                         <td>{lead.leadSource}</td>
-                                        <td>{lead.assignedTo}</td>
+                                        {/* <td>{lead.assignedTo}</td> */}
                                         <td>{lead.assignedDate.split('T')[0]}</td>
                                         {/* <td>{lead.assignedTo}</td> */}
                                         <td>
-                                            <button className="btn btn-secondary" onClick={() => handleCreateTask(lead)}>Add</button>
+                                            <button className="btn btn-secondary btn-sm" onClick={() => handleCreateTask(lead)}>Add</button>
                                         </td>
                                         <td>
-                                            <button className="btn btn-primary" onClick={() => handleViewLead(lead)}>View</button>
+                                            <button className="btn btn-primary btn-sm" onClick={() => handleViewLead(lead)}>View</button>
                                         </td>
                                     </tr>
                                 ))

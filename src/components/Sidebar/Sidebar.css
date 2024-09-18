@@ -17,23 +17,25 @@
     overflow: hidden;
   } */
   .sidebar{
-    width: 200px;
+    width: 150px;
     /* background: radial-gradient(circle, #7e7eaa, #d2aaaa, #ddd1bb); */
     background:radial-gradient(circle, #bcbcca, #e4c5ff, #ebd1ef);
     height: 100%;
     position: fixed;
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.66);
     overflow: hidden;
     align-items: normal;
     justify-content: space-evenly;
     padding: 10px;
+    z-index: 1000;
   }
   .sidebar-scroll {
     height: calc(100vh - 60px); /* Adjust this value based on the header height if any */
     overflow-y: auto; /* Enable vertical scrolling */
-    padding-right: 10px; /* Optional: add some padding to the right to avoid scrollbar overlap */
+   /* padding-right: 10px; */
+    /* Optional: add some padding to the right to avoid scrollbar overlap */
   }
   
   /* Optional: Customize scrollbar appearance */
@@ -76,7 +78,6 @@
     color: var(--bs-nav-pills-link-active-color);
     background-color: #b377e3 !important;
 }
-  
 .brand-text {
   color: black;
   text-decoration: none;

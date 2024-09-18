@@ -57,11 +57,11 @@ export default function Employee() {
                                         <button className='btn btn-warning edit-button position-absolute top-0 end-0 m-2'>
                                             <i className='fas fa-edit'></i> Edit
                                         </button>
-                                        <img 
+                                        {/* <img 
                                             src={`https://cdn.pixabay.com/photo/2024/03/31/05/00/ai-generated-8665996_1280.jpg`} 
                                             className='card-img-top' 
                                             alt={`${employee.name}'s avatar`} 
-                                        />
+                                        /> */}
                                         <div className='card-body'>
                                             <h5 className='card-title'>{employee.name}</h5>
                                             <p className='card-text'>{employee.email}</p>

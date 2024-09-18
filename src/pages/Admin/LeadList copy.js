@@ -4,6 +4,8 @@ import * as XLSX from 'xlsx';
 import axios from './../../components/axios'; 
 import "./LeadList.css";
 import "./../../App.css";
+import moment from 'moment';
+import {jwtDecode} from 'jwt-decode';
 
 const LeadList = () => {
     const [leads, setLeads] = useState([]);
@@ -78,13 +80,20 @@ const LeadList = () => {
         if (!confirmed) {
             return; // Exit the function if the user cancels the action
         }
+
+        let token = localStorage.getItem('token');
+        let user;
+                const decodedToken = jwtDecode(token);
+                user = decodedToken.user;
+
+
     
         try {
             // Send the request to assign leads
             const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
                 leadIds: selectedLeads,
                 assignedToUserId: assignedTo,
-                assignedBy: 2
+                assignedBy: user.id
             });
     
             if (response.status === 200) {
@@ -360,7 +369,7 @@ const LeadList = () => {
                                         onChange={handleSelectAll}
                                     />
                                 </th>
-                                <th>Lead No.</th>
+                                <th>Lead Id.</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
@@ -368,7 +377,7 @@ const LeadList = () => {
                                 <th>Status</th>
                                 <th>Lead Source</th>
                                 <th>Lead Owner</th>
-                                <th>Assigned Date</th>
+                                <th>Imported On</th>
                                 <th>Assigned To</th>
                                 <th>Actions</th>
                             </tr>
@@ -391,21 +400,21 @@ const LeadList = () => {
                                     <td>{lead.status}</td>
                                     <td>{lead.leadSource}</td>
                                     <td>{lead.leadOwner}</td>
-                                    <td>{lead.assignedDate}</td>
+                                 <td>{moment(lead.dateImported).format(" DD MMM, YYYY    ")}</td>
                                     <td>{lead.assignedTo || "Not Assigned"}</td>
                                     <td>
                                         <button
-                                            className="btn btn-primary"
+                                            className="btn btn-light btn-sm"
                                             onClick={() => handleViewLead(lead)}
                                         >
-                                            View
+                                           <i className='fa fa-eye'/>
                                         </button>
-                                        <button
+                                        {/* <button
                                             className="btn btn-danger"
                                             onClick={() => handleDeleteLead(lead.id)}
                                         >
                                             Delete
-                                        </button>
+                                        </button> */}
                                     </td>
                                 </tr>
                             ))}

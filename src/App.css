@@ -16,14 +16,19 @@
   text-align: left;
   font-style: Poppins;
 }
+p{
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 14px;
+}
 .global-container {
   display: flex;
-  margin-left: 210px; 
-  margin-top: 50px;
+  margin-left: 160px;
+  margin-top: 48px;
   position: absolute; 
   z-index: 1; 
   overflow-x: hidden; 
-  width: calc(100% - 250px); 
+  width: calc(100% - 170px); 
   background-color: #d4d6d95e;
   border-radius: 5px;
 }
@@ -76,4 +81,42 @@
 .table th {
   background-color: #f4f4f4;
   font-size: 12px;
+}
+.btn-secondary{
+  font-size: 11px;
+}
+
+.bg-warning{
+  font-size: 11px;
+  margin: 8px;
+}
+
+
+/* task stylings */
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  pointer-events: none;
+}
+
+.input-with-icon input {
+  padding-right: 30px; /* To ensure the text doesn't overlap with the icon */
+}
+.radio-group {
+  display: flex;
+  align-items: center;
+}
+
+.radio-group .form-check {
+  margin-right: 1rem; /* Adjust as needed */
+}
+h4{
+  color:#b377e3;
 }

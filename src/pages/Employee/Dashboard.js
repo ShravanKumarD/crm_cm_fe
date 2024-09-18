@@ -6,6 +6,7 @@ import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  console.log("employee")
   const [employees, setEmployees] = useState([]);
   const [error, setError] = useState(null);
   const [leads, setLeads] = useState([]);
@@ -14,7 +15,7 @@ const Dashboard = () => {
   const [completedTasks, setCompletedTasks] = useState(0);
   const [upcomingMeetings, setUpcomingMeetings] = useState(0);
   const [performanceScore, setPerformanceScore] = useState(0);
-  const [showAll, setShowAll] = useState(false); // State to manage visibility of all tasks
+  const [showAll, setShowAll] = useState(false);
   const [leadsByDay, setLeadsByDay] = useState({});
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
@@ -113,7 +114,7 @@ const Dashboard = () => {
               <Card.Body>
                 <h2 className="text-center">Employee Dashboard</h2>
                 <Row className="text-center">
-                  <Col md={3}>
+                  <Col md={4}>
                     <Card className="metric-card">
                       <Card.Body>
                         <FaTasks size={40} className="metric-icon" />
@@ -122,7 +123,7 @@ const Dashboard = () => {
                       </Card.Body>
                     </Card> 
                   </Col>
-                  <Col md={3}>
+                  <Col md={4}>
                     <Card className="metric-card">
                       <Card.Body>
                         <FaChartBar size={40} className="metric-icon" />
@@ -131,7 +132,7 @@ const Dashboard = () => {
                       </Card.Body>
                     </Card>
                   </Col>
-                  <Col md={3}>
+                  <Col md={4}>
                     <Card className="metric-card">
                       <Card.Body>
                         <FaCalendarAlt size={40} className="metric-icon" />
@@ -140,7 +141,7 @@ const Dashboard = () => {
                       </Card.Body>
                     </Card>
                   </Col>
-                  <Col md={3}>
+                  {/* <Col md={3}>
                     <Card className="metric-card">
                       <Card.Body>
                         <FaUserAlt size={40} className="metric-icon" />
@@ -148,7 +149,7 @@ const Dashboard = () => {
                         <p>Performance</p>
                       </Card.Body>
                     </Card>
-                  </Col>
+                  </Col> */}
                 </Row>
               </Card.Body>
             </Card>
@@ -158,11 +159,11 @@ const Dashboard = () => {
           <Col md={8} className="mb-4">
             <Card className="dashboard-card">
               <Card.Body>
-                <h3>Recent Activities</h3>
+                <h3>Recent Tasks</h3>
                 <ul className="activity-list">
                   {tasks.slice(0, 3).map(task => (
                     <li key={task.id}>
-                      {task.title}: {task.description} ( {task.status})
+                      {task.title}: {task.createdDate.slice()} ( {task.followUp})
                     </li>
                   ))}
                 </ul>
@@ -175,7 +176,7 @@ const Dashboard = () => {
                   <ul className="activity-list">
                     {tasks.slice(3).map(task => (
                       <li key={task.id}>
-                        {task.title}: {task.description} (Due: {task.dueDate})
+                        {task.title}: {task.followUp} (Due: {task.dueDate})
                       </li>
                     ))}
                   </ul>
@@ -190,7 +191,7 @@ const Dashboard = () => {
                 <h3>Quick Actions</h3>
                 <ul className="quick-actions">
                   <li><Button variant="primary" onClick={() => handleAddTask(leads)}>Create New Task</Button></li>
-                  <li><Button variant="secondary" onClick={handleScheduleTask}>View Upcoming Meetings</Button></li>
+                  {/* <li><Button variant="secondary" onClick={handleScheduleTask}>View Upcoming Meetings</Button></li> */}
                 </ul>
               </Card.Body>
             </Card>

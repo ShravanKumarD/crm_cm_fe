@@ -39,6 +39,7 @@ export default function Leads() {
                     dob: item.dob || item.dateOfBirth || item.dateofBirth || 'N/A',
                     company: item.company || item.organization || item.firm || 'N/A',
                     assignedDate: item.AssignedDate || item.Date || new Date().toISOString().split('T')[0] || 'N/A',
+                    dateImported:new Date(),
                     gender: item.Gender || item.gender || 'N/A',
                     city: item.city || item.City || 'N/A',
                     country: item.country || item.Country || 'N/A',

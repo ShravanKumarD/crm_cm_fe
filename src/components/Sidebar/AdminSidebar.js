@@ -1,14 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
-const AdminSidebar = ({ user, userId }) => {
+const AdminSidebar = () => {
+  const [employee,setEmployee]=useState('')
+  const [error,setError]=useState('')
+  let user = JSON.parse(localStorage.getItem('user'))
+
+
+  useEffect(()=>{
+    fetchEmployees();
+  },[])
+  const fetchEmployees = async () => {
+    try {
+        const response = await axios .get(`http://localhost:3000/user/${user.id}`);
+        setEmployee(response.data);
+        console.log(employee,'user')
+    } catch (err) {
+        setError('Failed to fetch employees.');
+        console.error(err);
+    }
+};
+
   return (
     <aside className="main-sidebar elevation-4 fixed">
       <div className="sidebar">
-        <a href="/" className="brand-link">
+      <a href="# " className="brand-link">
           <span className="brand-text font-weight-light">
-            <strong>ADMIN</strong>
+          <i className="nav-icon fas fa-user"
+          style={{padding:"4.5px"}}
+/>
+            {employee.name}
           </span>
         </a>
         {/* Scrollable content */}
@@ -19,23 +42,37 @@ const AdminSidebar = ({ user, userId }) => {
               role="menu"
               data-accordion="false"
             >
-              <li className="nav-item">
+                <li className="nav-item">
                 <NavLink
                   to="/admin-dashboard"
                   className="nav-link"
                   activeClassName="active"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    textDecoration: "none",
+                  }}
                 >
-                  <i className="nav-icon fas fa-tachometer-alt" />
-                  <p>Dashboard</p>
+                  <i
+                    className="nav-icon fas fa-tachometer-alt"
+                    style={{ marginRight: "8px" }}
+                  />
+                  <p style={{ margin: 0 }}>Dashboard</p>
                 </NavLink>
               </li>
+
               <li className="nav-item has-treeview">
                 <NavLink
                   to="/Leads"
                   className="nav-link"
                   activeClassName="active"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    textDecoration: "none",
+                  }}
                 >
-                  <i className="nav-icon fa fa-rocket" />
+                  <i className="nav-icon fa fa-rocket" style={{ marginRight: "8px" }} />
                   <p>
                     Leads
                   </p>
@@ -46,8 +83,13 @@ const AdminSidebar = ({ user, userId }) => {
                   to="/employee"
                   className="nav-link"
                   activeClassName="active"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    textDecoration: "none",
+                  }}
                 >
-                  <i className="nav-icon fa fa-users" />
+                  <i className="nav-icon fa fa-users"    style={{ marginRight: "8px" }} />
                   <p>
                     Employees
                   </p>
@@ -58,8 +100,13 @@ const AdminSidebar = ({ user, userId }) => {
                   to="/settings"
                   className="nav-link"
                   activeClassName="active"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    textDecoration: "none",
+                  }}
                 >
-                  <i className="nav-icon fa fa-cog" />
+                  <i className="nav-icon fa fa-cog"    style={{ marginRight: "8px" }}/>
                   <p>Settings</p>
                 </NavLink>
               </li>
@@ -68,8 +115,13 @@ const AdminSidebar = ({ user, userId }) => {
                   to="/reports"
                   className="nav-link"
                   activeClassName="active"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    textDecoration: "none",
+                  }}
                 >
-                  <i className="nav-icon fa fa-chart-bar" />
+                  <i className="nav-icon fa fa-chart-bar"   style={{ marginRight: "8px" }} />
                   <p>Reports</p>
                 </NavLink>
               </li>

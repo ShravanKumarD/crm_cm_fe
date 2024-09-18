@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
 export default function ManagerSidebar() {
+  const [employee,setEmployee]=useState('')
+  const [error,setError]=useState('')
+  let user = JSON.parse(localStorage.getItem('user'))
+
+  useEffect(()=>{
+    fetchEmployees();
+  },[])
+  const fetchEmployees = async () => {
+    try {
+        const response = await axios .get(`http://localhost:3000/user/${user.id}`);
+        setEmployee(response.data);
+        console.log(employee,'user')
+    } catch (err) {
+        setError('Failed to fetch employees.');
+        console.error(err);
+    }
+};
+
   return (
     <aside className="main-sidebar elevation-4 fixed">
     <div className="sidebar">
