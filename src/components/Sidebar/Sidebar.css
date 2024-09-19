@@ -18,8 +18,7 @@
   } */
   .sidebar{
     width: 150px;
-    /* background: radial-gradient(circle, #7e7eaa, #d2aaaa, #ddd1bb); */
-    background:radial-gradient(circle, #bcbcca, #e4c5ff, #ebd1ef);
+    background:#e4c5ff;
     height: 100%;
     position: fixed;
     /* display: flex; */

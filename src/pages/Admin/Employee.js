@@ -13,7 +13,7 @@ export default function Employee() {
             try {
                 const response = await axios.get('http://localhost:3000/user');
                 setEmployees(response.data);
-                console.log(employees,"emp")
+                console.log(employees,"emp");
             } catch (err) {
                 setError('Failed to fetch employees.');
                 console.error(err);
@@ -34,7 +34,6 @@ export default function Employee() {
             console.error('Error deleting employee:', error.message);
         }
     };
-    
 
     const handleNavigate = () => {
         window.location.href = "/employee-add";
@@ -43,28 +42,24 @@ export default function Employee() {
     return (
         <div className='global-container'>
             <div className='container'>
+                <br/>
                 <h1>Employee List</h1>
-                <Button className="btn btn-primary btn-lg" onClick={handleNavigate}>Add Employee</Button>
+                <Button className="btn btn-primary btn-md mb-4" onClick={handleNavigate}>Add Employee</Button>
 
                 {error && <Alert variant='danger' className='mt-3'>{error}</Alert>}
 
-                <div className='row mt-4'>
+                <div className='row'>
                     {employees.length > 0 ? (
                         employees.map(employee => (
                             <div key={employee.id} className='col-md-4 mb-4'>
-                                <div className='card position-relative card-custom'>
+                                <div className='card position-relative card-custom shadow-sm'>
                                     <Link to={`/employee-edit/${employee.id}`} className='text-decoration-none'>
                                         <button className='btn btn-warning edit-button position-absolute top-0 end-0 m-2'>
-                                            <i className='fas fa-edit'></i> Edit
+                                            <i className='fas fa-edit'></i>
                                         </button>
-                                        {/* <img 
-                                            src={`https://cdn.pixabay.com/photo/2024/03/31/05/00/ai-generated-8665996_1280.jpg`} 
-                                            className='card-img-top' 
-                                            alt={`${employee.name}'s avatar`} 
-                                        /> */}
                                         <div className='card-body'>
-                                            <h5 className='card-title'>{employee.name}</h5>
-                                            <p className='card-text'>{employee.email}</p>
+                                            <h5 className='card-title text-primary'>{employee.name}</h5>
+                                            <p className='card-text text-muted'>{employee.email}</p>
                                             <p className='card-text'>{employee.designation}</p>
                                             <p className='card-text'>{employee.department}</p>
                                         </div>
@@ -73,7 +68,7 @@ export default function Employee() {
                                         className='btn btn-danger delete-button position-absolute top-0 start-0 m-2'
                                         onClick={() => handleDeleteUser(employee.id)}
                                     >
-                                        <i className='fas fa-trash'></i> Delete
+                                        <i className='fas fa-trash'></i>
                                     </button>
                                 </div>
                             </div>

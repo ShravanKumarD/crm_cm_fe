@@ -38,13 +38,18 @@ const Dashboard = () => {
       setError('Failed to fetch employees.');
     }
   };
-
   const fetchLeads = async () => {
     try {
         const response = await axios.get('http://localhost:3000/lead/');
         if (response.status === 200) {
-            console.log(response,"statu")
-            setLeads(response.data.leads.map(lead => ({
+            const today = new Date().toISOString().split('T')[0];
+
+            const leadsToday = response.data.leads.filter(lead => {
+                const assignedDate = new Date(lead.assignedDate).toISOString().split('T')[0]; 
+                return assignedDate === today;
+            });
+
+            setLeads(leadsToday.map(lead => ({
                 ...lead,
                 assignedTo: lead.assignedTo || "Not Assigned"
             })));
@@ -53,6 +58,7 @@ const Dashboard = () => {
         console.error('Error fetching leads:', error.message);
     }
 };
+
 
   const fetchTasks = async () => {
     try {

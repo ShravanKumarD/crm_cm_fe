@@ -110,7 +110,7 @@ const AdminSidebar = () => {
                   <p>Settings</p>
                 </NavLink>
               </li>
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <NavLink
                   to="/reports"
                   className="nav-link"
@@ -124,7 +124,7 @@ const AdminSidebar = () => {
                   <i className="nav-icon fa fa-chart-bar"   style={{ marginRight: "8px" }} />
                   <p>Reports</p>
                 </NavLink>
-              </li>
+              </li> */}
             </ul>
           </nav>
         </div>

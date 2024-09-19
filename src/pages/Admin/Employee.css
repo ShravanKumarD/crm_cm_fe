@@ -1,13 +1,44 @@
+.global-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
 .card-custom {
-    
+    border: 1px solid #e3e6f0;
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out;
+    overflow: hidden;
 }
 
-.card-custom .card-body {
-    max-height: 150px; /* Adjust the height of the body if needed */
-    overflow: hidden;  /* Hide overflow to prevent content from spilling */
+.card-custom:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.card-custom img {
-    height: 150px; /* Adjust the height of the image if needed */
-    object-fit:contain; /* Ensure the image covers the area properly */
+.card-title {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+.edit-button, .delete-button {
+    /* border-radius: 50%; */
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+.edit-button:hover, .delete-button:hover {
+    opacity: 0.85;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
 }

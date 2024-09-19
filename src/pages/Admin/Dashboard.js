@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Table, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, ProgressBar, Button } from 'react-bootstrap';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import axios from 'axios';
 import './AdminDashboard.css';
@@ -20,6 +20,7 @@ const AdminDashboard = () => {
   const [totalLeads, setTotalLeads] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
   const [upcomingMeetings, setUpcomingMeetings] = useState(0);
+  const [showAllLeads, setShowAllLeads] = useState(false); // New state for "Show More"
 
   useEffect(() => {
     const fetchLeadsData = async () => {
@@ -61,7 +62,7 @@ const AdminDashboard = () => {
       const filteredTasks = response.data.filter(task => task.userId === user.id);
       const completed = filteredTasks.filter(task => task.status === 'Completed').length;
       const walkins = filteredTasks.filter(task => task.status === 'Walk-ins').length;
-  
+
       setCompletedTasks(completed);
       setUpcomingMeetings(walkins);
       setTasks(filteredTasks);
@@ -70,7 +71,7 @@ const AdminDashboard = () => {
       setError('Failed to fetch tasks.');
     }
   };
-    
+
   const processLeadsData = (data) => {
     const statusCounts = data.reduce((acc, lead) => {
       acc[lead.status] = (acc[lead.status] || 0) + 1;
@@ -85,7 +86,8 @@ const AdminDashboard = () => {
 
   return (
     <div className='global-container'>
-      <Container fluid>
+      <div className='container' fluid>
+        <p>&nbsp;</p>
         {/* Lead Summary Cards */}
         <Row className="mb-4">
           {[
@@ -106,7 +108,7 @@ const AdminDashboard = () => {
         </Row>
 
         {/* Charts and Progress */}
-        <Row className="mb-4">
+        {/* <Row className="mb-4">
           <Col md={6}>
             <Card className="dashboard-chart-card">
               <Card.Body>
@@ -131,16 +133,7 @@ const AdminDashboard = () => {
               </Card.Body>
             </Card>
           </Col>
-
-          {/* <Col md={6}>
-            <Card className="dashboard-chart-card">
-              <Card.Body>
-                <h1>Lead Conversion Progress</h1>
-                <ProgressBar now={0} label={`${60}%`} />
-              </Card.Body>
-            </Card>
-          </Col> */}
-        </Row>
+        </Row> */}
 
         {/* Recent Lead Activities */}
         <Row>
@@ -158,7 +151,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {leads.map((lead, index) => (
+                    {(showAllLeads ? leads : leads.slice(0, 3)).map((lead, index) => (
                       <tr key={index}>
                         <td>{lead.name}</td>
                         <td>{lead.status}</td>
@@ -168,6 +161,10 @@ const AdminDashboard = () => {
                     ))}
                   </tbody>
                 </Table>
+                <button  className='btn btn-light btn-sm'
+                onClick={() => setShowAllLeads(!showAllLeads)}>
+                  {showAllLeads ? 'Show Less' : 'Show More...'}
+                </button>
               </Card.Body>
             </Card>
           </Col>
@@ -189,7 +186,8 @@ const AdminDashboard = () => {
             </Card>
           </Col>
         </Row>
-      </Container>
+        <p>&nbsp;</p>
+      </div>
     </div>
   );
 };

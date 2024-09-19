@@ -95,13 +95,14 @@ export default function Leads() {
     return (
         <div className="global-container">
             <div className='container'>
+                <p>&nbsp;</p>
                 <div className="page-header">
-                    <h1>Leads</h1>
+                    <h1>Manage Leads</h1>
                 </div>
                 <div className='mb-3'>
-                    <Button className="btn btn-primary btn-lg" onClick={handleShow}>Add Leads</Button>
-                    <Button className='btn btn-info btn-lg ms-2' onClick={handleNavigate}>View Leads</Button>
-                    <Button className='btn btn-danger btn-lg ms-2' onClick={handleNavigateManagement}>Manage Leads</Button>
+                    <Button className="btn btn-primary btn-md" onClick={handleShow}>Add Leads</Button>
+                    <Button className='btn btn-info btn-md ms-2' onClick={handleNavigate}>View Leads</Button>
+                    <Button className='btn btn-danger btn-md ms-2' onClick={handleNavigateManagement}>Manage Leads</Button>
                 </div>
 
 
@@ -129,6 +130,7 @@ export default function Leads() {
                         </Button>
                     </Modal.Footer>
                 </Modal>
+                <p>&nbsp;</p>
             </div>
         </div>
     );
