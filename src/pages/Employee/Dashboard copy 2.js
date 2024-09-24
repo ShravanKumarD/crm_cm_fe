@@ -26,6 +26,7 @@ const Dashboard = () => {
     fetchEmployee();
     fetchTasks();
     fetchLeads();
+    fetchActivity();
   }, []);
 
   const fetchEmployee = async () => {
@@ -82,6 +83,24 @@ const Dashboard = () => {
       setError("Failed to fetch tasks.");
     }
   };
+
+  const fetchActivity = async () => {
+    console.log('test');
+    
+    try {
+        const response = await axios.get(`http://localhost:3000/task/${user.id}`);
+        
+        if (response && response.data) {
+            // Filter the tasks by leadId
+            const filteredTasks = response.data.filter(taskItem => taskItem.leadId === lead.id);
+
+            setTask(filteredTasks); 
+            console.log(filteredTasks, 'filtered tasks by leadId in activity');
+        }
+    } catch (error) {
+        console.error('Error fetching task data:', error.message);
+    }
+};
 
   const fetchAssignedLeads = async () => {
     try {

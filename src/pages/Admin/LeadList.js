@@ -65,54 +65,113 @@ const LeadList = () => {
             console.error('Error deleting lead:', error.message);
         }
     };
-    const handleAssignLeads = async (assignedTo) => {
-        if (selectedLeads.length === 0) {
-            alert('Please select leads to assign.');
-            return;
-        }
-    
-        if (!assignedTo) {
-            console.error('No user selected for assignment.');
-            return;
-        }
-    
-        const confirmed = window.confirm(`Are you sure you want to assign the selected leads to this user?`);
-        if (!confirmed) {
-            return; // Exit the function if the user cancels the action
-        }
-
-        let token = localStorage.getItem('token');
-        let user;
-                const decodedToken = jwtDecode(token);
-                user = decodedToken.user;
-
-
-    
-        try {
-            // Send the request to assign leads
-            const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
-                leadIds: selectedLeads,
-                assignedToUserId: assignedTo,
-                assignedBy: user.id
-            });
-    
-            if (response.status === 200) {
-                // Update local leads state after successful assignment
-                setLeads(prevLeads =>
-                    prevLeads.map(lead =>
-                        selectedLeads.includes(lead.id) ? { ...lead, assignedTo: response.data.assignedTo.name } : lead
-                    )
-                );
-                setSelectedLeads([]);
-            } else {
-                console.error('Failed to assign leads:', response.data.error || 'Unknown error');
-            }
-        } catch (error) {
-            console.error('Error assigning leads:', error.message || 'Unknown error');
-        }
-    };
+    // const handleAssignLeads = async (assignedTo) => {
+    //     if (selectedLeads.length === 0) {
+    //         alert('Please select leads to assign.');
+    //         return;
+    //     }
+    //     if (!assignedTo) {
+    //         console.error('No user selected for assignment.');
+    //         return;
+    //     }
+    //     const confirmed = window.confirm(`Are you sure you want to assign the selected leads to this user?`);
+    //     if (!confirmed) {
+    //         return;
+    //     }
+    //     let token = localStorage.getItem('token');
+    //     let user;
+    //             const decodedToken = jwtDecode(token);
+    //             user = decodedToken.user;
+    //     try {
+    //         // Send the request to assign leads
+    //         const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
+    //             leadIds: selectedLeads,
+    //             assignedToUserId: assignedTo,
+    //             assignedBy: user.id 
+    //         });
+    //         const leadUpdate = await axios.put(`http://localhost:3000/lead/update-leads`,{
+    //             leadIds: selectedLeads,
+    //             assignedTo:assignedTo,
+    //         })
+    //         if (response.status === 200) {
+    //             // Update local leads state after successful assignment
+    //             setLeads(prevLeads =>
+    //                 prevLeads.map(lead =>
+    //                     selectedLeads.includes(lead.id) ? { ...lead, assignedTo: response.data.assignedTo.name } : lead
+    //                 )
+    //             );
+    //             setSelectedLeads([]);
+    //         } else {
+    //             console.error('Failed to assign leads:', response.data.error || 'Unknown error');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error assigning leads:', error.message || 'Unknown error');
+    //     }
+    // };
     
     // Handles file upload and processes data
+    
+    const handleAssignLeads = async (assignedTo) => {
+        if (selectedLeads.length === 0) {
+          alert("Please select leads to assign.");
+          return;
+        }
+        if (!assignedTo) {
+          console.error("No user selected for assignment.");
+          return;
+        }
+      
+        const confirmed = window.confirm(
+          `Are you sure you want to assign the selected leads to this user?`
+        );
+        if (!confirmed) {
+          return;
+        }
+      
+        let token = localStorage.getItem("token");
+        let user;
+        const decodedToken = jwtDecode(token);
+        user = decodedToken.user;
+      
+        try {
+          const updateLeadIds = Array.isArray(selectedLeads) ? selectedLeads : [selectedLeads];
+          const [assignResponse, leadUpdateResponse] = await Promise.all([
+            axios.post("http://localhost:3000/leadAssignment/assign", {
+              leadIds: updateLeadIds,
+              assignedToUserId: assignedTo,
+              assignedBy: user.id,
+            }),
+            // axios.put("http://localhost:3000/lead/updateLeads", {
+            //   leadIds: updateLeadIds,
+            //   assignedTo: assignedTo,
+            // }),
+          ]);   
+      
+          // Check if both requests were successful
+          if (assignResponse.status === 200 && leadUpdateResponse.status === 200) {
+            // Update local leads state after successful assignment
+            setLeads((prevLeads) =>
+              prevLeads.map((lead) =>
+                selectedLeads.includes(lead.id)
+                  ? { ...lead, assignedTo: assignResponse.data.assignedTo.name }
+                  : lead
+              )
+            );
+            setSelectedLeads([]); // Clear the selection after assignment
+          } else {
+            console.error(
+              "Failed to assign leads:",
+              assignResponse.data.error || "Unknown error"
+            );
+          }
+        } catch (error) {
+          console.error("Error assigning leads:", error.message || "Unknown error");
+        }
+      };
+      
+
+
+  
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();

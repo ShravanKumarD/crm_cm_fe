@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Col, Row, Container, Button } from 'react-bootstrap';
-import { FaTasks, FaCalendarAlt, FaChartBar } from 'react-icons/fa';
-import axios from './../../components/axios'; 
-import './Dashboard.css';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Card, Col, Row, Container, Button } from "react-bootstrap";
+import { FaTasks, FaCalendarAlt, FaChartBar } from "react-icons/fa";
+import axios from "./../../components/axios";
+import "./Dashboard.css";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  console.log('amdin dash')
+  console.log("amdin dash");
   const [employees, setEmployees] = useState([]);
   const [error, setError] = useState(null);
   const [leads, setLeads] = useState([]);
@@ -17,10 +17,9 @@ const Dashboard = () => {
   const [leadsByDay, setLeadsByDay] = useState({});
   const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
+  const [leadsAssignedToday, setleadsAssignedToday] = useState(0);
 
-
-  const user = JSON.parse(localStorage.getItem('user'));
-
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     fetchAssignedLeads();
@@ -34,73 +33,99 @@ const Dashboard = () => {
       const response = await axios.get(`http://localhost:3000/user/${user.id}`);
       setEmployees(response.data);
     } catch (err) {
-      console.error('Failed to fetch employees:', err.message);
-      setError('Failed to fetch employees.');
+      console.error("Failed to fetch employees:", err.message);
+      setError("Failed to fetch employees.");
     }
   };
   const fetchLeads = async () => {
     try {
-        const response = await axios.get('http://localhost:3000/lead/');
-        if (response.status === 200) {
-            const today = new Date().toISOString().split('T')[0];
+      const response = await axios.get("http://localhost:3000/lead/");
+      if (response.status === 200) {
+        // const today = new Date().toISOString().split('T')[0];
 
-            const leadsToday = response.data.leads.filter(lead => {
-                const assignedDate = new Date(lead.assignedDate).toISOString().split('T')[0]; 
-                return assignedDate === today;
-            });
+        // const leadsToday = response.data.leads.filter(lead => {
+        //     const assignedDate = new Date(lead.assignedDate).toISOString().split('T')[0];
+        //     return assignedDate === today;
+        // });
 
-            setLeads(leadsToday.map(lead => ({
-                ...lead,
-                assignedTo: lead.assignedTo || "Not Assigned"
-            })));
-        }
+        setLeads(
+          leadsToday.map((lead) => ({
+            ...lead,
+            assignedTo: lead.assignedTo || "Not Assigned",
+          }))
+        );
+      }
     } catch (error) {
-        console.error('Error fetching leads:', error.message);
+      console.error("Error fetching leads:", error.message);
     }
-};
-
+  };
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/task/');
-      const filteredTasks = response.data.filter(task => task.userId === user.id);
-  console.log(response,"response")
-      const completed = filteredTasks.filter(task => task.status === 'Completed').length;
-      const walkins = filteredTasks.filter(task => task.status === 'Walk-ins').length;
-  
+      const response = await axios.get("http://localhost:3000/task/");
+      const filteredTasks = response.data.filter(
+        (task) => task.userId === user.id
+      );
+      console.log(response, "response");
+      const completed = filteredTasks.filter(
+        (task) => task.status === "Completed"
+      ).length;
+      const walkins = filteredTasks.filter(
+        (task) => task.status === "Walk-ins"
+      ).length;
+  console.log(filteredTasks,"filteredTasksfilteredTasks")
       setCompletedTasks(completed);
       setUpcomingMeetings(walkins);
       setTasks(filteredTasks);
-  
     } catch (err) {
-      console.error('Failed to fetch tasks:', err.message);
-      setError('Failed to fetch tasks.');
+      console.error("Failed to fetch tasks:", err.message);
+      setError("Failed to fetch tasks.");
     }
   };
-    
+
   const fetchAssignedLeads = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/leadAssignment/user-leads/${user.id}`);
+      const response = await axios.get(
+        `http://localhost:3000/leadAssignment/user-leads/${user.id}`
+      );
       if (response.status === 200) {
-        const leadIds = response.data.leads.map(lead => lead.leadId);
+        let count = 0;
+        const today = new Date().toISOString().split("T")[0];
+        const AssignedToday = response.data.leads.filter((lead) => {
+          const assignedDate = new Date(lead.assignedDate)
+            .toISOString()
+            .split("T")[0];
+          if (assignedDate === today) {
+            count++;
+          }
+          return assignedDate === today;
+        });
+
+        setleadsAssignedToday(count);
+
+        const leadIds = response.data.leads.map((lead) => lead.leadId);
         setTotalLeads(leadIds.length);
         fetchLeadDetails(leadIds);
       }
     } catch (error) {
-      console.error('Error fetching assigned leads:', error.message);
-      setError('Failed to fetch assigned leads.');
+      console.error("Error fetching assigned leads:", error.message);
+      setError("Failed to fetch assigned leads.");
     }
   };
 
   const fetchLeadDetails = async (leadIds = []) => {
     try {
-      const response = await axios.get('http://localhost:3000/lead/');
+      const response = await axios.get("http://localhost:3000/lead/");
       if (response.status === 200) {
-        const filteredLeads = response.data.leads.filter(lead => leadIds.includes(lead.id));
-        setLeads(filteredLeads.map(lead => ({
-          ...lead,
-          assignedTo: lead.assignedTo || "Not Assigned"
-        })));
+        const filteredLeads = response.data.leads.filter((lead) =>
+          leadIds.includes(lead.id)
+        );
+        setLeads(
+          filteredLeads.map((lead) => ({
+            ...lead,
+            assignedTo: lead.assignedTo || "Not Assigned",
+          }))
+        );
 
         const leadsCountByDay = filteredLeads.reduce((acc, lead) => {
           const date = new Date(lead.createdDate).toDateString();
@@ -110,13 +135,13 @@ const Dashboard = () => {
         setLeadsByDay(leadsCountByDay);
       }
     } catch (error) {
-      console.error('Error fetching lead details:', error.message);
-      setError('Failed to fetch lead details.');
+      console.error("Error fetching lead details:", error.message);
+      setError("Failed to fetch lead details.");
     }
   };
 
   const handleAddTask = () => {
-    navigate('/add-task-employee', { state: { leads } });
+    navigate("/add-task-employee", { state: { leads } });
   };
 
   const today = new Date().toDateString();
@@ -135,15 +160,20 @@ const Dashboard = () => {
                   <Col md={4}>
                     <Card className="metric-card">
                       <Card.Body>
+                        <div>
+                          <p className="right-top">
+                            today's leads: {leadsAssignedToday}/{totalLeads}
+                          </p>
+                        </div>
                         <FaTasks size={40} className="metric-icon" />
                         <h3>{totalLeads}</h3>
                         <p>Total Leads</p>
                         <p></p>
-                        <div className="text-right">
-                          <small>{leadsToday} leads today</small>
-                        </div>
+                        {/* <div className="text-right"> */}
+                        {/* <small>{leadsAssignedToday}leads assigned today</small> */}
+                        {/* </div> */}
                       </Card.Body>
-                    </Card> 
+                    </Card>
                   </Col>
                   <Col md={4}>
                     <Card className="metric-card">
@@ -174,22 +204,29 @@ const Dashboard = () => {
               <Card.Body>
                 <h3>Recent Tasks</h3>
                 <ul className="activity-list">
-                  {tasks.slice(0, 3).map(task => (
+                  {tasks.slice(0, 3).map((task) => (
                     <li key={task.id}>
-                      {task.title}: {task.followUp} (Due: {new Date(task.dueDate).toLocaleDateString()})
+                      {task.title}: {task.followUp} (Due:{" "}
+                      {/* {(task.dueDate)}) */}
+                      customer walking)
                     </li>
                   ))}
                 </ul>
                 {tasks.length > 3 && (
-                  <Button variant="link" onClick={() => setShowAll(!showAll)} className="readMore">
-                    {showAll ? 'Show Less' : 'Read More'}
+                  <Button
+                    variant="link"
+                    onClick={() => setShowAll(!showAll)}
+                    className="readMore"
+                  >
+                    {showAll ? "Show Less" : "Read More"}
                   </Button>
                 )}
                 {showAll && (
                   <ul className="activity-list">
-                    {tasks.slice(3).map(task => (
+                    {tasks.slice(3).map((task) => (
                       <li key={task.id}>
-                        {task.title}: {task.followUp} (Due: {new Date(task.dueDate).toLocaleDateString()})
+                        {task.title}: {task.followUp} (Due:{" "}
+                        {new Date(task.dueDate).toLocaleDateString()})
                       </li>
                     ))}
                   </ul>
@@ -204,7 +241,11 @@ const Dashboard = () => {
               <Card.Body>
                 <h3>Quick Actions</h3>
                 <ul className="quick-actions">
-                  <li><Button variant="primary" onClick={handleAddTask}>Create New Task</Button></li>
+                  <li>
+                    <Button variant="primary" onClick={handleAddTask}>
+                      Create New Task
+                    </Button>
+                  </li>
                 </ul>
               </Card.Body>
             </Card>

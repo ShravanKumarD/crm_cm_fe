@@ -7,7 +7,7 @@ const LeadDetail = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { lead } = location.state || {};
-    const [activeTab, setActiveTab] = useState('general');
+    const [activeTab, setActiveTab] = useState('Basic Info');
     const [isEditing, setIsEditing] = useState(false);
     const [task,setTask]=useState([]);
 
@@ -70,7 +70,7 @@ const LeadDetail = () => {
 
     const handleSave = async () => {
         try {
-            const response = await axios.put(`http://localhost:3000/lead/${lead.id}`,editLead);
+            const response = await axios.put(`http://localhost:3000/lead/${lead.id}/${editLead}`,editLead);
             console.log('Lead updated successfully:', response);
         } catch (error) {
             console.error('Error updating lead:', error);
@@ -82,7 +82,7 @@ const handleNavigate=async ()=>{
 }
     const renderTabContent = () => {
         switch (activeTab) {
-            case 'general':
+            case 'Basic Info':
                 return (
                     <div className="card-body">
                     <h4 className="mb-3">Lead Information</h4>
@@ -107,12 +107,12 @@ const handleNavigate=async ()=>{
                     </div>
                 
                     <div className="d-flex justify-content-between">
-                        <button className="btn btn-primary btn-lg" onClick={() => setIsEditing(!isEditing)}>
+                        <button className="btn btn-primary btn-sm" onClick={() => setIsEditing(!isEditing)}>
                             {isEditing ? 'Cancel' : 'Edit Lead'}
                         </button>
                 
                         {isEditing && (
-                            <button className="btn btn-primary btn-lg" onClick={handleSave}>
+                            <button className="btn btn-primary btn-sm" onClick={handleSave}>
                                 Save Changes
                             </button>
                         )}
@@ -259,7 +259,7 @@ const handleNavigate=async ()=>{
                 <div className="card">
                     <div className="card-header">
                         <ul className="nav nav-tabs">
-                            {['general', 'activity'].map(tab => (
+                            {['Basic Info', 'activity'].map(tab => (
                                 <li key={tab} className="nav-item">
                                     <button
                                         className={`nav-link ${activeTab === tab ? 'active' : ''}`}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Button, Table, Modal } from "react-bootstrap";  // Import Modal
+import { Form, Button, Table } from "react-bootstrap";
 import axios from "./../../components/axios";
 import "./../../App.css";
 
@@ -17,9 +17,6 @@ const LeadList = () => {
   });
   const [leadStatuses, setLeadStatuses] = useState({});
   const [selectAll, setSelectAll] = useState(false);
-  const [showModal, setShowModal] = useState(false);  // State to control modal visibility
-  const [currentLead, setCurrentLead] = useState(null);  // To store the lead to update
-  const [newStatus, setNewStatus] = useState("");  // To store the new status
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -50,7 +47,6 @@ const LeadList = () => {
         const filteredLeads = response.data.leads.filter((lead) =>
           leadIds.includes(lead.id)
         );
-        console.log(filteredLeads,"filteredLeads")
         setLeads(
           filteredLeads.map((lead) => ({
             ...lead,
@@ -79,6 +75,7 @@ const LeadList = () => {
   };
 
   const handleCreateTask = (lead) => {
+    console.log(lead,"leadIdleadId")
     navigate("/add-task-employee", { state: { lead } });
   };
 
@@ -102,47 +99,46 @@ const LeadList = () => {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
+    setFilters(prevFilters => ({
+        ...prevFilters,
+        [name]: value
     }));
-  };
-
+};
   const handleStatusChange = (leadId, newStatus) => {
-    setCurrentLead(leadId);  // Store current lead
-    setNewStatus(newStatus);  // Store new status
-    setShowModal(true);  // Show confirmation modal
-  };
-
-  const confirmStatusChange = () => {
+    // Update the local state for the changed lead status
     setLeadStatuses((prevStatuses) => ({
       ...prevStatuses,
-      [currentLead]: newStatus,
+      [leadId]: newStatus,
     }));
-    updateLeadStatus(currentLead, newStatus);  // Proceed with status update
-    setShowModal(false);  // Close the modal
+  
+    // Send the updated status to the backend
+    updateLeadStatus(leadId, newStatus);
   };
-
+  
   const updateLeadStatus = (leadId, newStatus) => {
+    console.log(newStatus,"newStatus", user.id," user.id",leadId,"leadId")
     const updateTaskStatus = axios.post(`http://localhost:3000/task/`, {
       status: newStatus,
       userId: user.id,
       leadId: leadId,
     });
-
+  
     const fetchLeadStatus = axios.put(`http://localhost:3000/lead/${leadId}`, {
       status: newStatus,
       userId: user.id,
     });
-
-    const updateLeadAssignment = axios.put(
-      `http://localhost:3000/leadAssignment/${leadId}`,
-      { status: newStatus }
-    );
-
+  
+    const updateLeadAssignment = axios.put(`http://localhost:3000/leadAssignment/${leadId}`, {
+      status: newStatus,
+    });
+  
+    // Use Promise.all to execute the promises concurrently
     Promise.all([updateTaskStatus, fetchLeadStatus, updateLeadAssignment])
       .then((responses) => {
-        const [taskResponse] = responses;
+        const [taskResponse, leadResponse, leadAssignmentResponse] = responses;
+        
+        console.log(taskResponse.data);
+  
         if (taskResponse.status === 200) {
           console.log(`Status for lead ${leadId} updated successfully`);
         }
@@ -152,31 +148,22 @@ const LeadList = () => {
         setError(`Failed to update status for lead ${leadId}.`);
       });
   };
-
-  // Apply filters to the leads before rendering
-  const filteredLeads = leads.filter((lead) => {
-    return (
-      (filters.name === "" || lead.name.toLowerCase().includes(filters.name.toLowerCase())) &&
-      (filters.date === "" || lead.dateImported.split("T")[0] === filters.date) &&
-      (filters.id === "" || lead.id.toString().includes(filters.id)) &&
-      (filters.status === "" || lead.status === filters.status)
-    );
-  });
+  
 
   return (
     <div className="global-container">
       <div className="container">
         <h1 className="text-left">{employees.name}</h1>
         <div className="col-md-3">
-          <input
-            type="text"
-            name="name"
-            className="form-control"
-            placeholder="Filter by Name"
-            value={filters.name}
-            onChange={handleFilterChange}
-          />
-        </div>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    className="form-control"
+                                    placeholder="Filter by Name"
+                                    value={filters.name}
+                                    onChange={handleFilterChange}
+                                />
+                            </div>
         <div className="table-responsive">
           <Table striped>
             <thead>
@@ -192,8 +179,7 @@ const LeadList = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Imported Date</th>
-                <th>Assigned Date</th>
+                <th>Added Date</th>
                 <th>Lead Source</th>
                 <th>Status</th>
                 <th>Activity</th>
@@ -201,7 +187,7 @@ const LeadList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredLeads.map((lead) => (
+              {leads.map((lead) => (
                 <tr key={lead.id}>
                   <td>
                     <input
@@ -215,31 +201,32 @@ const LeadList = () => {
                   <td>{lead.email}</td>
                   <td>{lead.phone}</td>
                   <td>{lead.dateImported.split("T")[0]}</td>
-                  <td>{lead.assignedDate}</td>
                   <td>{lead.leadSource || "NA"}</td>
-
                   <td>
-  <Form.Control
-    as="select"
-    name="status"
-    value={leadStatuses[lead.id] || lead.status || newStatus || ""}
-    onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-  >
-    <option value="">Select status</option>
-    <option value="RNR">RNR</option>
-    <option value="Switch Off">Switch Off</option>
-    <option value="Busy">Busy</option>
-    <option value="Call Back">Call Back</option>
-    <option value="Interested">Interested</option>
-    <option value="Not Interested">Not Interested</option>
-    <option value="Not Working/Not Reachable">Not Working/Not Reachable</option>
-    <option value="Follow Up">Follow Up</option>
-  </Form.Control>
-</td>
-
-
-
-
+                    {lead.status === "active" ? (
+                      <Form.Control
+                        as="select"
+                        name="status"
+                        value={leadStatuses[lead.id] || lead.status}
+                        onChange={(e) =>
+                          handleStatusChange(lead.id, e.target.value)
+                        }
+                      >
+                        <option value="">Select status</option>
+                        <option value="RNR">RNR</option>
+                        <option value="Switch Off">Switch Off</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Call Back">Call Back</option>
+                        <option value="Interested">Interested</option>
+                        <option value="Not Interested">Not Interested</option>
+                        <option value="Not Working/Not Reachable">
+                          Not Working/Not Reachable
+                        </option>
+                      </Form.Control>
+                    ) : (
+                      lead.status
+                    )}
+                  </td>
                   <td>
                     <button
                       className="btn btn-secondary btn-sm"
@@ -262,24 +249,6 @@ const LeadList = () => {
           </Table>
         </div>
       </div>
-
-      {/* Confirmation Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Status Change</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to change the status to "{newStatus}" for this lead?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={confirmStatusChange}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

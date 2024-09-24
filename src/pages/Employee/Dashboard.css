@@ -49,3 +49,9 @@
     color: #b377e3;
     text-decoration: none;
   }
+  .right-top {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  
