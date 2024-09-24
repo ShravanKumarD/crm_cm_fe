@@ -14,6 +14,9 @@ const LeadList = () => {
     date: "",
     id: "",
     status: "",
+    phone:"",
+    leadStatus: "",
+    source: "",
   });
   const [leadStatuses, setLeadStatuses] = useState({});
   const [selectAll, setSelectAll] = useState(false);
@@ -159,7 +162,11 @@ const LeadList = () => {
       (filters.name === "" || lead.name.toLowerCase().includes(filters.name.toLowerCase())) &&
       (filters.date === "" || lead.dateImported.split("T")[0] === filters.date) &&
       (filters.id === "" || lead.id.toString().includes(filters.id)) &&
-      (filters.status === "" || lead.status === filters.status)
+      (filters.status === "" || lead.status === filters.status) &&
+      (filters.phone === "" || lead.phone.includes(filters.phone)) &&
+      (filters.leadStatus === "" || lead.status === filters.leadStatus)&&
+      (filters.source === "" || lead.leadSource.toLowerCase().includes(filters.source.toLowerCase())) 
+      // (filters.source === "" || lead.leadSource === filters.source) 
     );
   });
 
@@ -167,16 +174,77 @@ const LeadList = () => {
     <div className="global-container">
       <div className="container">
         <h1 className="text-left">{employees.name}</h1>
-        <div className="col-md-3">
-          <input
-            type="text"
-            name="name"
-            className="form-control"
-            placeholder="Filter by Name"
-            value={filters.name}
-            onChange={handleFilterChange}
-          />
-        </div>
+        <div>
+  <div className="row">
+    <div className="col-md-3">
+      <input
+        type="text"
+        name="name"
+        className="form-control"
+        placeholder="Filter by Name"
+        value={filters.name}
+        onChange={handleFilterChange}
+      />
+    </div>
+
+    <div className="col-md-3">
+      {/* <label>Filter by Imported Date</label> */}
+      <input
+        type="date"
+        name="date"
+        className="form-control"
+        placeholder="Filter by Imported Date"
+        value={filters.date}
+        onChange={handleFilterChange}
+      />
+    </div>
+
+    <div className="col-md-3">
+      <input
+        type="text"
+        name="phone"
+        className="form-control"
+        placeholder="Filter by Phone"
+        value={filters.phone}
+        onChange={handleFilterChange}
+      />
+    </div>
+
+    <div className="col-md-3">
+      <Form.Control
+        as="select"
+        name="leadStatus"
+        className="form-control"
+        value={filters.leadStatus}
+        onChange={handleFilterChange}
+      >
+        <option value="">Filter by Lead Status</option>
+        <option value="RNR">RNR</option>
+        <option value="Switch Off">Switch Off</option>
+        <option value="Busy">Busy</option>
+        <option value="Call Back">Call Back</option>
+        <option value="Interested">Interested</option>
+        <option value="Not Interested">Not Interested</option>
+        <option value="Not Working/Not Reachable">Not Working/Not Reachable</option>
+        <option value="Follow Up">Follow Up</option>
+      </Form.Control>
+    </div>
+<p>&nbsp;</p>
+    <div className="col-md-3">
+      <input
+        type="text"
+        name="source"
+        className="form-control"
+        placeholder="Filter by Lead Source"
+        value={filters.source}
+        onChange={handleFilterChange}
+      />
+    </div>
+  </div>
+</div>
+<br/>
+
+  
         <div className="table-responsive">
           <Table striped>
             <thead>

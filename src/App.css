@@ -1,4 +1,7 @@
-    /* background:radial-gradient(circle, #bcbcca, #e4c5ff, #ebd1ef); */ 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+ 
+ 
+ /* background:radial-gradient(circle, #bcbcca, #e4c5ff, #ebd1ef); */ 
  
  .dashboard-container {
   display: contents;
@@ -78,11 +81,11 @@ p{
 }
 .table td {
   background-color: #fff;
-  font-size: 11px;
+  font-size: 13px;
 }
 .table th {
   background-color: #f4f4f4;
-  font-size: 12px;
+  font-size: 14px;
 }
 .btn-secondary{
   font-size: 11px;

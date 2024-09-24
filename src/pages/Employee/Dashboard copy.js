@@ -18,8 +18,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
   const [leadsAssignedToday, setleadsAssignedToday] = useState(0);
-
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [searchTerm, setSearchTerm] = useState("");
+  const user = JSON.parse(localStorage.getItem("user")) || {};
 
   useEffect(() => {
     fetchAssignedLeads();
@@ -73,7 +73,7 @@ const Dashboard = () => {
       const walkins = filteredTasks.filter(
         (task) => task.status === "Walk-ins"
       ).length;
-
+  console.log(filteredTasks,"filteredTasksfilteredTasks")
       setCompletedTasks(completed);
       setUpcomingMeetings(walkins);
       setTasks(filteredTasks);
@@ -113,6 +113,8 @@ const Dashboard = () => {
     }
   };
 
+  
+
   const fetchLeadDetails = async (leadIds = []) => {
     try {
       const response = await axios.get("http://localhost:3000/lead/");
@@ -139,6 +141,10 @@ const Dashboard = () => {
       setError("Failed to fetch lead details.");
     }
   };
+
+  const filteredLeads = leads.filter((lead) =>
+    lead.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleAddTask = () => {
     navigate("/add-task-employee", { state: { leads } });
@@ -198,16 +204,20 @@ const Dashboard = () => {
             </Card>
           </Col>
 
-          {/* Recent Tasks Section */}
+
           <Col md={8} className="mb-4">
             <Card className="dashboard-card">
               <Card.Body>
                 <h3>Recent Tasks</h3>
                 <ul className="activity-list">
-                  {tasks.slice(0, 3).map((task) => (
+                  {tasks.map((task) => (
                     <li key={task.id}>
-                      {task.title}: {task.followUp} (Due:{" "}
-                      {new Date(task.dueDate).toLocaleDateString()})
+                 {task.followUp ? new Date(task.followUp).toLocaleDateString("en-GB", {
+                   weekday: "long",
+                   day: "numeric",  
+                   month: "long",  
+                   year: "numeric"
+}) :null}
                     </li>
                   ))}
                 </ul>
@@ -245,22 +255,6 @@ const Dashboard = () => {
                       Create New Task
                     </Button>
                   </li>
-                </ul>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          {/* Leads by Day Section */}
-          <Col md={4} className="mb-4">
-            <Card className="dashboard-card">
-              <Card.Body>
-                <h3>Leads by Day</h3>
-                <ul className="activity-list">
-                  {Object.entries(leadsByDay).map(([date, count]) => (
-                    <li key={date}>
-                      {date}: {count} leads
-                    </li>
-                  ))}
                 </ul>
               </Card.Body>
             </Card>
