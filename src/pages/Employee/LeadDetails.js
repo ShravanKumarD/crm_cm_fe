@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Form } from "react-bootstrap";
 import axios from './../../components/axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -66,6 +67,22 @@ const LeadDetail = () => {
             console.error('Error fetching task data:', error.message);
         }
     };
+
+    const handleTaskStatusChange = async (taskId, newStatus) => {
+        try {
+            const response = await axios.put(`http://localhost:3000/task/${taskId}`, {
+                 status: newStatus,
+                userId:user.id ,
+            leadId:lead.id});
+            console.log('Task status updated:', response.data);
+
+            // Re-fetch the tasks to reflect the new status
+            fetchActivity();
+        } catch (error) {
+            console.error('Error updating task status:', error.message);
+        }
+    };
+
     
 
     const handleSave = async () => {
@@ -98,6 +115,7 @@ const handleNavigate=async ()=>{
                                         className="form-control"
                                         value={editLead[field]}
                                         onChange={handleInputChange}
+                                        readOnly={field === 'phone'} 
                                     />
                                 ) : (
                                     <p className="form-control-plaintext">{editLead[field]}</p>
@@ -158,6 +176,7 @@ const handleNavigate=async ()=>{
                                         <th>Documnets Collected</th>
                                         <th>Created By</th>
                                         <th>Created On</th>
+                                        <th>Task Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -181,7 +200,16 @@ const handleNavigate=async ()=>{
                         ? `${new Date(taskItem.createdDate).toLocaleDateString()} ${new Date(taskItem.createdDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                         : 'Not Availabale'}</td>
 
-                          
+<td>
+                                                <Form.Control
+                                                    as="select"
+                                                    value={taskItem.status}
+                                                    onChange={(e) => handleTaskStatusChange(taskItem.id, e.target.value)}
+                                                >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Completed">Completed</option>
+                                                </Form.Control>
+                                            </td>
                                             </tr>
                                         ))
                                     ) : (

@@ -77,12 +77,20 @@ const Dashboard = () => {
   console.log(filteredTasks,"filteredTasksfilteredTasks")
       setCompletedTasks(completed);
       setUpcomingMeetings(walkins);
-      setTasks(filteredTasks.reverse());
+      const filtered = filteredTasks.filter((task) => {
+        // Ensure follow-up is not null, not undefined, and not an empty string
+        return task.followUp !== "N/A" && task.followUp !== "" && task.followUp !== null;
+      });
+     console.log(filtered,"filtered")
+      setTasks(filtered .reverse());
     } catch (err) {
       console.error("Failed to fetch tasks:", err.message);
       setError("Failed to fetch tasks.");
     }
   };
+
+
+
 
   const fetchAssignedLeads = async () => {
     try {
@@ -216,9 +224,8 @@ const Dashboard = () => {
                       <th>Lead</th>
                     <th>Phone</th>
                       <th>Follow-up Date</th>
-                  
-                      <th>description</th>
-                      <th>actionType</th>
+                      <th>Note</th>
+                      <th>Action Type</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -233,12 +240,10 @@ const Dashboard = () => {
                                 day: "numeric",
                                 month: "long",
                                 year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12:true, 
                               })
-                            : "N/A"}
-                        </td>
-                        <td>
-                          {task.dueDate
-                            ? new Date(task.dueDate).toLocaleDateString("en-GB")
                             : "N/A"}
                         </td>
                         <td>{task.description}</td>
@@ -261,23 +266,23 @@ const Dashboard = () => {
                     <tbody>
                       {tasks.slice(3).map((task) => (
                         <tr key={task.id}>
-                          <td>{task.title}</td>
-                          <td>{task.status}</td>
-                          <td>
-                            {task.followUp
-                              ? new Date(task.followUp).toLocaleDateString("en-GB", {
-                                  weekday: "long",
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                })
-                              : "N/A"}
-                          </td>
-                          <td>
-                            {task.dueDate
-                              ? new Date(task.dueDate).toLocaleDateString("en-GB")
-                              : "N/A"}
-                          </td>
+                       <td>{task.lead.name}</td>
+                        <td>{task.lead.phone}</td>
+                        <td>
+                          {task.followUp
+                            ? new Date(task.followUp).toLocaleDateString("en-GB", {
+                                weekday: "long",
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12:true, 
+                              })
+                            : "N/A"}
+                        </td>
+                        <td>{task.description}</td>
+                        <td>{task.actionType}</td>
                         </tr>
                       ))}
                     </tbody>

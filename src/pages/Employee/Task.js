@@ -152,7 +152,7 @@ export default function TaskForm({ leadData }) {
     console.log(loanReport, "loanReport");
     try {
       await axios.post("http://localhost:3000/loans-reports/", loanReport);
-      alert("Loan report submitted successfully");
+      alert("Loan report submitted succes sfully");
     } catch (error) {
       console.error("There was an error posting the loan report!", error);
     }
