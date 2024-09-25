@@ -55,22 +55,27 @@ const AdminDashboard = () => {
       setError('Failed to fetch employees.');
     }
   };
-
   const fetchTasks = async () => {
     try {
       const response = await axios.get('http://localhost:3000/task/');
-      const filteredTasks = response.data.filter(task => task.userId === user.id);
-      const completed = filteredTasks.filter(task => task.status === 'Completed').length;
-      const walkins = filteredTasks.filter(task => task.status === 'Walk-ins').length;
-
-      setCompletedTasks(completed);
-      setUpcomingMeetings(walkins);
-      setTasks(filteredTasks);
+  
+      // Assuming response.data is an array of tasks
+      const sortedTasks = response.data.sort((a, b) => {
+        const dateA = new Date(a.createdDate);
+        const dateB = new Date(b.createdDate); 
+        return dateA - dateB; // Sort in ascending order
+      });
+  
+      console.log(sortedTasks, "sortedTasks");
+      
+      // Set the tasks state
+      setTasks(sortedTasks);
     } catch (err) {
       console.error('Failed to fetch tasks:', err.message);
       setError('Failed to fetch tasks.');
     }
   };
+  
 
   const processLeadsData = (data) => {
     const statusCounts = data.reduce((acc, lead) => {
@@ -83,18 +88,31 @@ const AdminDashboard = () => {
       value: statusCounts[status],
     }));
   };
-
+  const today = new Date().toISOString().split('T')[0]; 
+  const newLeadsCount = leads.filter(lead => {
+    const assignedDate = new Date(lead.dateImported).toISOString().split('T')[0];
+    console.log(assignedDate,"assignedDate")
+    return assignedDate === today && lead.status === 'New';
+  }).length;
+  console.log(user,"name")
+  
   return (
     <div className='global-container'>
       <div className='container' fluid>
         <p>&nbsp;</p>
         {/* Lead Summary Cards */}
+        <Card className="lead-summary-card">
+           <Card.Body>
+           hello {user.email}, well come back
+           </Card.Body>
+        
+        </Card>
+        <p>&nbsp;</p>
+       
         <Row className="mb-4">
           {[
             { title: 'Total Leads', count: totalLeads },
-            { title: 'New Leads', count: leads.filter(lead => lead.status === 'New').length },
-            { title: 'Contacted Leads', count: leads.filter(lead => lead.status === 'Contacted').length },
-            { title: 'Converted Leads', count: leads.filter(lead => lead.status === 'Converted').length },
+            { title: 'Today Leads', count: newLeadsCount  },
           ].map(({ title, count }, index) => (
             <Col md={3} key={index}>
               <Card className="lead-summary-card">
@@ -102,9 +120,12 @@ const AdminDashboard = () => {
                   <h1>{title}</h1>
                   <h4>{count}</h4>
                 </Card.Body>
+                
               </Card>
             </Col>
           ))}
+        
+       
         </Row>
 
         {/* Charts and Progress */}
@@ -137,7 +158,7 @@ const AdminDashboard = () => {
 
         {/* Recent Lead Activities */}
         <Row>
-          <Col md={8}>
+          <Col md={12}>
             <Card>
               <Card.Body>
                 <h1>Recent Lead Activities</h1>
@@ -147,16 +168,41 @@ const AdminDashboard = () => {
                       <th>Lead Name</th>
                       <th>Status</th>
                       <th>Assigned To</th>
+                      <th>assignedDate</th>
                       <th>Last Activity</th>
+                      <th>actionType</th>
+                      <th>lead status</th>
+                      <th>phone</th>
+                      <th>createdDate</th>
+                      <th>description</th>
+                      <th>followUp</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {(showAllLeads ? leads : leads.slice(0, 3)).map((lead, index) => (
+                    {(showAllLeads ? tasks : tasks.slice(0, 3)).map((tasks, index) => (
                       <tr key={index}>
-                        <td>{lead.name}</td>
-                        <td>{lead.status}</td>
-                        <td>{lead.assignedTo || 'Not Assigned'}</td>
-                        <td>{lead.lastActivity || 'N/A'}</td>
+                        <td>{tasks.lead.name}</td>
+                        <td>{tasks.status}</td>
+                        <td>{tasks.user.name || 'Not Assigned'}</td>
+                        <td>{tasks.lead.assignedDate}</td>
+                        <td>{tasks.lastActivity || 'N/A'}</td>
+                        <td>{tasks.actionType}</td>
+                        <td>{tasks.lead.status || "N/A"}</td>
+                        <td>{tasks.lead.phone}</td>
+                        <td>
+  {new Date(tasks.createdDate).toLocaleTimeString([], {
+   weekday: "long",
+   day: "numeric",
+   month: "long",
+   year: "numeric",
+   hour: "2-digit",
+   minute: "2-digit",
+   hour12:true, 
+  })}
+</td>
+<td>{tasks.description||"N/A"}</td>
+<td>{tasks.followUp||"N/A"}</td>
+
                       </tr>
                     ))}
                   </tbody>
@@ -170,21 +216,21 @@ const AdminDashboard = () => {
           </Col>
 
           {/* Upcoming Tasks */}
-          <Col md={4}>
-            <Card>
-              <Card.Body>
-                <h1>Upcoming Tasks</h1>
-                <ul className="task-list">
-                  {tasks.map((task, index) => (
-                    <li key={index}>
-                      {task.title} <br />
-                      <span>Due: {task.dueDate}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Card.Body>
-            </Card>
-          </Col>
+            {/* <Col md={4}>
+              <Card>
+                <Card.Body>
+                  <h1>Upcoming Tasks</h1>
+                  <ul className="task-list">
+                    {tasks.map((task, index) => (
+                      <li key={index}>
+                        {task.title} <br />
+                        <span>Due: {task.dueDate}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col> */}
         </Row>
         <p>&nbsp;</p>
       </div>

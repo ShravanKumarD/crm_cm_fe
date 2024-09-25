@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Col, Row, Container, Button,Table } from "react-bootstrap";
+import { Card, Col, Row, Container, Button,Table,Form } from "react-bootstrap";
 import { FaTasks, FaCalendarAlt, FaChartBar } from "react-icons/fa";
 import axios from "./../../components/axios";
 import "./Dashboard.css";
@@ -20,6 +20,7 @@ const Dashboard = () => {
   const [leadsAssignedToday, setleadsAssignedToday] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const user = JSON.parse(localStorage.getItem("user")) || {};
+  const [task, setTask] = useState([]);
 
   
   useEffect(() => {
@@ -61,35 +62,82 @@ const Dashboard = () => {
     }
   };
 
+  // const fetchTasks = async () => {
+  //   try {
+  //     const response = await axios.get("http://localhost:3000/task/");
+  //     const filteredTasks = response.data.filter(
+  //       (task) => task.userId === user.id
+  //     );
+  //     console.log(response, "response");
+  //     const completed = filteredTasks.filter(
+  //       (task) => task.status === "Completed"
+  //     ).length;
+  //     const walkins = filteredTasks.filter(
+  //       (task) => task.status === "Walk-ins"
+  //     ).length;
+  // console.log(filteredTasks,"filteredTasksfilteredTasks")
+  //     setCompletedTasks(completed);
+  //     setUpcomingMeetings(walkins);
+  //     const filtered = filteredTasks.filter((task) => {
+  //       // Ensure follow-up is not null, not undefined, and not an empty string
+  //       return task.followUp !== "N/A" && task.followUp !== "" && task.followUp !== null;
+  //     });
+  //    console.log(filtered,"filtered")
+  //     setTasks(filtered );
+  //   } catch (err) {
+  //     console.error("Failed to fetch tasks:", err.message);
+  //     setError("Failed to fetch tasks.");
+  //   }
+  // };
   const fetchTasks = async () => {
     try {
       const response = await axios.get("http://localhost:3000/task/");
       const filteredTasks = response.data.filter(
         (task) => task.userId === user.id
       );
+  
       console.log(response, "response");
+  
+      // Counting Completed and Walk-ins tasks
       const completed = filteredTasks.filter(
         (task) => task.status === "Completed"
       ).length;
       const walkins = filteredTasks.filter(
         (task) => task.status === "Walk-ins"
       ).length;
-  console.log(filteredTasks,"filteredTasksfilteredTasks")
+  
       setCompletedTasks(completed);
       setUpcomingMeetings(walkins);
-      const filtered = filteredTasks.filter((task) => {
-        // Ensure follow-up is not null, not undefined, and not an empty string
-        return task.followUp !== "N/A" && task.followUp !== "" && task.followUp !== null;
-      });
-     console.log(filtered,"filtered")
-      setTasks(filtered .reverse());
+  
+      // Get current date and 2 days from now
+      const today = new Date();
+      const twoDaysLater = new Date();
+      twoDaysLater.setDate(today.getDate() + 2);
+  
+      // Filter tasks with valid follow-up date
+      const upcomingTasks = filteredTasks
+        .filter((task) => {
+          return task.followUp !== "N/A" && task.followUp !== "" && task.followUp !== null;
+        })
+        .map((task) => ({
+          ...task,
+          followUpDate: new Date(task.followUp), // Convert follow-up to Date object
+        }))
+        // Sort tasks by follow-up date
+        .sort((a, b) => a.followUpDate - b.followUpDate)
+        // Filter tasks for today + 2 days
+        .filter((task) => {
+          return task.followUpDate >= today && task.followUpDate <= twoDaysLater;
+        });
+  
+      console.log(upcomingTasks, "upcomingTasks");
+      setTasks(upcomingTasks);
     } catch (err) {
       console.error("Failed to fetch tasks:", err.message);
       setError("Failed to fetch tasks.");
     }
   };
-
-
+  
 
 
   const fetchAssignedLeads = async () => {
@@ -121,7 +169,55 @@ const Dashboard = () => {
       setError("Failed to fetch assigned leads.");
     }
   };
+  const handleTaskStatusChange = async (taskId, newStatus) => {
+    try {
+      // Update the task status in the backend
+      const response = await axios.put(`http://localhost:3000/task/${taskId}`, {
+        status: newStatus,
+        userId: user.id,
+  leadId: tasks.lead.id,
 
+      });
+      console.log("Task status updated:", response.data);
+  
+      setTasks((prevTasks) => {
+        console.log(prevTasks,"prevtask")
+        const updatedTasks = prevTasks.filter((task) => task.taskStatus !=="Completed" );
+        console.log(updatedTasks,"updated")
+      return updatedTasks;
+      });
+  
+      // Optionally, re-fetch tasks to ensure the state is up to date
+      fetchTasks();  // Fetches the latest tasks including new upcoming ones
+  
+    } catch (error) {
+      console.error("Error updating task status:", error.message);
+    }
+  };
+  
+
+
+
+
+  const fetchActivity = async () => {
+    console.log("test");
+
+    try {
+      const response = await axios.get(`http://localhost:3000/task/${user.id}`);
+
+      if (response && response.data) {
+        // Filter the tasks by leadId
+        const filteredTasks = response.data.filter(
+          (taskItem) => taskItem.leadId === tasks.lead.id
+        );
+
+        setTask(filteredTasks);
+        console.log(filteredTasks, "filtered tasks by leadId in activity");
+      }
+    } catch (error) {
+      console.error("Error fetching task data:", error.message);
+    }
+  };
   
 
   const fetchLeadDetails = async (leadIds = []) => {
@@ -226,6 +322,7 @@ const Dashboard = () => {
                       <th>Follow-up Date</th>
                       <th>Note</th>
                       <th>Action Type</th>
+                      <th>Task Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -248,6 +345,19 @@ const Dashboard = () => {
                         </td>
                         <td>{task.description}</td>
                         <td>{task.actionType}</td>
+                        <td>
+                        <Form.Control
+                          as="select"
+                          value={task.status}
+                          onChange={(e) =>
+                            handleTaskStatusChange(task.id, e.target.value)
+                          }
+                          className="dropdownText"
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Completed">Completed</option>
+                        </Form.Control>
+                      </td>
                       </tr>
                     ))}
                   </tbody>

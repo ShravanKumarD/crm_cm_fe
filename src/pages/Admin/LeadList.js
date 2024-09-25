@@ -361,6 +361,7 @@ const LeadList = () => {
                                     onChange={handleFilterChange}
                                 />
                             </div>
+                            <p>&nbsp;</p>
                             <div className="col-md-3">
                                 <input
                                     type="text"
