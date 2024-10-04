@@ -25,7 +25,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchLeadsData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/lead/');
+        const response = await axios.get('/lead/');
         if (response.status === 200) {
           const processedData = processLeadsData(response.data.leads);
           setLeadsData(processedData);
@@ -48,7 +48,7 @@ const AdminDashboard = () => {
 
   const fetchEmployee = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/user/${user.id}`);
+      const response = await axios.get(`/user/${user.id}`);
       setEmployees(response.data);
     } catch (err) {
       console.error('Failed to fetch employees:', err.message);
@@ -57,7 +57,7 @@ const AdminDashboard = () => {
   };
   const fetchTasks = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/task/');
+      const response = await axios.get('/task/');
   
       // Assuming response.data is an array of tasks
       const sortedTasks = response.data.sort((a, b) => {
@@ -65,8 +65,6 @@ const AdminDashboard = () => {
         const dateB = new Date(b.createdDate); 
         return dateA - dateB; // Sort in ascending order
       });
-  
-      console.log(sortedTasks, "sortedTasks");
       
       // Set the tasks state
       setTasks(sortedTasks);
@@ -91,10 +89,8 @@ const AdminDashboard = () => {
   const today = new Date().toISOString().split('T')[0]; 
   const newLeadsCount = leads.filter(lead => {
     const assignedDate = new Date(lead.dateImported).toISOString().split('T')[0];
-    console.log(assignedDate,"assignedDate")
     return assignedDate === today && lead.status === 'New';
   }).length;
-  console.log(user,"name")
   
   return (
     <div className='global-container'>
@@ -103,7 +99,7 @@ const AdminDashboard = () => {
         {/* Lead Summary Cards */}
         <Card className="lead-summary-card">
            <Card.Body>
-           hello {user.email}, well come back
+           hello , well come back
            </Card.Body>
         
         </Card>

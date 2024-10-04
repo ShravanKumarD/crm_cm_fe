@@ -1,40 +1,115 @@
-/* AuthPage.css */
 .auth-container {
-    background-color: #f8f9fa;
-    /* padding: 30px; */
+    display: flex;
     justify-content: center;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-.auth-card {
-    padding: 20px;
-    border-radius: 8px;
-    background-size: cover;
-    background-color: grey;
-    background-position: center;
-    color: #ffffff; 
-    font-weight: bolder;
-    font-family: Poppins;
-}
-
-.auth-card {
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.auth-header {
+    align-items: center;
+    background:linear-gradient(to right, #988ac630, #caaae6);
+    box-shadow: 10px 10px 10px #a8bad7;
+    border-radius: 4px;
+  }
+  
+  .auth-box {
+    /* width: 700px; */
+    height: 450px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    transition: all 0.5s ease-in-out;
+  }
+  
+  .sign-in-mode .left-panel,
+  .sign-up-mode .right-panel {
+    background-color: #7f77ff;
+    color: white;
+    transition: all 0.5s ease-in-out;
+  }
+  
+  .left-panel,
+  .right-panel {
+    width: 50%;
+    padding: 40px;
+    box-sizing: border-box;
+  }
+  
+  h1 {
     margin-bottom: 20px;
-}
-
-.btn-toggle {
-    margin-top: 10px;
-}
-
-.form-group {
+    font-size: 24px;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  input {
     margin-bottom: 15px;
-}
-
-.loginText{
-    color: #fff;
-    font-weight: 700;
-}
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: Poppins;
+  }
+  
+  button {
+    background-color: #7f77ff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: Poppins;
+  }
+  
+  button:hover {
+    background-color: #6e66cc;
+  }
+  
+  .social-icons a {
+    margin-right: 10px;
+    color: #7f77ff;
+  }
+  
+  .social-icons a:hover {
+    color: #6e66cc;
+  }
+  
+  a {
+    text-decoration: none;
+    color: #7f77ff;
+    margin-top: 10px;
+    font-family: Poppins;
+  }
+  .loginText{
+    font-family: Poppins;
+    text-decoration: none;
+  }
+  a:hover {
+    color: #6e66cc;
+  }
+  
+  p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-family: Poppins;
+  }
+  
+  .sign-in-mode .right-panel,
+  .sign-up-mode .left-panel {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%);
+  }
+  
+  .sign-in-mode .left-panel {
+    transform: translateX(0);
+    pointer-events: all;
+    opacity: 1;
+  }
+  
+  .sign-up-mode .right-panel {
+    transform: translateX(0);
+    pointer-events: all;
+    opacity: 1;
+  }
+  

@@ -32,7 +32,7 @@ export default function LeadManagement() {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/user');
+            const response = await axios.get('/user');
             setEmployees(response.data);
         } catch (err) {
             setError('Failed to fetch employees.');
@@ -42,7 +42,7 @@ export default function LeadManagement() {
 
     const fetchLeads = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/lead/');
+            const response = await axios.get('/lead/');
             if (response.status === 200) {
                 setLeads(response.data.leads);
             }
@@ -54,7 +54,7 @@ export default function LeadManagement() {
 
     const fetchLeadAssignmentList = async (id) => {
         try {
-            const response = await axios.get(`http://localhost:3000/leadAssignment/asignedbyadmin/${user.id}`);
+            const response = await axios.get(`/leadAssignment/asignedbyadmin/${user.id}`);
             setLeadAssignments(response.data.leadAssignments);
         } catch (err) {
             setError('Failed to fetch lead assignments.');
@@ -64,7 +64,7 @@ export default function LeadManagement() {
 
     const revertLeadAssigned = async (id) => {
         try {
-            await axios.delete(`http://localhost:3000/leadAssignment/revertlead/${id}`);
+            await axios.delete(`/leadAssignment/revertlead/${id}`);
             fetchLeadAssignmentList();
         } catch (err) {
             setError('Failed to revert lead assignment.');
@@ -75,7 +75,7 @@ export default function LeadManagement() {
     const revertSelectedLeads = async () => {
         try {
             for (const id of selectedLeads) {
-                await axios.delete(`http://localhost:3000/leadAssignment/revertlead/${id}`);
+                await axios.delete(`/leadAssignment/revertlead/${id}`);
             }
             fetchLeadAssignmentList();
             setSelectedLeads(new Set()); // Clear selected leads after reverting

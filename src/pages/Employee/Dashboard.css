@@ -55,3 +55,31 @@
     right: 0;
   }
   
+  .blinking-light {
+    width: 10px; 
+    height: 10px; /* Adjust the height of the star */
+    background-color: #f50000; /* Star color */
+    display: inline-block;
+    animation: blink 1s infinite; /* Keep the blinking effect */
+    clip-path: polygon(
+        50% 0%,   /* Top point */
+        61% 35%,  /* Right top */
+        98% 35%,  /* Right point */
+        68% 57%,  /* Bottom right */
+        79% 91%,  /* Bottom right outer */
+        50% 70%,  /* Bottom point */
+        21% 91%,  /* Bottom left outer */
+        32% 57%,  /* Bottom left */
+        2% 35%,   /* Left point */
+        39% 35%   /* Left top */
+    );
+    margin-left: 5px; /* Margin to separate from other elements */
+}
+  
+
+  /* Blinking animation */
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+  }

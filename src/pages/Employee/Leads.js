@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Form, Button, Table, Modal } from "react-bootstrap"; // Import Modal
 import axios from "./../../components/axios";
 import "./../../App.css";
+import DatePicker from "react-datepicker";
+import ModalComponent from "./../../components/Modal";
 
 const LeadList = () => {
   const [leads, setLeads] = useState([]);
@@ -20,22 +22,50 @@ const LeadList = () => {
   });
   const [leadStatuses, setLeadStatuses] = useState({});
   const [selectAll, setSelectAll] = useState(false);
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
-  const [currentLead, setCurrentLead] = useState(null); // To store the lead to update
-  const [newStatus, setNewStatus] = useState(""); // To store the new status
+  const [showModal, setShowModal] = useState(false);
+  const [currentLead, setCurrentLead] = useState(null);
+  const [newStatus, setNewStatus] = useState("");
   const navigate = useNavigate();
+  const [selectedAction, setSelectedAction] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const [followUpDate, setFollowUpDate] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
+  const [task, setTask] = useState({
+    description: "",
+    status: "",
+    userId: user.id || "",
+    leadId: "",
+    actionType: "",
+    createdDate: "",
+    updatedDate: "",
+    followUp: "",
+  });
 
+  const [leadFollowUpDates, setLeadFollowUpDates] = useState({});
+
+  const openModal = (leadId) => {
+    setCurrentLead(leadId);
+    setModalOpen(true);
+  };
+  const closeModal = () => {
+    setModalOpen(false);
+    setNote("");  
+  };
   useEffect(() => {
     fetchAssignedLeads();
     fetchEmployee();
   }, []);
 
+  const handleActionChange = (id, value) => {
+    setSelectedAction(value);
+    handleStatusChange(id, value); // Call the original status change function
+  };
+
   const fetchAssignedLeads = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/leadAssignment/user-leads/${user.id}`
-      );
+      const response = await axios.get(`/leadAssignment/user-leads/${user.id}`);
       if (response.status === 200) {
         const leadIds = response.data.leads.map((lead) => lead.leadId);
         fetchLeadDetails(leadIds);
@@ -45,10 +75,12 @@ const LeadList = () => {
       setError("Failed to fetch assigned leads.");
     }
   };
-
   const fetchLeadDetails = async (leadIds) => {
     try {
-      const response = await axios.get("http://localhost:3000/lead/");
+      // Fetch leads data
+      const response = await axios.get("/lead/");
+      console.log(response.data, "response");
+
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
           leadIds.includes(lead.id)
@@ -68,7 +100,7 @@ const LeadList = () => {
 
   const fetchEmployee = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/user/${user.id}`);
+      const response = await axios.get(`/user/${user.id}`);
       setEmployees(response.data);
     } catch (err) {
       console.error("Failed to fetch employees:", err.message);
@@ -111,9 +143,9 @@ const LeadList = () => {
   };
 
   const handleStatusChange = (leadId, newStatus) => {
-    setCurrentLead(leadId); // Store current lead
-    setNewStatus(newStatus); // Store new status
-    setShowModal(true); // Show confirmation modal
+    setCurrentLead(leadId);
+    setNewStatus(newStatus);
+    setShowModal(true);
   };
 
   const confirmStatusChange = () => {
@@ -121,44 +153,72 @@ const LeadList = () => {
       ...prevStatuses,
       [currentLead]: newStatus,
     }));
-    updateLeadStatus(currentLead, newStatus); // Proceed with status update
-    setShowModal(false); // Close the modal
+    updateLeadStatus(currentLead, newStatus);
+    setShowModal(false);
   };
 
-  const updateLeadStatus = (leadId, newStatus) => {
-    const updateTaskStatus = axios.post(`http://localhost:3000/task/`, {
-      status: newStatus,
-      userId: user.id,
+  const postTask = async (leadId, followUp, note) => {
+    const followUpDate = followUp
+      ? new Date(followUp + "Z").toISOString()
+      : null;
+    const localFollowUpDate = followUpDate ? new Date(followUpDate) : null;
+    let uid = user.id;
+    const data = {
+      userId: uid,
       leadId: leadId,
-    });
-
-    const fetchLeadStatus = axios.put(`http://localhost:3000/lead/${leadId}`, {
-      status: newStatus,
+      followUp: localFollowUpDate,
+      description:note,
+    };
+    const updateStatusInLeads = await axios.put(`/lead/${leadId}`, {
+      status: newStatus || "Active",
       userId: user.id,
+      followUp: localFollowUpDate,
+      description:note,
+      status:newStatus
     });
 
-    const updateLeadAssignment = axios.put(
-      `http://localhost:3000/leadAssignment/${leadId}`,
-      { status: newStatus }
-    );
-
-    Promise.all([updateTaskStatus, fetchLeadStatus, updateLeadAssignment])
-      .then((responses) => {
-        const [taskResponse] = responses;
-        if (taskResponse.status === 200) {
-          console.log(`Status for lead ${leadId} updated successfully`);
-        }
-      })
-      .catch((error) => {
-        console.error(
-          `Error updating status for lead ${leadId}:`,
-          error.message
-        );
-        setError(`Failed to update status for lead ${leadId}.`);
-      });
+    try {
+      const response = await axios.post("/task", data);
+      if (response) {
+        console.log("Task created successfully:", response.data,updateStatusInLeads);
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
   };
 
-  // Apply filters to the leads before rendering
+  const updateLeadStatus = async (leadId) => {
+    try {
+      const response = await axios.post("/task/", {
+        status: newStatus,
+        userId: user.id,
+        leadId: leadId,
+        followUp: followUpDate,
+        description: note,
+      });
+      const updateStatusInLeads = await axios.put(`/lead/${leadId}`, {
+        status: newStatus || "Active",
+        userId: user.id,
+      });
+      const updateLeadAssignment = await axios.put(
+        `/leadAssignment/${leadId}`,
+        { status: newStatus || "Active" }
+      );
+
+      console.log(
+        "Response:",
+        response,
+        updateStatusInLeads,
+        updateLeadAssignment
+      );
+      alert("Task created and lead status updated successfully!");
+      closeModal();
+    } catch (error) {
+      console.error(`Error updating status for lead ${leadId}:`, error.message);
+      setError(`Failed to update status for lead ${leadId}.`);
+    }
+  };
   const filteredLeads = leads.filter((lead) => {
     return (
       (filters.name === "" ||
@@ -266,10 +326,11 @@ const LeadList = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Imported Date</th>
+                {/* <th>Imported Date</th> */}
                 <th>Assigned Date</th>
                 <th>Lead Source</th>
-                <th>Status</th>
+                <th>Update Status</th>
+                <th>Follow up date</th>
                 <th>Activity</th>
                 <th>Action</th>
               </tr>
@@ -284,18 +345,18 @@ const LeadList = () => {
                       onChange={() => handleCheckboxChange(lead.id)}
                     />
                   </td>
-                  <td>{lead.id}</td>
-                  <td>{lead.name}</td>
-                  <td>{lead.email}</td>
-                  <td>{lead.phone}</td>
+                  <td>{lead.id || "NA"}</td>
+                  <td>{lead.name || "NA"}</td>
+                  <td>{lead.email || "NA"}</td>
+                  <td>{lead.phone || "NA"}</td>
                   <td>{lead.dateImported.split("T")[0]}</td>
-                  <td>{lead.assignedDate}</td>
+                  {/* <td>{lead.assignedDate||"NA"}</td> */}
                   <td>{lead.leadSource || "NA"}</td>
-
                   <td>
                     <Form.Control
                       as="select"
                       name="status"
+                      className="dropdownInTable"
                       value={
                         leadStatuses[lead.id] || lead.status || "Task Created"
                       }
@@ -303,19 +364,104 @@ const LeadList = () => {
                         handleStatusChange(lead.id, e.target.value)
                       }
                     >
-                      <option value="">Select status</option>
-                      <option value="RNR">RNR</option>
-                      <option value="Switch Off">Switch Off</option>
-                      <option value="Busy">Busy</option>
-                      <option value="Call Back">Call Back</option>
+                      <option value="">Select Status</option>
                       <option value="Interested">Interested</option>
+                      <option value="Follow Up">Follow Up</option>
+                      <option value="Call Back">Call Back</option>
+                      <option value="RNR">RNR (Ring No Response)</option>
+                      <option value="Switch Off">Switched Off</option>
+                      <option value="Busy">Busy</option>
                       <option value="Not Interested">Not Interested</option>
                       <option value="Not Working/Not Reachable">
-                        Not Working/Not Reachable
+                        Not Working / Not Reachable
                       </option>
-                      <option value="Follow Up">Follow Up</option>
+                      <option value="message">Message</option>
+                      <option value="email">Email</option>
+                      <option value="schedule appointment with manager">
+                        Schedule Appointment with Manager
+                      </option>
+                      <option value="customer walkin">Customer Walk-in</option>
                     </Form.Control>
                   </td>
+
+                  <td>
+  <div className="touchable-global"  onClick={() => openModal(lead.id)}>
+    {lead.tasks.length === 0 ? (
+      <span>Add follow-up</span>
+    ) : (
+      <div key={lead.id}>
+        <span>
+          {lead.followUp ? (
+            new Date(lead.followUp).toLocaleString()
+          ) : (
+            "No follow-up"
+          )}
+        </span>
+      </div>
+    )}
+  </div>
+
+  <ModalComponent
+    showModal={isModalOpen}
+    handleClose={closeModal}
+    title="Add Follow-Up"
+  >
+                    <Form.Control
+                      as="select"
+                      name="status"
+                      className="dropdownInTable"
+                      value={
+                        leadStatuses[lead.id] || lead.status || "Task Created"
+                      }
+                      onChange={(e) =>
+                        handleStatusChange(currentLead, e.target.value)
+                      }
+                    >
+                      <option value="">Select Status</option>
+                      <option value="Interested">Interested</option>
+                      <option value="Follow Up">Follow Up</option>
+                      <option value="Call Back">Call Back</option>
+                      <option value="RNR">RNR (Ring No Response)</option>
+                      <option value="Switch Off">Switched Off</option>
+                      <option value="Busy">Busy</option>
+                      <option value="Not Interested">Not Interested</option>
+                      <option value="Not Working/Not Reachable">
+                        Not Working / Not Reachable
+                      </option>
+                      <option value="message">Message</option>
+                      <option value="email">Email</option>
+                      <option value="schedule appointment with manager">
+                        Schedule Appointment with Manager
+                      </option>
+                      <option value="customer walkin">Customer Walk-in</option>
+                    </Form.Control>
+                  <p>&nbsp;</p>
+
+    <DatePicker
+      className="dropdownInTable"
+      showTimeSelect
+      dateFormat="Pp"
+      selected={followUpDate ? new Date(followUpDate) : null}
+      onChange={(date) => setFollowUpDate(date)}
+    />
+    <Form.Group controlId="formDescription" className="mb-3">
+      <Form.Label>Add Note</Form.Label>
+      <Form.Control
+        as="textarea"
+        rows={3}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Write here..."
+      />
+    </Form.Group>
+    <Button
+      variant="btn btn-primary btn-sm"
+      onClick={() => postTask(currentLead, followUpDate, note)} 
+    >
+      Submit
+    </Button>
+  </ModalComponent>
+</td>
 
                   <td>
                     <button

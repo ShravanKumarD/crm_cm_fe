@@ -36,12 +36,10 @@ export default function EmployeeAdd() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3000/user/', formData);
+            const response = await axios.post('/user/', formData);
             if (response) {
-                console.log('Success:', response.data);
                 setShowModal(true);
             } else {
-                console.log('Error:', response.statusText);
                 alert('Form submission failed. Please try again.');
             }
         } catch (error) {

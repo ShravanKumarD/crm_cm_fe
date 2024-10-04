@@ -34,9 +34,8 @@ const UpdateTaskForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.put(`http://localhost:3000/task/${task.id}`, task)
+    axios.put(`/task/${task.id}`, task)
       .then(response => {
-        console.log(response.data);
         alert('Task updated successfully');
       })
       .catch(error => {

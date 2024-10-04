@@ -19,12 +19,11 @@ export default function Settings() {
     const [employee, setEmployee] = useState(null);
     const [error, setError] = useState('');
     let user = JSON.parse(localStorage.getItem('user'));
-    console.log(user.id,'user')
 
     useEffect(() => {
         const fetchEmployees = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/user/${user.id}`);
+                const response = await axios.get(`/user/${user.id}`);
                 setEmployee(response.data);
                 setFormData(prevData => ({
                     ...prevData,
@@ -77,7 +76,7 @@ export default function Settings() {
                 role: formData.role, // Include new field
             };
 
-            const response = await fetch(`http://localhost:3000/user/${user.id}`, {
+            const response = await fetch(`/user/${user.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,13 +85,9 @@ export default function Settings() {
             });
 
             const data = await response.json();
-            console.log(data);
-
             if (response.status === 200) {
-                console.log('Success:', data);
                 alert('User updated successfully!');
             } else {
-                console.log('Error:', data.message);
                 setError('Failed to update user information. No fields were modified.');
             }
         } catch (error) {

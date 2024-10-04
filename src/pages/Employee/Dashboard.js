@@ -6,7 +6,6 @@ import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  console.log("amdin dash");
   const [employees, setEmployees] = useState([]);
   const [error, setError] = useState(null);
   const [leads, setLeads] = useState([]);
@@ -32,7 +31,7 @@ const Dashboard = () => {
 
   const fetchEmployee = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/user/${user.id}`);
+      const response = await axios.get(`/user/${user.id}`);
       setEmployees(response.data);
     } catch (err) {
       console.error("Failed to fetch employees:", err.message);
@@ -41,15 +40,8 @@ const Dashboard = () => {
   };
   const fetchLeads = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/lead/");
+      const response = await axios.get("/lead/");
       if (response.status === 200) {
-        // const today = new Date().toISOString().split('T')[0];
-
-        // const leadsToday = response.data.leads.filter(lead => {
-        //     const assignedDate = new Date(lead.assignedDate).toISOString().split('T')[0];
-        //     return assignedDate === today;
-        // });
-
         setLeads(
           leadsToday.map((lead) => ({
             ...lead,
@@ -61,43 +53,12 @@ const Dashboard = () => {
       console.error("Error fetching leads:", error.message);
     }
   };
-
-  // const fetchTasks = async () => {
-  //   try {
-  //     const response = await axios.get("http://localhost:3000/task/");
-  //     const filteredTasks = response.data.filter(
-  //       (task) => task.userId === user.id
-  //     );
-  //     console.log(response, "response");
-  //     const completed = filteredTasks.filter(
-  //       (task) => task.status === "Completed"
-  //     ).length;
-  //     const walkins = filteredTasks.filter(
-  //       (task) => task.status === "Walk-ins"
-  //     ).length;
-  // console.log(filteredTasks,"filteredTasksfilteredTasks")
-  //     setCompletedTasks(completed);
-  //     setUpcomingMeetings(walkins);
-  //     const filtered = filteredTasks.filter((task) => {
-  //       // Ensure follow-up is not null, not undefined, and not an empty string
-  //       return task.followUp !== "N/A" && task.followUp !== "" && task.followUp !== null;
-  //     });
-  //    console.log(filtered,"filtered")
-  //     setTasks(filtered );
-  //   } catch (err) {
-  //     console.error("Failed to fetch tasks:", err.message);
-  //     setError("Failed to fetch tasks.");
-  //   }
-  // };
   const fetchTasks = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/task/");
+      const response = await axios.get("/task/");
       const filteredTasks = response.data.filter(
         (task) => task.userId === user.id
       );
-  
-      console.log(response, "response");
-  
       // Counting Completed and Walk-ins tasks
       const completed = filteredTasks.filter(
         (task) => task.status === "Completed"
@@ -121,16 +82,12 @@ const Dashboard = () => {
         })
         .map((task) => ({
           ...task,
-          followUpDate: new Date(task.followUp), // Convert follow-up to Date object
+          followUpDate: new Date(task.followUp),
         }))
-        // Sort tasks by follow-up date
         .sort((a, b) => a.followUpDate - b.followUpDate)
-        // Filter tasks for today + 2 days
         .filter((task) => {
           return task.followUpDate >= today && task.followUpDate <= twoDaysLater;
         });
-  
-      console.log(upcomingTasks, "upcomingTasks");
       setTasks(upcomingTasks);
     } catch (err) {
       console.error("Failed to fetch tasks:", err.message);
@@ -143,7 +100,7 @@ const Dashboard = () => {
   const fetchAssignedLeads = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/leadAssignment/user-leads/${user.id}`
+        `/leadAssignment/user-leads/${user.id}`
       );
       if (response.status === 200) {
         let count = 0;
@@ -172,18 +129,14 @@ const Dashboard = () => {
   const handleTaskStatusChange = async (taskId, newStatus) => {
     try {
       // Update the task status in the backend
-      const response = await axios.put(`http://localhost:3000/task/${taskId}`, {
+      const response = await axios.put(`/task/${taskId}`, {
         status: newStatus,
         userId: user.id,
   leadId: tasks.lead.id,
 
       });
-      console.log("Task status updated:", response.data);
-  
       setTasks((prevTasks) => {
-        console.log(prevTasks,"prevtask")
         const updatedTasks = prevTasks.filter((task) => task.taskStatus !=="Completed" );
-        console.log(updatedTasks,"updated")
       return updatedTasks;
       });
   
@@ -200,19 +153,15 @@ const Dashboard = () => {
 
 
   const fetchActivity = async () => {
-    console.log("test");
-
-    try {
-      const response = await axios.get(`http://localhost:3000/task/${user.id}`);
+  try {
+      const response = await axios.get(`/task/${user.id}`);
 
       if (response && response.data) {
         // Filter the tasks by leadId
         const filteredTasks = response.data.filter(
           (taskItem) => taskItem.leadId === tasks.lead.id
         );
-
         setTask(filteredTasks);
-        console.log(filteredTasks, "filtered tasks by leadId in activity");
       }
     } catch (error) {
       console.error("Error fetching task data:", error.message);
@@ -222,7 +171,7 @@ const Dashboard = () => {
 
   const fetchLeadDetails = async (leadIds = []) => {
     try {
-      const response = await axios.get("http://localhost:3000/lead/");
+      const response = await axios.get("/lead/");
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
           leadIds.includes(lead.id)
@@ -333,12 +282,11 @@ const Dashboard = () => {
                         <td>
                           {task.followUp
                             ? new Date(task.followUp).toLocaleDateString("en-GB", {
-                                weekday: "long",
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
+                              day: "numeric",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
                                 hour12:true, 
                               })
                             : "N/A"}

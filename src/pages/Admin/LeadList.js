@@ -29,9 +29,8 @@ const LeadList = () => {
 
     const fetchLeads = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/lead/');
+            const response = await axios.get('/lead/');
             if (response.status === 200) {
-                console.log(response,"statu")
                 setLeads(response.data.leads.map(lead => ({
                     ...lead,
                     assignedTo: lead.assignedTo || "Not Assigned"
@@ -44,9 +43,8 @@ const LeadList = () => {
     
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/user');
+            const response = await axios.get('/user');
             setEmployees(response.data);
-            console.log(employees, "emp");
         } catch (err) {
             setError('Failed to fetch employees.');
             console.error(err);
@@ -55,7 +53,7 @@ const LeadList = () => {
 
     const handleDeleteLead = async (id) => {
         try {
-            const response = await axios.delete(`http://localhost:3000/lead/${id}`);
+            const response = await axios.delete(`/${id}`);
             if (response.status === 200) {
                 setLeads(prevLeads => prevLeads.filter(lead => lead.id !== id));
             } else {
@@ -84,12 +82,12 @@ const LeadList = () => {
     //             user = decodedToken.user;
     //     try {
     //         // Send the request to assign leads
-    //         const response = await axios.post('http://localhost:3000/leadAssignment/assign', {
+    //         const response = await axios.post('/leadAssignment/assign', {
     //             leadIds: selectedLeads,
     //             assignedToUserId: assignedTo,
     //             assignedBy: user.id 
     //         });
-    //         const leadUpdate = await axios.put(`http://localhost:3000/lead/update-leads`,{
+    //         const leadUpdate = await axios.put(`/lead/update-leads`,{
     //             leadIds: selectedLeads,
     //             assignedTo:assignedTo,
     //         })
@@ -136,12 +134,12 @@ const LeadList = () => {
         try {
           const updateLeadIds = Array.isArray(selectedLeads) ? selectedLeads : [selectedLeads];
           const [assignResponse, leadUpdateResponse] = await Promise.all([
-            axios.post("http://localhost:3000/leadAssignment/assign", {
+            axios.post("/leadAssignment/assign", {
               leadIds: updateLeadIds,
               assignedToUserId: assignedTo,
               assignedBy: user.id,
             }),
-            // axios.put("http://localhost:3000/lead/updateLeads", {
+            // axios.put("/lead/updateLeads", {
             //   leadIds: updateLeadIds,
             //   assignedTo: assignedTo,
             // }),
@@ -183,7 +181,6 @@ const LeadList = () => {
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                   console.log(jsonData,"jos")
                 const importedLeads = jsonData.map((item, index) => ({
                     id: leads.length + index + 1, // Generate a unique ID
                     name: item.name || item.Name || item.firstname + item.lastname || 'N/A',

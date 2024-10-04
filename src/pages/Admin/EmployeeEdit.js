@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 
 export default function EmployeeEdit() {
     const { id } = useParams();
-    console.log(id)
     const [formData, setFormData] = useState({
         employeeId: id,
         name: '',
@@ -25,7 +24,7 @@ export default function EmployeeEdit() {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/user/${id}`);
+                const response = await axios.get(`/user/${id}`);
                 setFormData(response.data);
             } catch (err) {
                 setError('Failed to fetch user data.');
@@ -51,12 +50,10 @@ export default function EmployeeEdit() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:3000/user/${id}`, formData);
+            const response = await axios.put(`/user/${id}`, formData);
             if (response.status === 200) {
-                console.log('Success:', response.data);
                 alert('User updated successfully!');
             } else {
-                console.log('Error:', response.statusText);
                 alert('User update failed. Please try again.');
             }
         } catch (error) {

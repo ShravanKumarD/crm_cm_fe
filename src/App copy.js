@@ -53,8 +53,6 @@ import Employee from './pages/Admin/Employee';
         try {
             const decodedToken = jwtDecode(token);
             user = decodedToken.user;
-            console.log(decodedToken.user,'decodedTokens'
-            )
             localStorage.setItem('user', JSON.stringify(user));
         } catch (error) {
             console.error('Invalid token:', error);

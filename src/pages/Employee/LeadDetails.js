@@ -52,10 +52,10 @@ const LeadDetail = () => {
   };
 
   const fetchActivity = async () => {
-    console.log("test");
+    
 
     try {
-      const response = await axios.get(`http://localhost:3000/task/${user.id}`);
+      const response = await axios.get(`/task/${user.id}`);
 
       if (response && response.data) {
         // Filter the tasks by leadId
@@ -63,23 +63,21 @@ const LeadDetail = () => {
           (taskItem) => taskItem.leadId === lead.id
         );
 
-        setTask(filteredTasks);
-        console.log(filteredTasks, "filtered tasks by leadId in activity");
+        setTask(filteredTasks.reverse());
       }
     } catch (error) {
       console.error("Error fetching task data:", error.message);
     }
   };
 
-  const handleTaskStatusChange = async (taskId, newStatus) => {
+  const handleTaskStatusChange = async (taskId, newStatus,task) => {
     try {
-      const response = await axios.put(`http://localhost:3000/task/${taskId}`, {
-        status: newStatus,
+      const response = await axios.put(`/task/${taskId}`, {
+        taskStatus: newStatus,
         userId: user.id,
-        leadId: lead.id,
+        leadId: task.leadId,
       });
-      console.log("Task status updated:", response.data);
-
+    console.log(response,"response")
       // Re-fetch the tasks to reflect the new status
       fetchActivity();
     } catch (error) {
@@ -90,10 +88,9 @@ const LeadDetail = () => {
   const handleSave = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/lead/${lead.id}/${editLead}`,
+        `/lead/${lead.id}/${editLead}`,
         editLead
       );
-      console.log("Lead updated successfully:", response);
     } catch (error) {
       console.error("Error updating lead:", error);
     }
@@ -249,7 +246,7 @@ const LeadDetail = () => {
                           as="select"
                           value={taskItem.status}
                           onChange={(e) =>
-                            handleTaskStatusChange(taskItem.id, e.target.value)
+                            handleTaskStatusChange(taskItem.id, e.target.value, taskItem)
                           }
                           className="dropdownText"
                         >

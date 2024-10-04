@@ -72,7 +72,7 @@ export default function Leads() {
 
     const postData = async (data) => {
         try {
-            const response = await fetch('http://localhost:3000/lead/bulk', {
+            const response = await fetch('/lead/bulk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,8 +84,6 @@ export default function Leads() {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to post data.');
             }
-
-            console.log('Data successfully posted');
         } catch (error) {
             setError(error.message || 'An error occurred while posting data.');
             console.error('Error posting data:', error);

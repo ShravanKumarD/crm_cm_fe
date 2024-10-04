@@ -13,7 +13,7 @@ export default function ReportPage() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/reports', {
+                const response = await axios.get('/reports', {
                     params: filter
                 });
                 setReports(response.data);
@@ -35,7 +35,7 @@ export default function ReportPage() {
 
     const handleExport = (format) => {
         // Logic for exporting report
-        console.log(`Exporting report as ${format}`);
+
     };
 
     return (

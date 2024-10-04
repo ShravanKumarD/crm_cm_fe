@@ -7,20 +7,20 @@ export default function EmployeeSidebar() {
   const [employee,setEmployee]=useState('')
   const [error,setError]=useState('')
   let user = JSON.parse(localStorage.getItem('user'))
-
+console.log(user,"user")
   useEffect(()=>{
+    const fetchEmployees = async () => {
+      try {
+          const response = await axios .get(`/user/${user.id}`);
+          setEmployee(response.data);
+      } catch (err) {
+          setError('Failed to fetch employees.');
+          console.error(err);
+      }
+  };
+  
     fetchEmployees();
   },[])
-  const fetchEmployees = async () => {
-    try {
-        const response = await axios .get(`http://localhost:3000/user/${user.id}`);
-        setEmployee(response.data);
-        console.log(employee,'user')
-    } catch (err) {
-        setError('Failed to fetch employees.');
-        console.error(err);
-    }
-};
 
   return (
     <aside className="main-sidebar elevation-4 fixed">
@@ -78,6 +78,26 @@ export default function EmployeeSidebar() {
                   <p>Leads</p>
                 </NavLink>
               </li>
+                {/* walkins */}
+              <li className="nav-item has-treeview">
+                <NavLink
+                  to="/walkins-list"
+                  className="nav-link"
+                  activeClassName="active"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    textDecoration: "none",
+                  }}
+                >
+                  <i
+                    className="nav-icon fas fa-person-walking"
+                    style={{ marginRight: "8px" }}
+                  />
+                  <p>Walkins</p>
+                </NavLink>
+              </li>
+
 
               {/* Settings Link */}
               <li className="nav-item">

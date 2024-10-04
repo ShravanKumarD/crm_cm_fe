@@ -11,9 +11,8 @@ export default function Employee() {
     useEffect(() => {
         const fetchEmployees = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/user');
+                const response = await axios.get('/user');
                 setEmployees(response.data);
-                console.log(employees,"emp");
             } catch (err) {
                 setError('Failed to fetch employees.');
                 console.error(err);
@@ -24,7 +23,7 @@ export default function Employee() {
 
     const handleDeleteUser = async (id) => {
         try {
-            const response = await axios.delete(`http://localhost:3000/user/${id}`);
+            const response = await axios.delete(`/user/${id}`);
             if (response.status === 200 || response.status === 204) { // Accept 200 or 204 status
                 setEmployees(prevEmployees => prevEmployees.filter(employee => employee.id !== id));
             } else {

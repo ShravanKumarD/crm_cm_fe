@@ -14,9 +14,8 @@ const AdminSidebar = () => {
   },[])
   const fetchEmployees = async () => {
     try {
-        const response = await axios .get(`http://localhost:3000/user/${user.id}`);
+        const response = await axios .get(`/user/${user.id}`);
         setEmployee(response.data);
-        console.log(employee,'user')
     } catch (err) {
         setError('Failed to fetch employees.');
         console.error(err);

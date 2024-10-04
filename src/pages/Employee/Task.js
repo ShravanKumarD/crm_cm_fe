@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Card, Table } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./../../App.css";
+import DatePicker from "react-datepicker";
+import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
+
 
 const user = JSON.parse(localStorage.getItem("user")) || {};
 
@@ -64,12 +68,11 @@ export default function TaskForm({ leadData }) {
 
       try {
         // No need to call .json(), Axios automatically parses JSON
-        console.log(user.id, "userid");
         const loanReportsPromise = axios.get(
-          `http://localhost:3000/loans-reports/${lead.id}`
+          `/loans-reports/${lead.id}`
         );
         const creditReportsPromise = axios.get(
-          `http://localhost:3000/credit-reports/${lead.id}`
+          `/credit-reports/${lead.id}`
         );
         const [loanReportsResponse, creditReportsResponse] = await Promise.all([
           loanReportsPromise,
@@ -149,18 +152,22 @@ export default function TaskForm({ leadData }) {
     }));
   };
   const postLoanReport = async () => {
-    console.log(loanReport, "loanReport");
     try {
-      await axios.post("http://localhost:3000/loans-reports/", loanReport);
-      alert("Loan report submitted succes sfully");
+      await axios.post(
+        `/loans-reports/${user.id}`,
+        loanReport
+      );
+      alert("Loan report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the loan report!", error);
     }
   };
   const postCreditReport = async () => {
-    console.log(creditReport, "creditReport");
     try {
-      await axios.post("http://localhost:3000/credit-reports/", creditReport);
+      await axios.post(
+        `/credit-reports/${user.id}`,
+        creditReport
+      );
       alert("Credit report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the credit report!", error);
@@ -176,7 +183,7 @@ export default function TaskForm({ leadData }) {
     };
 
     try {
-      await axios.post("http://localhost:3000/task/", combinedData);
+      await axios.post("/task/", combinedData);
       alert("Task added successfully");
       navigate(-1);
     } catch (error) {
@@ -208,7 +215,7 @@ export default function TaskForm({ leadData }) {
   const fetchAssignedLeads = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/leadAssignment/user-leads/${user.id}`
+        `/leadAssignment/user-leads/${user.id}`
       );
       if (response.status === 200) {
         const leadIds = response.data.leads.map((lead) => lead.leadId);
@@ -221,7 +228,7 @@ export default function TaskForm({ leadData }) {
   };
   const fetchLeadDetails = async (leadIds) => {
     try {
-      const response = await axios.get("http://localhost:3000/lead/");
+      const response = await axios.get("/lead/");
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
           leadIds.includes(lead.id)
@@ -237,26 +244,59 @@ export default function TaskForm({ leadData }) {
   const filteredLeads = leads.filter((lead) =>
     lead.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  // const handleLeadSelect = (e) => {
-  //   const selectedLeadId = e.target.value;
-  //   const selected = leads.find((lead) => lead.id === selectedLeadId);
-  //   setSelectedLead(selected);
-
-  //   if (selected) {
-  //     setFormData({
-  //       name: selected.name,
-  //       email: selected.email,
-  //       phone: selected.phone,
-  //       city: selected.city,
-  //       company: selected.company,
-  //       salary: selected.salary,
-  //     });
-  //     setTask((prevTask) => ({
-  //       ...prevTask,
-  //       leadId: selected.id,
-  //     }));
-  //   }
-  // };
+  const handleDownload = (e) => {
+    const format = e.target.value;
+    if (format === "pdf") {
+      downloadAsPDF();
+    } else if (format === "excel") {
+      downloadAsExcel();
+    }
+  };
+  const downloadAsPDF = () => {
+    const doc = new jsPDF();
+    
+    // Loan Report Section
+    doc.text("Loan Report", 10, 10);
+    data.loanReports.forEach((loan, index) => {
+      doc.text(`Bank: ${loan.bankName}`, 10, 20 + index * 10);
+      doc.text(`Amount: ${loan.loanAmount}`, 60, 20 + index * 10);
+      doc.text(`EMI: ${loan.emi}`, 110, 20 + index * 10);
+      doc.text(`Outstanding: ${loan.outstanding}`, 150, 20 + index * 10);
+    });
+    
+    // Credit Report Section
+    doc.text("Credit Report", 10, 60);
+    data.creditReports.forEach((credit, index) => {
+      doc.text(`Card: ${credit.creditCardName}`, 10, 70 + index * 10);
+      doc.text(`Outstanding: ${credit.totalOutstanding}`, 60, 70 + index * 10);
+    });
+  
+    doc.save("report.pdf");
+  };
+  
+  // Function to download reports as Excel
+  const downloadAsExcel = () => {
+    const loanReportData = data.loanReports.map(loan => ({
+      'Bank Name': loan.bankName,
+      'Loan Amount': loan.loanAmount,
+      'EMI': loan.emi,
+      'Outstanding': loan.outstanding,
+    }));
+  
+    const creditReportData = data.creditReports.map(credit => ({
+      'Credit Card Name': credit.creditCardName,
+      'Total Outstanding': credit.totalOutstanding,
+    }));
+  
+    const ws1 = XLSX.utils.json_to_sheet(loanReportData);
+    const ws2 = XLSX.utils.json_to_sheet(creditReportData);
+    const wb = XLSX.utils.book_new();
+  
+    XLSX.utils.book_append_sheet(wb, ws1, "Loan Report");
+    XLSX.utils.book_append_sheet(wb, ws2, "Credit Report");
+  
+    XLSX.writeFile(wb, "report.xlsx");
+  };
 
   return (
     <div className="global-container">
@@ -368,42 +408,53 @@ export default function TaskForm({ leadData }) {
           </Row>
           <p>&nbsp;</p>
           <Card className="mb-4">
-            <Card.Body>
-              <Row>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="formActionType">
-                    <Form.Label>Create Task</Form.Label>
-                    <Form.Control
-                      as="select"
-                      name="actionType"
-                      value={task.actionType}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select an action</option>
-                      <option value="message">Message</option>
-                      <option value="email">Email</option>
-                      <option value="Call Back">Call Back</option>
-                      <option value="schedule appointment with manager">
-                        Schedule Appointment with Manager
-                      </option>
-                      <option value="customer walkin">Customer walkin</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="formFollowup">
-                    <Form.Label>Arrange for a follow-up</Form.Label>
-                    <Form.Control
-                      type="datetime-local"
-                      name="followUp"
-                      value={task.followUp}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+  <Card.Body>
+    <Row>
+      <Col md={6} className="mb-3">
+        <Form.Group controlId="formActionType">
+          <Form.Label>Create Task</Form.Label>
+          <Form.Control
+            as="select"
+            name="actionType"
+            value={task.actionType}
+            onChange={handleChange}
+          >
+            <option value="">Select an action</option>
+            <option value="message">Message</option>
+            <option value="email">Email</option>
+            <option value="Call Back">Call Back</option>
+            <option value="schedule appointment with manager">
+              Schedule Appointment with Manager
+            </option>
+            <option value="customer walkin">Customer walkin</option>
+          </Form.Control>
+        </Form.Group>
+      </Col>
+      <Col md={6} className="mb-3">
+      <Form.Label>Arrange for a follow-up</Form.Label>
+        <Form.Group controlId="formFollowup">
+       
+          <DatePicker
+            // className="dropdownInTable"
+            showTimeSelect
+            dateFormat="Pp"
+            name="followUp"
+            selected={task.followUp ? new Date(task.followUp) : null}
+            onChange={(date) => { 
+              handleChange({
+                target: {
+                  name: "followUp",
+                  value: date,
+                },
+              });
+            }}
+          />
+        </Form.Group>
+      </Col>
+    </Row>
+  </Card.Body>
+</Card>
+
 
           <Form.Group controlId="formDescription" className="mb-3">
             <Form.Label>Add Note</Form.Label>
@@ -444,6 +495,15 @@ export default function TaskForm({ leadData }) {
 
           {documentsCollected === "yes" && (
             <>
+            <Form.Group>
+  <Form.Label>Download Reports</Form.Label>
+  <Form.Control  as="select" onChange={handleDownload}>
+    <option value="">Select Format</option>
+    <option value="pdf">Download as PDF</option>
+    <option value="excel">Download as Excel</option>
+  </Form.Control>
+</Form.Group>
+
               <h5>Loans Report</h5>
               <div className="row mb-3">
                 <div className="col">
@@ -455,7 +515,6 @@ export default function TaskForm({ leadData }) {
                     className="form-control"
                     value={loanReport.bankName}
                     onChange={handleLoanReportChange}
-                    
                   />
                 </div>
                 <div className="col">
@@ -467,7 +526,6 @@ export default function TaskForm({ leadData }) {
                     className="form-control"
                     value={loanReport.loanAmount}
                     onChange={handleLoanReportChange}
-                  
                   />
                 </div>
                 <div className="col">
@@ -479,7 +537,6 @@ export default function TaskForm({ leadData }) {
                     className="form-control"
                     value={loanReport.emi}
                     onChange={handleLoanReportChange}
-                    
                   />
                 </div>
                 <div className="col">
@@ -491,7 +548,6 @@ export default function TaskForm({ leadData }) {
                     className="form-control"
                     value={loanReport.outstanding}
                     onChange={handleLoanReportChange}
-                    
                   />
                 </div>
               </div>
@@ -513,7 +569,6 @@ export default function TaskForm({ leadData }) {
                       className="form-control"
                       value={creditReport.creditCardName}
                       onChange={creditReportChange}
-                      
                     />
                   </div>
                   <div className="col">
@@ -527,7 +582,6 @@ export default function TaskForm({ leadData }) {
                       className="form-control"
                       value={creditReport.totalOutstanding}
                       onChange={creditReportChange}
-                      
                     />
                   </div>
                 </div>
@@ -538,83 +592,107 @@ export default function TaskForm({ leadData }) {
 
                 <br />
                 <br />
-               
+
                 <div className="row">
-  <div className="col-sm-8">
-    <p><strong>Loan Report</strong></p>
-    <table className="table">
-      <thead>
-        <tr>
-          <th>Bank Name</th>
-          <th>Loan Amount</th>
-          <th>EMI</th>
-          <th>Outstanding</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.loanReports.map((loan) => (
-          <tr key={loan.id}>
-            <td>{loan.bankName}</td>
-            <td>{loan.loanAmount}</td>
-            <td>{loan.emi}</td>
-            <td>{loan.outstanding}</td>
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td><strong>Total</strong></td>
-          <td>
-            <strong>
-              {data.loanReports.reduce((total, loan) => Number(total) + Number(loan.loanAmount), 0)}
-            </strong>
-          </td>
-          <td>
-            <strong>
-              {data.loanReports.reduce((total, loan) => Number(total) + Number(loan.emi), 0)}
-            </strong>
-          </td>
-          <td>
-            <strong>
-              {data.loanReports.reduce((total, loan) => Number(total) + Number(loan.outstanding), 0)}
-            </strong>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+                  <div className="col-sm-8">
+                    <p>
+                      <strong>Loan Report</strong>
+                    </p>
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Bank Name</th>
+                          <th>Loan Amount</th>
+                          <th>EMI</th>
+                          <th>Outstanding</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.loanReports.map((loan) => (
+                          <tr key={loan.id}>
+                            <td>{loan.bankName}</td>
+                            <td>{loan.loanAmount}</td>
+                            <td>{loan.emi}</td>
+                            <td>{loan.outstanding}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td>
+                            <strong>Total</strong>
+                          </td>
+                          <td>
+                            <strong>
+                              {data.loanReports.reduce(
+                                (total, loan) =>
+                                  Number(total) + Number(loan.loanAmount),
+                                0
+                              )}
+                            </strong>
+                          </td>
+                          <td>
+                            <strong>
+                              {data.loanReports.reduce(
+                                (total, loan) =>
+                                  Number(total) + Number(loan.emi),
+                                0
+                              )}
+                            </strong>
+                          </td>
+                          <td>
+                            <strong>
+                              {data.loanReports.reduce(
+                                (total, loan) =>
+                                  Number(total) + Number(loan.outstanding),
+                                0
+                              )}
+                            </strong>
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
 
-  <div className="col-sm-4">
-    <p><strong>Credit Reports</strong></p>
-    <table className="table">
-      <thead>
-        <tr>
-          <th>Credit Card Name</th>
-          <th>Total Outstanding</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.creditReports.map((credit) => (
-          <tr key={credit.id}>
-            <td>{credit.creditCardName}</td>
-            <td>{credit.totalOutstanding}</td>
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td><strong>Total</strong></td>
-          <td>
-            <strong>
-              {data.creditReports.reduce((total, credit) => Number(total) + Number(credit.totalOutstanding), 0)}
-            </strong>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-</div>
-
+                  <div className="col-sm-4">
+                    <p>
+                      <strong>Credit Reports</strong>
+                    </p>
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Credit Card Name</th>
+                          <th>Total Outstanding</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.creditReports.map((credit) => (
+                          <tr key={credit.id}>
+                            <td>{credit.creditCardName}</td>
+                            <td>{credit.totalOutstanding}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td>
+                            <strong>Total</strong>
+                          </td>
+                          <td>
+                            <strong>
+                              {data.creditReports.reduce(
+                                (total, credit) =>
+                                  Number(total) +
+                                  Number(credit.totalOutstanding),
+                                0
+                              )}
+                            </strong>
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
               </>
             </>
           )}

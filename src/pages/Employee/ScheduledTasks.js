@@ -24,7 +24,7 @@ export default function ScheduledTasks() {
 
     const fetchTasks = () => {
         // API call to fetch tasks from server
-        axios.get('http://localhost:3000/task/')
+        axios.get('/task/')
             .then(response => {
                 const filteredTasks = response.data.filter(task => task.userId === user.id);
                 setTasks(filteredTasks);
@@ -39,9 +39,8 @@ export default function ScheduledTasks() {
     };
 
     const handleDelete = (taskId) => {
-        axios.delete(`http://localhost:3000/task/${taskId}`)
+        axios.delete(`/task/${taskId}`)
             .then(response => {
-                console.log(response.data);
                 // Refresh the task list after successful deletion
                 fetchTasks();
             })

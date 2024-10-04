@@ -52,10 +52,8 @@ const LeadDetail = () => {
   };
 
   const fetchActivity = async () => {
-    console.log("test");
-
     try {
-      const response = await axios.get(`http://localhost:3000/task/${user.id}`);
+      const response = await axios.get(`/task/${user.id}`);
 
       if (response && response.data) {
         // Filter the tasks by leadId
@@ -64,7 +62,6 @@ const LeadDetail = () => {
         );
 
         setTask(filteredTasks);
-        console.log(filteredTasks, "filtered tasks by leadId in activity");
       }
     } catch (error) {
       console.error("Error fetching task data:", error.message);
@@ -73,13 +70,11 @@ const LeadDetail = () => {
 
   const handleTaskStatusChange = async (taskId, newStatus) => {
     try {
-      const response = await axios.put(`http://localhost:3000/task/${taskId}`, {
+      const response = await axios.put(`/task/${taskId}`, {
         status: newStatus,
         userId: user.id,
         leadId: lead.id,
       });
-      console.log("Task status updated:", response.data);
-
       // Re-fetch the tasks to reflect the new status
       fetchActivity();
     } catch (error) {
@@ -89,11 +84,9 @@ const LeadDetail = () => {
 
   const handleSave = async () => {
     try {
-      const response = await axios.put(
-        `http://localhost:3000/lead/${lead.id}/${editLead}`,
+      const response = await axios.put(`/lead/${lead.id}/${editLead}`,
         editLead
       );
-      console.log("Lead updated successfully:", response);
     } catch (error) {
       console.error("Error updating lead:", error);
     }

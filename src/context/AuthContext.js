@@ -9,13 +9,13 @@ export const AuthProvider = ({ children }) => {
     const login = (userToken, userRole) => {
         setToken(userToken);
         setRole(userRole);
-        localStorage.setItem('token', userToken); // Store token in localStorage for persistence
+        localStorage.setItem('token', userToken);
     };
 
     const logout = () => {
         setToken(null);
         setRole(null);
-        localStorage.removeItem('token'); // Clear token from localStorage
+        localStorage.removeItem('token');
     };
 
     return (

@@ -23,10 +23,8 @@ const SignupPage = () => {
 
     const handleSignup = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/auth/signup', formData);
-            console.log(response.data);
+            const response = await axios.post('/auth/signup', formData);
             if (response.data) {
-                console.log('fdfh')
                 window.location.href = "/login";
                 // navigate('/login');
             } else {

@@ -29,7 +29,7 @@ const LoginPage = () => {
   const handleLogin = async () => {
     if (email && password) {
       try {
-        const response = await axios.post("http://localhost:3000/auth/login", {
+        const response = await axios.post("/auth/login", {
           email,
           password,
         });
@@ -59,6 +59,7 @@ const LoginPage = () => {
         </div>
       )}
       <div className="form-group">
+        
         <label htmlFor="email">Email</label>
         <input
           type="email"

@@ -33,6 +33,7 @@ import LeadManagement from './pages/Admin/LeadManagement';
   import ScheduledTasks from './pages/Employee/ScheduledTasks';
   import EmployeeSettings from  './pages/Employee/Settings';
   import UpdateTaskForm  from './pages/Employee/UpdateTaskForm';
+  import WalkinsList from './pages/Employee/Walkins';
 
   // Manager routes
   import ManagerDashboard from './pages/Manager/Dashboard';
@@ -51,8 +52,6 @@ import Employee from './pages/Admin/Employee';
         try {
             const decodedToken = jwtDecode(token);
             user = decodedToken.user;
-            console.log(decodedToken.user,'decodedTokens'
-            )
             localStorage.setItem('user', JSON.stringify(user));
         } catch (error) {
             console.error('Invalid token:', error);
@@ -131,7 +130,9 @@ import Employee from './pages/Admin/Employee';
                         <Route path="/add-task-employee" element={<TaskViewEmployee />}/>
                         <Route path="/scheduled-tasks" element={<ScheduledTasks/>}/>
                         <Route path="/employee-settings" element={<EmployeeSettings/>}/>
+                        <Route path="/walkins-list" element={<WalkinsList/>}/>
                         <Route path="/update-task-form" element={<UpdateTaskForm/>}/>
+                    
                       </Route>
 
                      

@@ -64,12 +64,11 @@ export default function TaskForm({ leadData }) {
 
       try {
         // No need to call .json(), Axios automatically parses JSON
-        console.log(user.id, "userid");
         const loanReportsPromise = axios.get(
-          `http://localhost:3000/loans-reports/${user.id}`
+          `13.127.116.191/loans-reports/${user.id}`
         );
         const creditReportsPromise = axios.get(
-          `http://localhost:3000/credit-reports/${user.id}`
+          `13.127.116.191/credit-reports/${user.id}`
         );
         const [loanReportsResponse, creditReportsResponse] = await Promise.all([
           loanReportsPromise,
@@ -149,18 +148,16 @@ export default function TaskForm({ leadData }) {
     }));
   };
   const postLoanReport = async () => {
-    console.log(loanReport, "loanReport");
     try {
-      await axios.post("http://localhost:3000/loans-reports/", loanReport);
+      await axios.post("13.127.116.191/loans-reports/", loanReport);
       alert("Loan report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the loan report!", error);
     }
   };
   const postCreditReport = async () => {
-    console.log(creditReport, "creditReport");
     try {
-      await axios.post("http://localhost:3000/credit-reports/", creditReport);
+      await axios.post("13.127.116.191/credit-reports/", creditReport);
       alert("Credit report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the credit report!", error);
@@ -176,7 +173,7 @@ export default function TaskForm({ leadData }) {
     };
 
     try {
-      await axios.post("http://localhost:3000/task/", combinedData);
+      await axios.post("13.127.116.191/task/", combinedData);
       alert("Task added successfully");
       navigate(-1);
     } catch (error) {
@@ -208,7 +205,7 @@ export default function TaskForm({ leadData }) {
   const fetchAssignedLeads = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/leadAssignment/user-leads/${user.id}`
+        `13.127.116.191/leadAssignment/user-leads/${user.id}`
       );
       if (response.status === 200) {
         const leadIds = response.data.leads.map((lead) => lead.leadId);
@@ -221,7 +218,7 @@ export default function TaskForm({ leadData }) {
   };
   const fetchLeadDetails = async (leadIds) => {
     try {
-      const response = await axios.get("http://localhost:3000/lead/");
+      const response = await axios.get("13.127.116.191/lead/");
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
           leadIds.includes(lead.id)
