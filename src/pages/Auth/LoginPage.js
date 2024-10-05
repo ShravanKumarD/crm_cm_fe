@@ -52,7 +52,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div>
+    <>
       {error && (
         <div className="alert alert-danger" role="alert">
           {error}
@@ -83,12 +83,12 @@ const LoginPage = () => {
       </div>
       <button
         type="button"
-        className="btn btn-primary btn-block"
+        className="btn btn-primary btn-sm mt-3"
         onClick={handleLogin}
       >
         Login
       </button>
-    </div>
+    </>
   );
 };
 

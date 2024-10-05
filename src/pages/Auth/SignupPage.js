@@ -37,7 +37,7 @@ const SignupPage = () => {
     };
 
     return (
-        <div>
+        <>
             <div className="form-group">
                 <label htmlFor="name">Name</label>
                 <input
@@ -114,12 +114,12 @@ const SignupPage = () => {
             </div>
             <button
                 type="button"
-                className="btn btn-primary btn-block"
+                className="btn btn-primary btn-sm mt-3"
                 onClick={handleSignup}
             >
                 Signup
             </button>
-        </div>
+        </>
     );
 };
 

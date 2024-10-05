@@ -1,20 +1,29 @@
-.auth-container {
+
+body {
+  margin: 0;
+  height: 100vh; 
+}
+  .auth-container {
+    /* position: fixed; */
+    background-color: #f0f8ff; 
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
-    background:linear-gradient(to right, #988ac630, #caaae6);
-    box-shadow: 10px 10px 10px #a8bad7;
-    border-radius: 4px;
-  }
-  
+    justify-content: center;
+    background-attachment: fixed; 
+    z-index: -1; 
+}
   .auth-box {
-    /* width: 700px; */
-    height: 450px;
-    background-color: white;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
     transition: all 0.5s ease-in-out;
+    background-color: #caa8d2;
+    padding: 1%;
+    border-radius: 3px;
+    box-shadow: 0px 0px 20px #77536e99;
+width: 25vw; 
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+   
   }
   
   .sign-in-mode .left-panel,
@@ -44,12 +53,16 @@
   input {
     margin-bottom: 15px;
     padding: 12px;
-    border: 1px solid #ccc;
+    border: 1px solid #d97ee4;
     border-radius: 5px;
     font-size: 16px;
     font-family: Poppins;
   }
-  
+  label {
+    display: inline-block;
+    font-family: 'Poppins';
+    font-size: 14px;
+}
   button {
     background-color: #7f77ff;
     color: white;
@@ -83,6 +96,7 @@
   .loginText{
     font-family: Poppins;
     text-decoration: none;
+    font-size: 10px;
   }
   a:hover {
     color: #6e66cc;

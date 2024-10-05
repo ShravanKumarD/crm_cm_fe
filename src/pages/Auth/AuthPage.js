@@ -12,22 +12,16 @@ const AuthPage = () => {
     };
 
     return (
-        <div className="container mt-5">
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="auth-container">
-                        <div className="auth-card">
-                            <h2 className="text-center auth-header">{isSignup ? 'Signup' : 'Login'}</h2>
+        <div className="auth-container">
+                        <div className="auth-box">
+                            <label className="text-center auth-header"><strong>{isSignup ? 'Signup' : 'Login'}</strong></label>
                             {isSignup ? <SignupPage /> : <LoginPage />}
                             <div className="text-center mt-3">
                                 <button className="btn btn-link btn-toggle loginText" onClick={toggleForm}>
                                     {isSignup ? 'Already have an account? Login' : 'Don\'t have an account? Signup'}
                                 </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
-            </div>
         </div>
     );
 };
