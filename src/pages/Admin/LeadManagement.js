@@ -174,9 +174,10 @@ export default function LeadManagement() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="form-control mb-3"
                     />
-                    <Button className='btn btn-info btn-lg ms-2' onClick={handleNavigate}>View Leads</Button>
-                    <Button className='btn btn-danger btn-lg ms-2' onClick={revertSelectedLeads} disabled={selectedLeads.size === 0}>Revert Selected</Button>
-                    <p></p>
+                    
+                    <button className='btn btn-primary btn-sm  ms-2' onClick={handleNavigate}>View Leads</button>
+                    {/* <button className='btn btn-secondary btn-sm  ms-2' onClick={revertSelectedLeads} disabled={selectedLeads.size === 0}>Revert</button> */}
+                    <p>&nbsp;</p>
                     <table className="table">
                         <thead>
                             <tr>
@@ -207,7 +208,7 @@ export default function LeadManagement() {
                                         <td>{new Date(assignment.assignedDate).toLocaleDateString() || 'N/A'}</td>
                                         <td>
                                             <button
-                                                className="btn btn-warning"
+                                                className="btn btn-primary btn-sm"
                                                 onClick={() => handleRevertClick(assignment.leadId)}
                                             >
                                                <i className="fas fa-undo me-2"></i> Revert
@@ -246,16 +247,16 @@ export default function LeadManagement() {
             {/* Confirmation Modal */}
             <Modal show={showConfirmModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Confirm Revert</Modal.Title>
+                    <div><h2>Confirm Revert</h2></div>
                 </Modal.Header>
-                <Modal.Body>Are you sure you want to revert this lead assignment?</Modal.Body>
+                <Modal.Body><p>Are you sure you want to revert this lead assignment?</p></Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>
+                    <button className='btn btn-primary' onClick={handleCloseModal}>
                         Cancel
-                    </Button>
-                    <Button variant="warning" onClick={handleConfirmRevert}>
+                    </button>
+                    <button  className='btn btn-primary' onClick={handleConfirmRevert}>
                         Revert
-                    </Button>
+                    </button>
                 </Modal.Footer>
             </Modal>
         </div>

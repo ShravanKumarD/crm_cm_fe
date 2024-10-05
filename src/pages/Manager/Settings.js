@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import axios from './../../components/axios';
-
 export default function Settings() {
     const [formData, setFormData] = useState({
         name: '',
@@ -19,11 +18,9 @@ export default function Settings() {
     
     const [employee, setEmployee] = useState(null);
     const [error, setError] = useState('');
-    const user = JSON.parse(localStorage.getItem('user'));
-
+    const user = JSON.parse(localStorage.getItem("user")) || {};
 
     useEffect(() => {
-        console.log(user)
         const fetchEmployees = async () => {
             if (user) {
                 try {
@@ -82,6 +79,7 @@ export default function Settings() {
             const response = await axios.put(`/user/${user.id}`, updatedData);
 
             if (response.status === 200) {
+                console.log(response,"data")
                 alert('User updated successfully!');
             } else {
                 setError('Failed to update user information. No fields were modified.');

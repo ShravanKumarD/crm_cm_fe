@@ -31,7 +31,8 @@ const LeadList = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [note, setNote] = useState("");
   const [followUpDate, setFollowUpDate] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user"))
   const [task, setTask] = useState({
     description: "",
     status: "",
@@ -54,6 +55,7 @@ const LeadList = () => {
     setNote("");  
   };
   useEffect(() => {
+    
     fetchAssignedLeads();
     fetchEmployee();
   }, []);
@@ -79,7 +81,6 @@ const LeadList = () => {
     try {
       // Fetch leads data
       const response = await axios.get("/lead/");
-      console.log(response.data, "response");
 
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
@@ -188,6 +189,7 @@ const LeadList = () => {
     }
   };
 
+
   const updateLeadStatus = async (leadId) => {
     try {
       const response = await axios.post("/task/", {
@@ -204,13 +206,6 @@ const LeadList = () => {
       const updateLeadAssignment = await axios.put(
         `/leadAssignment/${leadId}`,
         { status: newStatus || "Active" }
-      );
-
-      console.log(
-        "Response:",
-        response,
-        updateStatusInLeads,
-        updateLeadAssignment
       );
       alert("Task created and lead status updated successfully!");
       closeModal();
@@ -489,19 +484,19 @@ const LeadList = () => {
       {/* Confirmation Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Status Change</Modal.Title>
+          <div><p>Confirm Status Change</p></div>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to change the status to "{newStatus}" for this
-          lead?
+         <p> Are you sure you want to change the status to "{newStatus}" for this
+         lead?</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <button className="btn btn-primary" onClick={() => setShowModal(false)}>
             Cancel
-          </Button>
-          <Button variant="primary" onClick={confirmStatusChange}>
+          </button>
+          <button className="btn btn-primary"  onClick={confirmStatusChange}>
             Confirm
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
     </div>

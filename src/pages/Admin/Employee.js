@@ -42,9 +42,9 @@ export default function Employee() {
         <div className='global-container'>
             <div className='container'>
                 <br/>
-                <h1>Employee List</h1>
+               
                 <Button className="btn btn-primary btn-md mb-4" onClick={handleNavigate}>Add Employee</Button>
-
+                <h1>Employee List</h1>
                 {error && <Alert variant='danger' className='mt-3'>{error}</Alert>}
 
                 <div className='row'>
@@ -52,23 +52,25 @@ export default function Employee() {
                         employees.map(employee => (
                             <div key={employee.id} className='col-md-4 mb-4'>
                                 <div className='card position-relative card-custom shadow-sm'>
+                                    <p>&nbsp;</p>
                                     <Link to={`/employee-edit/${employee.id}`} className='text-decoration-none'>
-                                        <button className='btn btn-warning edit-button position-absolute top-0 end-0 m-2'>
+                                        <button className='btn btn-primary edit-button position-absolute top-0 end-0 m-2'>
                                             <i className='fas fa-edit'></i>
                                         </button>
+                                         <button 
+                                        className='btn btn-primary delete-button position-absolute top-0 start-0 m-2'
+                                        onClick={() => handleDeleteUser(employee.id)}
+                                    >
+                                        <i className='fas fa-trash'></i>
+                                    </button>
                                         <div className='card-body'>
-                                            <h5 className='card-title text-primary'>{employee.name}</h5>
+                                            <h2>{employee.name}</h2>
                                             <p className='card-text text-muted'>{employee.email}</p>
                                             <p className='card-text'>{employee.designation}</p>
                                             <p className='card-text'>{employee.department}</p>
                                         </div>
                                     </Link>
-                                    <button 
-                                        className='btn btn-danger delete-button position-absolute top-0 start-0 m-2'
-                                        onClick={() => handleDeleteUser(employee.id)}
-                                    >
-                                        <i className='fas fa-trash'></i>
-                                    </button>
+                                   
                                 </div>
                             </div>
                         ))

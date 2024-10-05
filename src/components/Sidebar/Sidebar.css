@@ -18,7 +18,7 @@
   } */
   .sidebar{
     width: 150px;
-    background:#e4c5ff;
+    background:#b6bcdd78;
     height: 100%;
     position: fixed;
     /* display: flex; */
@@ -65,17 +65,21 @@
   }
   
   .sidebar ul li a {
-    color: #fff;
+    color: #6c24248c;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 14px;
   }
   
   .sidebar ul li a:hover {
     text-decoration: underline;
+    background-color: transparent;
   }
   .nav-pills .nav-link.active, .nav-pills .show>.nav-link {
     color: var(--bs-nav-pills-link-active-color);
-    background-color: #b377e3 !important;
+    background-color: #c3c7df !important;
+}
+.nav {
+  display:contents !important;
 }
 .brand-text {
   color: black;
@@ -83,4 +87,10 @@
 }
 .brand-link{
   text-decoration: none;
+}
+.brand-image{
+  display: flex;
+  height: 11vh;
+  width: 7vw;
+  margin: 5px
 }

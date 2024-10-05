@@ -10,7 +10,7 @@ export default function Leads() {
     const handleShow = () => setShowModal(true);
     const handleClose = () => {
         setShowModal(false);
-        setError(''); // Clear error when modal is closed
+        setError(''); 
     };
 
     const handleFileUpload = (e) => {
@@ -99,35 +99,32 @@ export default function Leads() {
                 </div>
                 <div className='mb-3'>
                     <Button className="btn btn-primary btn-md" onClick={handleShow}>Add Leads</Button>
-                    <Button className='btn btn-info btn-md ms-2' onClick={handleNavigate}>View Leads</Button>
-                    <Button className='btn btn-danger btn-md ms-2' onClick={handleNavigateManagement}>Manage Leads</Button>
+                    <Button className='btn  btn-primary btn-md ms-2' onClick={handleNavigate}>View Leads</Button>
+                    <Button className='btn  btn-primary btn-md ms-2' onClick={handleNavigateManagement}>Manage Leads</Button>
                 </div>
 
 
-                {/* Modal */}
                 <Modal show={showModal} onHide={handleClose}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Add Leads</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        {error && <Alert variant="danger">{error}</Alert>}
-                        <p>Please upload Leads in the form of an Excel sheet...</p>
-                        <input
-                            type="file"
-                            className="form-control"
-                            accept=".xlsx, .xls"
-                            onChange={handleFileUpload}
-                        />
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleClose}>
-                            Close
-                        </Button>
-                        <Button variant="primary" onClick={handleClose}>
-                            Save Changes
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+    <Modal.Body>
+        {error && <Alert variant="danger">{error}</Alert>}
+        <h2>Please upload Leads in the form of an Excel sheet...</h2>
+        <input
+            type="file"
+            className="form-control"
+            accept=".xlsx, .xls"
+            onChange={handleFileUpload}
+        />
+    </Modal.Body>
+    <div className='d-flex justify-content-center'>
+        <button className='btn btn-primary' onClick={handleClose}>
+            Close
+        </button>
+        <button  className='btn btn-primary' onClick={handleClose}>
+            Save Changes
+        </button>
+    </div>
+</Modal>
+
                 <p>&nbsp;</p>
             </div>
         </div>

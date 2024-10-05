@@ -14,6 +14,7 @@ const Walkins = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState({ leadId: null, taskType: "", followUpDate: null });
+  const [searchTerm, setSearchTerm] = useState(""); 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user")) || {};
 
@@ -23,9 +24,9 @@ const Walkins = () => {
 
   const fetchAssignedLeads = async () => {
     try {
-      const response = await axios.get(`/leadAssignment/user-leads/${user.id}`);
+      const response = await axios.get(`/leadAssignment/all-assigned`);
       if (response.status === 200) {
-        const leadIds = response.data.leads.map((lead) => lead.leadId);
+        const leadIds = response.data.map((lead) => lead.leadId);
         fetchLeadDetails(leadIds);
       }
     } catch (error) {
@@ -41,14 +42,13 @@ const Walkins = () => {
         const filteredLeads = response.data.leads.filter((lead) => leadIds.includes(lead.id));
         const fetchTasks = async () => {
           try {
-            const taskResponse = await axios.get(`/task/${user.id}`);
+            const taskResponse = await axios.get(`/task`);
             if (taskResponse && taskResponse.data) {
               const tasks = taskResponse.data.reverse();
               const combinedLeadsWithTasks = filteredLeads.map((lead) => ({
                 ...lead,
                 tasks: tasks.filter((task) => task.leadId === lead.id),
               }));
-              console.log(combinedLeadsWithTasks,"combinedLeadsWithTasks")
               const relevantLeads = combinedLeadsWithTasks.filter((lead) => {
                 const recentTask = lead.tasks[0]?.actionType;
                 return (
@@ -72,7 +72,7 @@ const Walkins = () => {
   };
 
   const handleViewLead = (lead) => {
-    navigate("/emp-lead-details", { state: { lead } });
+    navigate("/manager-lead-details", { state: { lead } });
   };
 
   const handleCheckboxChange = (id) => {
@@ -103,11 +103,11 @@ const Walkins = () => {
       const taskData = {
         leadId,
         actionType: taskType,
-        status:taskType,
+        status: taskType,
         followUp: followUpDate,
         userId: user.id,
       };
-     await axios.put(`/lead/${leadId}`, {
+      await axios.put(`/lead/${leadId}`, {
         status: taskType,
         userId: user.id,
       });
@@ -127,12 +127,28 @@ const Walkins = () => {
   const handleCreateTask = (lead) => {
     navigate("/add-task-employee", { state: { lead } });
   };
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  // Filter leads based on search term
+  const filteredLeads = leads.filter(lead => 
+    lead.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="global-container">
       <div className="container">
+        <br />
+        {/* Search Input Field */}
+        <Form.Group controlId="search">
+          <Form.Control 
+            type="text" 
+            placeholder="Search by name..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} 
+          />
+        </Form.Group>
         <br />
         <div className="table-responsive">
           <Table striped>
@@ -146,14 +162,14 @@ const Walkins = () => {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Lead Source</th>
-                <th>status</th>
+                <th>Status</th>
                 <th>Task Type</th>
                 <th>Follow up date</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {leads.map((lead) => (
+              {filteredLeads.map((lead) => (
                 <tr key={lead.id}>
                   <td>
                     <input
@@ -218,13 +234,14 @@ const Walkins = () => {
             <div><h2>Confirm Task Creation</h2></div>
           </Modal.Header>
           <Modal.Body>
-           <p> Are you sure you want to create this task for lead ID {selectedTask.leadId}?</p>
+            <p>
+            Are you sure you want to create this task for lead ID {selectedTask.leadId}?</p>
           </Modal.Body>
           <Modal.Footer>
-            <button className="btn btn-primary" onClick={() => setShowModal(false)}>
+            <button classname="btn btn-primary" onClick={() => setShowModal(false)}>
               Cancel
             </button>
-            <button className="btn btn-primary"onClick={handleSubmitTask}>
+            <button   classname="btn btn-primary"  onClick={handleSubmitTask}>
               Confirm
             </button>
           </Modal.Footer>

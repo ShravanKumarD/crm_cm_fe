@@ -6,7 +6,7 @@ import "./../../App.css";
 import DatePicker from "react-datepicker";
 import ModalComponent from "./../../components/Modal";
 
-const LeadList = () => {
+const LeadManager = () => {
   const [leads, setLeads] = useState([]);
   const [error, setError] = useState(null);
   const [employees, setEmployees] = useState([]);
@@ -31,6 +31,7 @@ const LeadList = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [note, setNote] = useState("");
   const [followUpDate, setFollowUpDate] = useState(null);
+  // const user = JSON.parse(localStorage.getItem("user"));
   const user = JSON.parse(localStorage.getItem("user"));
   const [task, setTask] = useState({
     description: "",
@@ -51,7 +52,7 @@ const LeadList = () => {
   };
   const closeModal = () => {
     setModalOpen(false);
-    setNote("");  
+    setNote("");
   };
   useEffect(() => {
     fetchAssignedLeads();
@@ -79,7 +80,6 @@ const LeadList = () => {
     try {
       // Fetch leads data
       const response = await axios.get("/lead/");
-      console.log(response.data, "response");
 
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
@@ -109,11 +109,11 @@ const LeadList = () => {
   };
 
   const handleViewLead = (lead) => {
-    navigate("/emp-lead-details", { state: { lead } });
+    navigate("/manager-lead-details", { state: { lead } });
   };
 
   const handleCreateTask = (lead) => {
-    navigate("/add-task-employee", { state: { lead } });
+    navigate("/add-task-manager", { state: { lead } });
   };
 
   const handleCheckboxChange = (id) => {
@@ -167,20 +167,24 @@ const LeadList = () => {
       userId: uid,
       leadId: leadId,
       followUp: localFollowUpDate,
-      description:note,
+      description: note,
     };
     const updateStatusInLeads = await axios.put(`/lead/${leadId}`, {
       status: newStatus || "Active",
       userId: user.id,
       followUp: localFollowUpDate,
-      description:note,
-      status:newStatus
+      description: note,
+      status: newStatus,
     });
 
     try {
       const response = await axios.post("/task", data);
       if (response) {
-        console.log("Task created successfully:", response.data,updateStatusInLeads);
+        console.log(
+          "Task created successfully:",
+          response.data,
+          updateStatusInLeads
+        );
         closeModal();
       }
     } catch (error) {
@@ -204,13 +208,6 @@ const LeadList = () => {
       const updateLeadAssignment = await axios.put(
         `/leadAssignment/${leadId}`,
         { status: newStatus || "Active" }
-      );
-
-      console.log(
-        "Response:",
-        response,
-        updateStatusInLeads,
-        updateLeadAssignment
       );
       alert("Task created and lead status updated successfully!");
       closeModal();
@@ -385,83 +382,88 @@ const LeadList = () => {
                   </td>
 
                   <td>
-  <div className="touchable-global"  onClick={() => openModal(lead.id)}>
-    {lead.tasks.length === 0 ? (
-      <span>Add follow-up</span>
-    ) : (
-      <div key={lead.id}>
-        <span>
-          {lead.followUp ? (
-            new Date(lead.followUp).toLocaleString()
-          ) : (
-            "No follow-up"
-          )}
-        </span>
-      </div>
-    )}
-  </div>
-
-  <ModalComponent
-    showModal={isModalOpen}
-    handleClose={closeModal}
-    title="Add Follow-Up"
-  >
-                    <Form.Control
-                      as="select"
-                      name="status"
-                      className="dropdownInTable"
-                      value={
-                        leadStatuses[lead.id] || lead.status || "Task Created"
-                      }
-                      onChange={(e) =>
-                        handleStatusChange(currentLead, e.target.value)
-                      }
+                    <div
+                      className="touchable-global"
+                      onClick={() => openModal(lead.id)}
                     >
-                      <option value="">Select Status</option>
-                      <option value="Interested">Interested</option>
-                      <option value="Follow Up">Follow Up</option>
-                      <option value="Call Back">Call Back</option>
-                      <option value="RNR">RNR (Ring No Response)</option>
-                      <option value="Switch Off">Switched Off</option>
-                      <option value="Busy">Busy</option>
-                      <option value="Not Interested">Not Interested</option>
-                      <option value="Not Working/Not Reachable">
-                        Not Working / Not Reachable
-                      </option>
-                      <option value="message">Message</option>
-                      <option value="email">Email</option>
-                      <option value="schedule appointment with manager">
-                        Schedule Appointment with Manager
-                      </option>
-                      <option value="customer walkin">Customer Walk-in</option>
-                    </Form.Control>
-                  <p>&nbsp;</p>
+                      {lead.tasks.length === 0 ? (
+                        <span>Add follow-up</span>
+                      ) : (
+                        <div key={lead.id}>
+                          <span>
+                            {lead.followUp
+                              ? new Date(lead.followUp).toLocaleString()
+                              : "No follow-up"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
-    <DatePicker
-      className="dropdownInTable"
-      showTimeSelect
-      dateFormat="Pp"
-      selected={followUpDate ? new Date(followUpDate) : null}
-      onChange={(date) => setFollowUpDate(date)}
-    />
-    <Form.Group controlId="formDescription" className="mb-3">
-      <Form.Label>Add Note</Form.Label>
-      <Form.Control
-        as="textarea"
-        rows={3}
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="Write here..."
-      />
-    </Form.Group>
-    <Button
-      variant="btn btn-primary btn-sm"
-      onClick={() => postTask(currentLead, followUpDate, note)} 
-    >
-      Submit
-    </Button>
-  </ModalComponent>
-</td>
+                    <ModalComponent
+                      showModal={isModalOpen}
+                      handleClose={closeModal}
+                      title="Add Follow-Up"
+                    >
+                      <Form.Control
+                        as="select"
+                        name="status"
+                        className="dropdownInTable"
+                        value={
+                          leadStatuses[lead.id] || lead.status || "Task Created"
+                        }
+                        onChange={(e) =>
+                          handleStatusChange(currentLead, e.target.value)
+                        }
+                      >
+                        <option value="">Select Status</option>
+                        <option value="Interested">Interested</option>
+                        <option value="Follow Up">Follow Up</option>
+                        <option value="Call Back">Call Back</option>
+                        <option value="RNR">RNR (Ring No Response)</option>
+                        <option value="Switch Off">Switched Off</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Not Interested">Not Interested</option>
+                        <option value="Not Working/Not Reachable">
+                          Not Working / Not Reachable
+                        </option>
+                        <option value="message">Message</option>
+                        <option value="email">Email</option>
+                        <option value="schedule appointment with manager">
+                          Schedule Appointment with Manager
+                        </option>
+                        <option value="customer walkin">
+                          Customer Walk-in
+                        </option>
+                      </Form.Control>
+                      <p>&nbsp;</p>
+
+                      <DatePicker
+                        className="dropdownInTable"
+                        showTimeSelect
+                        dateFormat="Pp"
+                        selected={followUpDate ? new Date(followUpDate) : null}
+                        onChange={(date) => setFollowUpDate(date)}
+                      />
+                      <Form.Group controlId="formDescription" className="mb-3">
+                        <Form.Label>Add Note</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          placeholder="Write here..."
+                        />
+                      </Form.Group>
+                      <Button
+                        variant="btn btn-primary btn-sm"
+                        onClick={() =>
+                          postTask(currentLead, followUpDate, note)
+                        }
+                      >
+                        Submit
+                      </Button>
+                    </ModalComponent>
+                  </td>
 
                   <td>
                     <button
@@ -492,14 +494,14 @@ const LeadList = () => {
           <div><h2>Confirm Status Change</h2></div>
         </Modal.Header>
         <Modal.Body>
-         <p>Are you sure you want to change the status to "{newStatus}" for this
-         lead?</p> 
+         <p> Are you sure you want to change the status to "{newStatus}" for this
+          lead?</p>
         </Modal.Body>
         <Modal.Footer>
-          <button className="btn btn-primary" onClick={() => setShowModal(false)}>
+          <button classname="btn btn-primary" onClick={() => setShowModal(false)}>
             Cancel
           </button>
-          <button className="btn btn-primary"  onClick={confirmStatusChange}>
+          <button vclassname="btn btn-primary" onClick={confirmStatusChange}>
             Confirm
           </button>
         </Modal.Footer>
@@ -508,4 +510,4 @@ const LeadList = () => {
   );
 };
 
-export default LeadList;
+export default LeadManager;

@@ -9,22 +9,21 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const { login } = useAuth(); // Get the login function from AuthContext
+  const { login } = useAuth(); 
   const navigate = useNavigate();
 
-  // Define getDefaultRoute function to route users based on role
-  const getDefaultRoute = (role) => {
-    switch (role) {
-      case "ROLE_ADMIN":
-        return "/admin-dashboard";
-      case "ROLE_MANAGER":
-        return "/manager-dashboard";
-      case "ROLE_EMPLOYEE":
-        return "/employee-dashboard";
-      default:
-        return "/login";
-    }
-  };
+    const getDefaultRoute = (role) => {
+      switch (role) {
+        case "ROLE_ADMIN":
+          return "/admin-dashboard";
+        case "ROLE_MANAGER":
+          return "/manager-dashboard";
+        case "ROLE_EMPLOYEE":
+          return "/employee-dashboard";
+        default:
+          return "/login";
+      }
+    };
 
   const handleLogin = async () => {
     if (email && password) {
@@ -38,8 +37,8 @@ const LoginPage = () => {
         const user = decodedToken.user;
 
         if (token && user) {
-          login(token, user.role); // Store token and role in AuthContext
-          navigate(getDefaultRoute(user.role)); // Redirect to the correct dashboard
+          login(token, user);
+          navigate(getDefaultRoute(user.role)); 
         } else {
           setError("Login failed, invalid response from server.");
         }

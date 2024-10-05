@@ -43,20 +43,18 @@ const Header = () => {
           </ul>
         </div>
       </nav>
-
-      {/* Logout Confirmation Modal */}
       <Modal show={showModal} onHide={closeModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Logout</Modal.Title>
+          <div><h2>Confirm Logout</h2></div>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to log out?</Modal.Body>
+        <Modal.Body><p>Are you sure you want to log out?</p></Modal.Body>
         <Modal.Footer>
-          <Button variant="light" onClick={closeModal}>
+          <button className='btn btn-primary' onClick={closeModal}>
             Cancel
-          </Button>
-          <Button variant="danger" onClick={confirmLogout}>
+          </button>
+          <button className='btn btn-primary' onClick={confirmLogout}>
             Log out
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
     </>

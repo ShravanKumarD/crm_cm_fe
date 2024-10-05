@@ -4,7 +4,12 @@ import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import axios from 'axios';
 import './AdminDashboard.css';
 import './../../App.css';
+import { Chart, ArcElement } from 'chart.js';
 
+Chart.register(ArcElement);
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#b377e3'];
+const user = JSON.parse(localStorage.getItem('user'));
 
 const AdminDashboard = () => {
   const [leadsData, setLeadsData] = useState([]);
@@ -15,8 +20,7 @@ const AdminDashboard = () => {
   const [totalLeads, setTotalLeads] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
   const [upcomingMeetings, setUpcomingMeetings] = useState(0);
-  const [showAllLeads, setShowAllLeads] = useState(false); 
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const [showAllLeads, setShowAllLeads] = useState(false); // New state for "Show More"
 
   useEffect(() => {
     const fetchLeadsData = async () => {
@@ -91,7 +95,17 @@ const AdminDashboard = () => {
   return (
     <div className='global-container'>
       <div className='container' fluid>
-                <Row className="mb-4">
+        <p>&nbsp;</p>
+        {/* Lead Summary Cards */}
+        <Card className="lead-summary-card">
+           <Card.Body>
+           hello , well come back
+           </Card.Body>
+        
+        </Card>
+        <p>&nbsp;</p>
+       
+        <Row className="mb-4">
           {[
             { title: 'Total Leads', count: totalLeads },
             { title: 'Today Leads', count: newLeadsCount  },
@@ -102,15 +116,46 @@ const AdminDashboard = () => {
                   <h1>{title}</h1>
                   <h4>{count}</h4>
                 </Card.Body>
+                
               </Card>
             </Col>
           ))}
         
        
         </Row>
+
+        {/* Charts and Progress */}
+        {/* <Row className="mb-4">
+          <Col md={6}>
+            <Card className="dashboard-chart-card">
+              <Card.Body>
+                <h1>Lead Source Overview</h1>
+                <PieChart width={400} height={300}>
+                  <Pie
+                    data={leadsData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {leadsData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row> */}
+
+        {/* Recent Lead Activities */}
         <Row>
           <Col md={12}>
-            <>
+            <Card>
               <Card.Body>
                 <h1>Recent Lead Activities</h1>
                 <Table striped bordered hover responsive>
@@ -158,12 +203,12 @@ const AdminDashboard = () => {
                     ))}
                   </tbody>
                 </Table>
-                <div  className='touchable-global  '
+                <button  className='btn btn-primary btn-sm'
                 onClick={() => setShowAllLeads(!showAllLeads)}>
                   {showAllLeads ? 'Show Less' : 'Show More...'}
-                </div>
+                </button>
               </Card.Body>
-            </>
+            </Card>
           </Col>
 
           {/* Upcoming Tasks */}

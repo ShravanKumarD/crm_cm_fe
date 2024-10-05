@@ -230,15 +230,15 @@ export default function EmployeeAdd() {
             </div>
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Employee Created</Modal.Title>
+                    <div><h2>Employee Created</h2></div>
                 </Modal.Header>
                 <Modal.Body>
-                    Employee has been created successfully!
+                   <p>Employee has been created successfully!</p> 
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={handleCloseModal}>
+                    <button className='btn btn-primary' onClick={handleCloseModal}>
                         Close
-                    </Button>
+                    </button>
                 </Modal.Footer>
             </Modal>
         </div>
