@@ -2,22 +2,22 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
-import logo from "./../../assets/mainlogo.png"
+import logo from "./../../assets/samcint_logo_2.png"
 
-const AdminSidebar = () => {
+const AdminSidebar = ({}) => {
   const [employee, setEmployee] = useState(null); 
   const [error, setError] = useState('');
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    if (user && user.id) {
-      fetchEmployees();
+    if (user && user.id) {  
+      fetchEmployee();
     } else {
-      setError('User ID not found.');
+      setError('User not found. Please log in.');
     }
   }, [user]);
 
-  const fetchEmployees = async () => {
+  const fetchEmployee = async () => {
     try {
       const response = await axios.get(`/user/${user.id}`);
       setEmployee(response.data);
@@ -30,19 +30,18 @@ const AdminSidebar = () => {
   return (
     <aside className="main-sidebar elevation-4 fixed">
       <div className="sidebar">
-        <img className="brand-image" src={logo} alt='image'/>
-      <h2 className="brand-text font-weight-light">
-            <i className="nav-icon fas fa-user" style={{margin:'5px', color:"#6c24248c"}}/>
-            {employee ? employee.name.split(' ')[0] : "Loading..."}
-          </h2>
+        <img className="brand-image" src={logo} alt="Logo" />
+        <h2 className="brand-text font-weight-light">
+          <i className="nav-icon fas fa-user" style={{ margin: '5px', color: "#6c24248c" }} />
+          {employee ? employee.name.split(' ')[0] : error || "Guest"}
+        </h2>
         <div className="sidebar-scroll">
           <nav className="mt-2">
             <ul className="nav nav-pills nav-sidebar flex-column" role="menu" data-accordion="false">
               <li className="nav-item">
                 <NavLink
                   to="/admin-dashboard"
-                  className="nav-link"
-                  activeClassName="active"
+                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                   style={{ display: "flex", alignItems: "center", textDecoration: "none" }}
                 >
                   <i className="nav-icon fas fa-tachometer-alt" style={{ marginRight: "8px" }} />
@@ -53,8 +52,7 @@ const AdminSidebar = () => {
               <li className="nav-item has-treeview">
                 <NavLink
                   to="/Leads"
-                  className="nav-link"
-                  activeClassName="active"
+                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                   style={{ display: "flex", alignItems: "center", textDecoration: "none" }}
                 >
                   <i className="nav-icon fa fa-rocket" style={{ marginRight: "8px" }} />
@@ -65,8 +63,7 @@ const AdminSidebar = () => {
               <li className="nav-item has-treeview">
                 <NavLink
                   to="/employee"
-                  className="nav-link"
-                  activeClassName="active"
+                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                   style={{ display: "flex", alignItems: "center", textDecoration: "none" }}
                 >
                   <i className="nav-icon fa fa-users" style={{ marginRight: "8px" }} />
@@ -77,8 +74,7 @@ const AdminSidebar = () => {
               <li className="nav-item">
                 <NavLink
                   to="/settings"
-                  className="nav-link"
-                  activeClassName="active"
+                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                   style={{ display: "flex", alignItems: "center", textDecoration: "none" }}
                 >
                   <i className="nav-icon fa fa-cog" style={{ marginRight: "8px" }} />

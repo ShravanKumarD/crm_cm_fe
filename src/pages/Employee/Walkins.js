@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./../../App.css";
 import { useAuth } from './../../context/AuthContext';
+import EmployeeSidebar from "../../components/Sidebar/EmployeeSidebar";
 
 const Walkins = () => {
   const [leads, setLeads] = useState([]);
@@ -131,6 +132,8 @@ const Walkins = () => {
   today.setHours(0, 0, 0, 0);
 
   return (
+    <>
+    <EmployeeSidebar/>
     <div className="global-container">
       <div className="container">
         <br />
@@ -231,6 +234,7 @@ const Walkins = () => {
         </Modal>
       </div>
     </div>
+    </>
   );
 };
 

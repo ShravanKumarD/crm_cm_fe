@@ -3,7 +3,8 @@ import { Card, Col, Row, Container, Button, Table, Form } from "react-bootstrap"
 import { FaTasks, FaCalendarAlt, FaChartBar } from "react-icons/fa";
 import axios from "./../../components/axios";
 import "./Dashboard.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
+import EmployeeSidebar from "../../components/Sidebar/EmployeeSidebar";
 
 const Dashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -28,7 +29,7 @@ const Dashboard = () => {
       fetchTasks();
       fetchLeads();
     }
-  }, [user]);
+  }, [user?.id]);
 
   const handleTaskStatusChange = async (taskId, newStatus) => {
     try {
@@ -36,7 +37,7 @@ const Dashboard = () => {
         status: newStatus,
         userId: user.id,
       });
-      fetchTasks(); // Re-fetch tasks after updating status
+    await  fetchTasks();
     } catch (error) {
       console.error("Error updating task status:", error.message);
     }
@@ -55,11 +56,9 @@ const Dashboard = () => {
   const fetchLeads = async () => {
     try {
       const response = await axios.get("/lead");
+      console.log(response.data,"res")
       if (response.status === 200) {
-        setLeads(response.data.map(lead => ({
-          ...lead,
-          assignedTo: lead.assignedTo || "Not Assigned",
-        })));
+        setLeads(response.data.leads)
       }
     } catch (error) {
       console.error("Error fetching leads:", error.message);
@@ -70,7 +69,7 @@ const Dashboard = () => {
     try {
       const response = await axios.get("/task/");
       const filteredTasks = response.data.filter(task => task.userId === user.id);
-      setTasks(filteredTasks);
+      setTasks(filteredTasks.filter(task => task.status !== "Completed"));
       setCompletedTasks(filteredTasks.filter(task => task.status === "Completed").length);
       setUpcomingMeetings(filteredTasks.filter(task => task.status === "Walk-ins").length);
     } catch (err) {
@@ -104,10 +103,7 @@ const Dashboard = () => {
       const response = await axios.get("/lead");
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter(lead => leadIds.includes(lead.id));
-        setLeads(filteredLeads.map(lead => ({
-          ...lead,
-          assignedTo: lead.assignedTo || "Not Assigned",
-        })));
+        setLeads(filteredLeads);
         const leadsCountByDay = filteredLeads.reduce((acc, lead) => {
           const date = new Date(lead.createdDate).toDateString();
           acc[date] = (acc[date] || 0) + 1;
@@ -124,12 +120,9 @@ const Dashboard = () => {
   const handleAddTask = () => {
     navigate("/add-task-employee", { state: { leads } });
   };
-
-  const filteredLeads = leads.filter(lead =>
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
+    <>
+    <EmployeeSidebar/>
     <Container fluid className="global-container">
       <div className="container">
         <Row>
@@ -139,6 +132,7 @@ const Dashboard = () => {
                 {/* <h2 className="text-center">Employee Dashboard</h2> */}
                 <Row className="text-center">
                   <Col md={4}>
+                  <Link to={`/emp-leads`} className='text-decoration-none'>
                     <Card className="metric-card">
                       <Card.Body>
                         <FaTasks size={40} className="metric-icon" />
@@ -146,8 +140,10 @@ const Dashboard = () => {
                         <p>Total Leads</p>
                       </Card.Body>
                     </Card>
+                    </Link>
                   </Col>
                   <Col md={4}>
+                  <Link to={`/emp-leads`} className='text-decoration-none'>
                     <Card className="metric-card">
                       <Card.Body>
                         <FaChartBar size={40} className="metric-icon" />
@@ -155,8 +151,10 @@ const Dashboard = () => {
                         <p>Completed Tasks</p>
                       </Card.Body>
                     </Card>
+                    </Link>
                   </Col>
                   <Col md={4}>
+                  <Link to={`/walkins-list`} className='text-decoration-none'>
                     <Card className="metric-card">
                       <Card.Body>
                         <FaCalendarAlt size={40} className="metric-icon" />
@@ -164,6 +162,7 @@ const Dashboard = () => {
                         <p>Walk-ins</p>
                       </Card.Body>
                     </Card>
+                    </Link>
                   </Col>
                 </Row>
               </Card.Body>
@@ -181,7 +180,7 @@ const Dashboard = () => {
                       <th>Phone</th>
                       <th>Follow-up Date</th>
                       <th>Note</th>
-                      <th>Action Type</th>
+                      <th>Lead Status</th>
                       <th>Task Status</th>
                     </tr>
                   </thead>
@@ -203,7 +202,7 @@ const Dashboard = () => {
                             : "N/A"}
                         </td>
                         <td>{task.description}</td>
-                        <td>{task.actionType}</td>
+                        <td>{task.lead.status || "N/A"}</td>  
                         <td>
                           <Form.Control
                             as="select"
@@ -249,7 +248,19 @@ const Dashboard = () => {
                               : "N/A"}
                           </td>
                           <td>{task.description}</td>
-                          <td>{task.actionType}</td>
+                          {/* <td>{task.actionType}</td> */}
+                          <td>{task.lead.status || "N/A"}</td>  
+                          <td>
+                          <Form.Control
+                            as="select"
+                            value={task.status}
+                            onChange={e => handleTaskStatusChange(task.id, e.target.value)}
+                            className="dropdownText"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                          </Form.Control>
+                        </td>
                         </tr>
                       ))}
                     </tbody>
@@ -276,6 +287,7 @@ const Dashboard = () => {
         </Row>
       </div>
     </Container>
+    </>
   );
 };
 

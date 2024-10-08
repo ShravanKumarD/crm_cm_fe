@@ -5,6 +5,7 @@ import axios from "./../../components/axios";
 import "./../../App.css";
 import DatePicker from "react-datepicker";
 import ModalComponent from "./../../components/Modal";
+import EmployeeSidebar from "../../components/Sidebar/EmployeeSidebar";
 
 const LeadList = () => {
   const [leads, setLeads] = useState([]);
@@ -31,8 +32,9 @@ const LeadList = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [note, setNote] = useState("");
   const [followUpDate, setFollowUpDate] = useState(null);
-  // const user = JSON.parse(localStorage.getItem("user"));
   const user = JSON.parse(localStorage.getItem("user"))
+  const [originalFollowUpDate, setOriginalFollowUpDate] = useState(null);
+  const[docsCollected,setDocsCollected]=useState('')
   const [task, setTask] = useState({
     description: "",
     status: "",
@@ -62,7 +64,7 @@ const LeadList = () => {
 
   const handleActionChange = (id, value) => {
     setSelectedAction(value);
-    handleStatusChange(id, value); // Call the original status change function
+    handleStatusChange(id, value); 
   };
 
   const fetchAssignedLeads = async () => {
@@ -86,6 +88,16 @@ const LeadList = () => {
         const filteredLeads = response.data.leads.filter((lead) =>
           leadIds.includes(lead.id)
         );
+        
+        const docsStatus = filteredLeads.map((lead) => {
+          const hasDocs = lead.tasks.length > 0 ? 'Yes' : 'No';
+          return {
+            id: lead.id,
+            docsCollected: hasDocs,
+          };
+        });
+
+        setDocsCollected(docsStatus);
         setLeads(
           filteredLeads.map((lead) => ({
             ...lead,
@@ -142,12 +154,17 @@ const LeadList = () => {
       [name]: value,
     }));
   };
-
   const handleStatusChange = (leadId, newStatus) => {
     setCurrentLead(leadId);
     setNewStatus(newStatus);
+  
+    if (newStatus === "customer walkin") {
+      setFollowUpDate(originalFollowUpDate); 
+    }
+  
     setShowModal(true);
   };
+  
 
   const confirmStatusChange = () => {
     setLeadStatuses((prevStatuses) => ({
@@ -162,7 +179,9 @@ const LeadList = () => {
     const followUpDate = followUp
       ? new Date(followUp + "Z").toISOString()
       : null;
+
     const localFollowUpDate = followUpDate ? new Date(followUpDate) : null;
+    setOriginalFollowUpDate(localFollowUpDate)
     let uid = user.id;
     const data = {
       userId: uid,
@@ -181,7 +200,14 @@ const LeadList = () => {
     try {
       const response = await axios.post("/task", data);
       if (response) {
-        console.log("Task created successfully:", response.data,updateStatusInLeads);
+        console.log("Task created successfully:", response.data,updateStatusInLeads);  
+           setLeads(prevLeads => prevLeads.map(lead => 
+          lead.id === leadId 
+              ? { ...lead, followUp: localFollowUpDate, status: newStatus || lead.status } 
+              : lead
+      ));
+
+
         closeModal();
       }
     } catch (error) {
@@ -231,6 +257,8 @@ const LeadList = () => {
   });
 
   return (
+    <>
+    <EmployeeSidebar/>
     <div className="global-container">
       <div className="container">
         <h1 className="text-left">{employees.name}</h1>
@@ -325,6 +353,7 @@ const LeadList = () => {
                 <th>Assigned Date</th>
                 <th>Lead Source</th>
                 <th>Update Status</th>
+                <th>Docs. Collected</th>
                 <th>Follow up date</th>
                 <th>Activity</th>
                 <th>Action</th>
@@ -344,7 +373,7 @@ const LeadList = () => {
                   <td>{lead.name || "NA"}</td>
                   <td>{lead.email || "NA"}</td>
                   <td>{lead.phone || "NA"}</td>
-                  <td>{lead.dateImported.split("T")[0]}</td>
+                  <td>{lead.dateImported ? lead.dateImported.split("T")[0] : "NA"}</td>
                   {/* <td>{lead.assignedDate||"NA"}</td> */}
                   <td>{lead.leadSource || "NA"}</td>
                   <td>
@@ -378,7 +407,9 @@ const LeadList = () => {
                       <option value="customer walkin">Customer Walk-in</option>
                     </Form.Control>
                   </td>
-
+  
+   <td>{docsCollected.find(doc => doc.id === lead.id)?.docsCollected || 'No'}</td>
+   
                   <td>
   <div className="touchable-global"  onClick={() => openModal(lead.id)}>
     {lead.tasks.length === 0 ? (
@@ -401,7 +432,7 @@ const LeadList = () => {
     handleClose={closeModal}
     title="Add Follow-Up"
   >
-                    <Form.Control
+                    {/* <Form.Control
                       as="select"
                       name="status"
                       className="dropdownInTable"
@@ -430,7 +461,7 @@ const LeadList = () => {
                       </option>
                       <option value="customer walkin">Customer Walk-in</option>
                     </Form.Control>
-                  <p>&nbsp;</p>
+                  <p>&nbsp;</p> */}
 
     <DatePicker
       className="dropdownInTable"
@@ -477,7 +508,7 @@ const LeadList = () => {
                 </tr>
               ))}
             </tbody>
-          </Table>
+          </Table>  
         </div>
       </div>
 
@@ -500,6 +531,7 @@ const LeadList = () => {
         </Modal.Footer>
       </Modal>
     </div>
+    </>
   );
 };
 

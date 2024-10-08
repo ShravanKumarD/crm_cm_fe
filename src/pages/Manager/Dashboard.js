@@ -51,7 +51,6 @@ const Dashboard = () => {
   }, []);
 
   const fetchEmployee = async () => {
-    console.log(user, "useruseruser");
     try {
       const response = await axios.get(`/user/${user.id}`);
       setEmployees(response.data);

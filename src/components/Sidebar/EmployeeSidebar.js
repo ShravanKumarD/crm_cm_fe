@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
+import logo from "./../../assets/samcint_logo_2.png"
 
 export default function EmployeeSidebar() {
   const [employee, setEmployee] = useState(null); 
@@ -29,6 +30,7 @@ export default function EmployeeSidebar() {
   return (
     <aside className="main-sidebar elevation-4 fixed">
       <div className="sidebar">
+      <img className="brand-image" src={logo} alt="Logo" />
         {/* <a  className="brand-link"> */}
           <h2 className="brand-text font-weight-light">
             <i className="nav-icon fas fa-user" style={{margin:'5px'}}/>
@@ -39,7 +41,10 @@ export default function EmployeeSidebar() {
           <nav className="mt-2">
             <ul className="nav nav-pills nav-sidebar flex-column" role="menu" data-accordion="false">
               <li className="nav-item">
-                <NavLink to="/employee-dashboard" className="nav-link" activeClassName="active" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+                <NavLink to="/employee-dashboard" 
+                // className="nav-link" activeClassName="active"
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                 style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
                   <i className="nav-icon fas fa-tachometer-alt" style={{ marginRight: "8px" }} />
                   <p style={{ margin: 0 }}>Dashboard</p>
                 </NavLink>
@@ -47,7 +52,11 @@ export default function EmployeeSidebar() {
 
               {/* Leads Link */}
               <li className="nav-item has-treeview">
-                <NavLink to="/emp-leads" className="nav-link" activeClassName="active" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+                <NavLink to="/emp-leads" 
+                // className="nav-link"
+                //  activeClassName="active" 
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                 style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
                   <i className="nav-icon fas fa-rocket" style={{ marginRight: "8px" }} />
                   <p>Leads</p>
                 </NavLink>
@@ -55,7 +64,9 @@ export default function EmployeeSidebar() {
 
               {/* Walkins */}
               <li className="nav-item has-treeview">
-                <NavLink to="/walkins-list" className="nav-link" activeClassName="active" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+                <NavLink to="/walkins-list" 
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
                   <i className="nav-icon fas fa-person-walking" style={{ marginRight: "8px" }} />
                   <p>Walkins</p>
                 </NavLink>
@@ -63,7 +74,9 @@ export default function EmployeeSidebar() {
 
               {/* Settings Link */}
               <li className="nav-item">
-                <NavLink to="/employee-settings" className="nav-link" activeClassName="active" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+                <NavLink to="/employee-settings"
+ className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                 style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
                   <i className="nav-icon fa fa-cog" style={{ marginRight: "8px" }} />
                   <p>Settings</p>
                 </NavLink>

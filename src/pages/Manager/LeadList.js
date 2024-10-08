@@ -21,7 +21,6 @@ const LeadList = () => {
     const [selectAll, setSelectAll] = useState(false); // State for "Select All"
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem("user")) || {};
-    console.log(user,"useruseruser")
 
     useEffect(() => {
         // Fetch leads data on component mount

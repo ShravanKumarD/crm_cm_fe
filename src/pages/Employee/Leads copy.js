@@ -31,7 +31,8 @@ const LeadList = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [note, setNote] = useState("");
   const [followUpDate, setFollowUpDate] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user"))
+  const [originalFollowUpDate, setOriginalFollowUpDate] = useState(null);
   const [task, setTask] = useState({
     description: "",
     status: "",
@@ -54,13 +55,14 @@ const LeadList = () => {
     setNote("");  
   };
   useEffect(() => {
+    
     fetchAssignedLeads();
     fetchEmployee();
   }, []);
 
   const handleActionChange = (id, value) => {
     setSelectedAction(value);
-    handleStatusChange(id, value); // Call the original status change function
+    handleStatusChange(id, value); 
   };
 
   const fetchAssignedLeads = async () => {
@@ -79,7 +81,6 @@ const LeadList = () => {
     try {
       // Fetch leads data
       const response = await axios.get("/lead/");
-      console.log(response.data, "response");
 
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
@@ -141,12 +142,17 @@ const LeadList = () => {
       [name]: value,
     }));
   };
-
   const handleStatusChange = (leadId, newStatus) => {
     setCurrentLead(leadId);
     setNewStatus(newStatus);
+  
+    if (newStatus === "customer walkin") {
+      setFollowUpDate(originalFollowUpDate); 
+    }
+  
     setShowModal(true);
   };
+  
 
   const confirmStatusChange = () => {
     setLeadStatuses((prevStatuses) => ({
@@ -161,7 +167,9 @@ const LeadList = () => {
     const followUpDate = followUp
       ? new Date(followUp + "Z").toISOString()
       : null;
+
     const localFollowUpDate = followUpDate ? new Date(followUpDate) : null;
+    setOriginalFollowUpDate(localFollowUpDate)
     let uid = user.id;
     const data = {
       userId: uid,
@@ -180,13 +188,21 @@ const LeadList = () => {
     try {
       const response = await axios.post("/task", data);
       if (response) {
-        console.log("Task created successfully:", response.data,updateStatusInLeads);
+        console.log("Task created successfully:", response.data,updateStatusInLeads);  
+           setLeads(prevLeads => prevLeads.map(lead => 
+          lead.id === leadId 
+              ? { ...lead, followUp: localFollowUpDate, status: newStatus || lead.status } 
+              : lead
+      ));
+
+
         closeModal();
       }
     } catch (error) {
       console.error("Error creating task:", error);
     }
   };
+
 
   const updateLeadStatus = async (leadId) => {
     try {
@@ -204,13 +220,6 @@ const LeadList = () => {
       const updateLeadAssignment = await axios.put(
         `/leadAssignment/${leadId}`,
         { status: newStatus || "Active" }
-      );
-
-      console.log(
-        "Response:",
-        response,
-        updateStatusInLeads,
-        updateLeadAssignment
       );
       alert("Task created and lead status updated successfully!");
       closeModal();
@@ -482,18 +491,18 @@ const LeadList = () => {
                 </tr>
               ))}
             </tbody>
-          </Table>
+          </Table>  
         </div>
       </div>
 
       {/* Confirmation Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <div><h2>Confirm Status Change</h2></div>
+          <div><p>Confirm Status Change</p></div>
         </Modal.Header>
         <Modal.Body>
-         <p>Are you sure you want to change the status to "{newStatus}" for this
-         lead?</p> 
+         <p> Are you sure you want to change the status to "{newStatus}" for this
+         lead?</p>
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-primary" onClick={() => setShowModal(false)}>

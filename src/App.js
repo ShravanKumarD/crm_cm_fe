@@ -77,18 +77,30 @@ const App = () => {
     return null;
   };
 
-  const getDefaultRoute = () => {
-    if (!user) return "/login";
-    switch (user.role) {
+  const getDefaultRoute = (role) => {
+    if (!role) return { sidebar: null, route: "/login" };
+    let sidebar = null;
+    let route = "/login"; 
+
+    switch (role) {
       case "ROLE_ADMIN":
-        return "/admin-dashboard";
+        sidebar = <AdminSidebar  user={user}/>;
+        route = "/admin-dashboard";
+        break;
       case "ROLE_MANAGER":
-        return "/manager-dashboard";
+        sidebar = <ManagerSidebar />;
+        route = "/manager-dashboard";
+        break;
       case "ROLE_EMPLOYEE":
-        return "/employee-dashboard";
+        sidebar = <EmployeeSidebar />;
+        route = "/employee-dashboard";
+        break;
       default:
-        return "/login";
+        sidebar = null;
+        break;
     }
+
+    return { sidebar, route };
   };
 
   return (
@@ -197,7 +209,7 @@ const App = () => {
         </Routes>
       </Router>
     </AuthProvider>
-  );
+    );
 };
 
 export default App;

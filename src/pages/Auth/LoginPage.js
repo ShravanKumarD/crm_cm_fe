@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import {jwtDecode} from "jwt-decode"; // Corrected import
-import { useAuth } from "./../../context/AuthContext"; // Import the useAuth hook
+import {jwtDecode} from "jwt-decode";
+import { useAuth } from "./../../context/AuthContext"; 
+import AdminSidebar from "./../../components/Sidebar/AdminSidebar";
+import ManagerSidebar from "./../../components/Sidebar/ManagerSidebar";
+import EmployeeSidebar from "./../../components/Sidebar/EmployeeSidebar";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -12,18 +15,32 @@ const LoginPage = () => {
   const { login } = useAuth(); 
   const navigate = useNavigate();
 
-    const getDefaultRoute = (role) => {
-      switch (role) {
-        case "ROLE_ADMIN":
-          return "/admin-dashboard";
-        case "ROLE_MANAGER":
-          return "/manager-dashboard";
-        case "ROLE_EMPLOYEE":
-          return "/employee-dashboard";
-        default:
-          return "/login";
-      }
-    };
+  const getDefaultRoute = (role) => {
+    console.log(role,'in getrole')
+    if (!role) return { sidebar: null, route: "/login" };
+    let sidebar = null;
+    let route = "/login"; 
+
+    switch (role) {
+      case "ROLE_ADMIN":
+        sidebar = <AdminSidebar/>;
+        route = "/admin-dashboard";
+        break;
+      case "ROLE_MANAGER":
+        sidebar = <ManagerSidebar />;
+        route = "/manager-dashboard";
+        break;
+      case "ROLE_EMPLOYEE":
+        sidebar = <EmployeeSidebar />;
+        route = "/employee-dashboard";
+        break;
+      default:
+        sidebar = null;
+        break;
+    }
+    console.log(sidebar,role,"wfbfregyfwghufwehifg")
+    return { sidebar, route };
+  };
 
   const handleLogin = async () => {
     if (email && password) {
@@ -35,10 +52,11 @@ const LoginPage = () => {
         const { token } = response.data;
         const decodedToken = jwtDecode(token);
         const user = decodedToken.user;
-
         if (token && user) {
           login(token, user);
-          navigate(getDefaultRoute(user.role)); 
+          const  {route}  = getDefaultRoute(user.role); 
+          console.log(route,"route")  
+          navigate(route); 
         } else {
           setError("Login failed, invalid response from server.");
         }
@@ -58,7 +76,6 @@ const LoginPage = () => {
         </div>
       )}
       <div className="form-group">
-        
         <label htmlFor="email">Email</label>
         <input
           type="email"

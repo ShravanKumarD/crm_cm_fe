@@ -185,6 +185,11 @@ const LeadManager = () => {
           response.data,
           updateStatusInLeads
         );
+        setLeads(prevLeads => prevLeads.map(lead => 
+          lead.id === leadId 
+              ? { ...lead, followUp: localFollowUpDate, status: newStatus || lead.status } 
+              : lead
+      ));
         closeModal();
       }
     } catch (error) {
@@ -346,7 +351,7 @@ const LeadManager = () => {
                   <td>{lead.name || "NA"}</td>
                   <td>{lead.email || "NA"}</td>
                   <td>{lead.phone || "NA"}</td>
-                  <td>{lead.dateImported.split("T")[0]}</td>
+                  <td>{lead.dateImported ? lead.dateImported.split("T")[0] : "NA"}</td>
                   {/* <td>{lead.assignedDate||"NA"}</td> */}
                   <td>{lead.leadSource || "NA"}</td>
                   <td>
@@ -404,7 +409,7 @@ const LeadManager = () => {
                       handleClose={closeModal}
                       title="Add Follow-Up"
                     >
-                      <Form.Control
+                      {/* <Form.Control
                         as="select"
                         name="status"
                         className="dropdownInTable"
@@ -435,7 +440,7 @@ const LeadManager = () => {
                           Customer Walk-in
                         </option>
                       </Form.Control>
-                      <p>&nbsp;</p>
+                      <p>&nbsp;</p> */}
 
                       <DatePicker
                         className="dropdownInTable"

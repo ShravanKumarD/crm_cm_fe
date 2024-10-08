@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useMemo} from 'react';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import axios from './../../components/axios';
 export default function Settings() {
@@ -18,11 +18,11 @@ export default function Settings() {
     
     const [employee, setEmployee] = useState(null);
     const [error, setError] = useState('');
-    const user = JSON.parse(localStorage.getItem("user")) || {};
+    const user = useMemo(() => JSON.parse(localStorage.getItem("user")) || {}, []);
 
     useEffect(() => {
         const fetchEmployees = async () => {
-            if (user) {
+            if (user?.id) {
                 try {
                     const response = await axios.get(`/user/${user.id}`);
                     setEmployee(response.data);
@@ -45,7 +45,8 @@ export default function Settings() {
         };
 
         fetchEmployees();
-    }, [user]);
+    }, [user.id]);
+
 
     const handleChange = (e) => {
         const { name, type, checked, value } = e.target;

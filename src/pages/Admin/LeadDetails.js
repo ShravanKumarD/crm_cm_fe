@@ -209,15 +209,29 @@ const LeadDetail = () => {
                       <td>{taskItem.status}</td>
                       <td>{taskItem.actionType}</td>
                       <td>
+                    
+
+                      //
+                      {new Date(task.createdDate).toLocaleDateString('en-US', {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}//
+
                         {taskItem.followUp
-                          ? `${new Date(
-                              taskItem.followUp
-                            ).toLocaleDateString()} ${new Date(
-                              taskItem.followUp
-                            ).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}`
+                          ? `${new Date(task.createdDate).toLocaleDateString('en-US', {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                           ${new Date(task.createdDate).toLocaleDateString('en-US', {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}`
                           : "Not Available"}
                       </td>
                       <td>{taskItem.description}</td>

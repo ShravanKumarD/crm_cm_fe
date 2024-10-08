@@ -11,6 +11,7 @@ import * as XLSX from 'xlsx';
 export default function TaskForm({ leadData }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user")) || {};
   const { lead } = location.state || leadData || {};
 
   const [task, setTask] = useState({
@@ -57,7 +58,7 @@ export default function TaskForm({ leadData }) {
 
   const [data, setData] = useState({ loanReports: [], creditReports: [] });
   const [loading, setLoading] = useState(true);
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -239,10 +240,10 @@ export default function TaskForm({ leadData }) {
       setError("Failed to fetch lead details.");
     }
   };
-
   const filteredLeads = leads.filter((lead) =>
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (lead.name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
   );
+  
   const handleDownload = (e) => {
     const format = e.target.value;
     if (format === "pdf") {
@@ -438,6 +439,7 @@ export default function TaskForm({ leadData }) {
             showTimeSelect
             dateFormat="Pp"
             name="followUp"
+            placeholderText="select date"
             selected={task.followUp ? new Date(task.followUp) : null}
             onChange={(date) => { 
               handleChange({

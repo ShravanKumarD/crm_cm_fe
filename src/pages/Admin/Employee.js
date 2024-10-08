@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Button, Alert } from 'react-bootstrap'; 
 import { Link } from 'react-router-dom';
 import './Employee.css'; // Import the CSS file with custom styles
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
 
 export default function Employee() {
     const [employees, setEmployees] = useState([]);
@@ -39,6 +40,9 @@ export default function Employee() {
     };
 
     return (
+        <>
+       <AdminSidebar/> 
+       
         <div className='global-container'>
             <div className='container'>
                 <br/>
@@ -80,5 +84,6 @@ export default function Employee() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

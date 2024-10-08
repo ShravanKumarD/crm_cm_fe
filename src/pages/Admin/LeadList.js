@@ -6,6 +6,7 @@ import "./LeadList.css";
 import "./../../App.css";
 import moment from 'moment';
 import {jwtDecode} from 'jwt-decode';
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
 
 const LeadList = () => {
     const [leads, setLeads] = useState([]);
@@ -98,10 +99,8 @@ const LeadList = () => {
             //   assignedTo: assignedTo,
             // }),
           ]);   
-      
-          // Check if both requests were successful
-          if (assignResponse.status === 200 && leadUpdateResponse.status === 200) {
-            // Update local leads state after successful assignment
+           console.log(assignResponse, leadUpdateResponse,"assignResponse, leadUpdateResponse")
+          if (assignResponse.status === 200 || leadUpdateResponse.status === 200) {
             setLeads((prevLeads) =>
               prevLeads.map((lead) =>
                 selectedLeads.includes(lead.id)
@@ -109,7 +108,7 @@ const LeadList = () => {
                   : lead
               )
             );
-            setSelectedLeads([]); // Clear the selection after assignment
+            setSelectedLeads([]);
           } else {
             console.error(
               "Failed to assign leads:",
@@ -134,14 +133,16 @@ const LeadList = () => {
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
+               
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                console.log(jsonData,"josnDatas")
                 const importedLeads = jsonData.map((item, index) => ({
                     id: leads.length + index + 1, // Generate a unique ID
                     name: item.name || item.Name || item.firstname + item.lastname || 'N/A',
                     email: item.email || item.Email || 'N/A',
                     status: item.status || item.Status || 'N/A',
-                    source: item.source || item.Source || item.leadSource||'N/A',
-                    phone: item.mobile || item.Mobile || item.Age || 'N/A',
+                    leadSource: item.source || item.Source || item.leadSource||item.source|| item.leadSource || item.LeadSource ||'N/A',
+                    phone: item.mobile || item.Mobile  || 'N/A',
                     dob: item.dob || item.dateOfBirth || item.dateofBirth || 'N/A',
                     company: item.company || item.organization || item.firm || 'N/A',
                     assignedDate: item.AssignedDate || item.Date || new Date().toISOString().split('T')[0] || 'N/A',
@@ -150,11 +151,11 @@ const LeadList = () => {
                     country: item.country || item.Country || 'N/A',
                     tags: item.tags || item.Tags || item.tag || 'N/A',
                     leadOwner: item.leadOwner || item.LeadOwner || 'N/A',
-                    leadSource: item.leadSource || item.LeadSource || 'N/A',
                     assignedTo: item.assignedTo || 'N/A',
                     dateImported: item.dateImported || new Date().toISOString(),
                 }));
-               await axios.post(`/lead`, importedLeads)
+                console.log(importedLeads,"importedLeads")
+               await axios.post(`/lead/bulk`, importedLeads)
                 .then(response => {
                     console.log(response.data);
                     console.log('Leads imported successfully:', response.data);
@@ -239,6 +240,9 @@ const LeadList = () => {
     const sortedLeads = sortLeads(filteredLeads);
 
     return (
+        <>
+        <AdminSidebar/>
+    
         <div className="global-container">
             <div className="container">
                 <h1 className="text-left">Lead List</h1>
@@ -403,7 +407,7 @@ const LeadList = () => {
                                     <td>{lead.phone}</td>
                                     <td>{lead.gender}</td>
                                     <td>{lead.status}</td>
-                                    <td>{lead.leadSource}</td>
+                                    <td>{lead.leadSource ||lead.Source || "NA"}</td>
                                     <td>{lead.leadOwner}</td>
                                  <td>{moment(lead.dateImported).format(" DD MMM, YYYY    ")}</td>
                                     <td>{lead.assignedTo || "Not Assigned"}</td>
@@ -428,6 +432,7 @@ const LeadList = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
