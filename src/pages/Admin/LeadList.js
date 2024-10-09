@@ -19,11 +19,14 @@ const LeadList = () => {
     date: "",
     id: "",
     status: "",
+    phone: "",
+    email: "",
+    assignedEmployee: "",
   });
   const [selectAll, setSelectAll] = useState(false);
   const navigate = useNavigate();
-  const recordsPerPage = 30;
-  const maxPageNumbers = 3;
+  const recordsPerPage = 50;
+  const maxPageNumbers = 5;
 
   useEffect(() => {
     fetchLeads();
@@ -200,7 +203,7 @@ const LeadList = () => {
         console.log(workbook.Sheets[0], "workbook");
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        const jsonData = XLSX.utils.sheet_to_json(worksheet) || {};
         console.log(jsonData[0], "jsonData");
         const importedLeads = jsonData.map((item, index) => ({
           name: Object.keys(item).find((key) =>
@@ -355,21 +358,27 @@ const LeadList = () => {
     const formattedDate = lead.dateImported
       ? moment(lead.dateImported).format("YYYY-MM-DD")
       : "";
+
+    const assignments = Array.isArray(lead.LeadAssignments) ? lead.LeadAssignments : [];
+    const assignment = assignments.find((x) => x.leadId === lead.id);
+    const assignedEmployee = assignment
+      ? employees.find((emp) => emp.id === assignment.assignedToUserId)
+      : null;
+  
     return (
-      (filters.name
-        ? lead.name.toLowerCase().includes(filters.name.toLowerCase())
-        : true) &&
+      (filters.name ? lead.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
       (filters.date ? formattedDate === filters.date : true) &&
       (filters.id ? lead.id.toString() === filters.id : true) &&
-      (filters.status
-        ? lead.status.toLowerCase().includes(filters.status.toLowerCase())
-        : true) &&
+      (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true) &&
       (filters.phone ? lead.phone.includes(filters.phone) : true) &&
-      (filters.email
-        ? lead.email.toLowerCase().includes(filters.email.toLowerCase())
+      (filters.email ? lead.email.toLowerCase().includes(filters.email.toLowerCase()) : true) &&
+      (filters.assignedEmployee
+        ? assignedEmployee && assignedEmployee.name.toLowerCase().includes(filters.assignedEmployee.toLowerCase())
         : true)
     );
   });
+  
+
   const sortLeads = (leadsList) => {
     return leadsList.sort((a, b) => {
       const statusA = a.status ? a.status.toLowerCase() : "";
@@ -484,6 +493,17 @@ const LeadList = () => {
                     onChange={handleFilterChange}
                   />
                 </div>
+                <div className="col-md-3">
+  <input
+    type="text"
+    name="assignedEmployee" 
+    className="form-control"
+    placeholder="Filter by Employee Name"
+    value={filters.assignedEmployee}
+    onChange={handleFilterChange}
+  />
+</div>
+
               </div>
             </div>
             {/* Bulk Actions Section */}
@@ -595,14 +615,24 @@ const LeadList = () => {
                     </td>
                     <td>
                       {(() => {
-                        const assignment = lead.LeadAssignments.find(
+                        // Ensure LeadAssignments is an array and defined
+                        const assignments = Array.isArray(lead.LeadAssignments)
+                          ? lead.LeadAssignments
+                          : [];
+
+                        const assignment = assignments.find(
                           (x) => x.leadId === lead.id
                         );
+                        const validEmployees = Array.isArray(employees)
+                          ? employees
+                          : [];
+
                         const assignedEmployee = assignment
-                          ? employees.find(
+                          ? validEmployees.find(
                               (emp) => emp.id === assignment.assignedToUserId
                             )
                           : null;
+
                         return assignedEmployee
                           ? assignedEmployee.name
                           : "Not Assigned";
@@ -615,18 +645,23 @@ const LeadList = () => {
                       >
                         <i className="fa fa-eye" />
                       </button>
-                      {/* <button
-                                            className="btn btn-danger"
-                                            onClick={() => handleDeleteLead(lead.id)}
-                                        >
-                                            Delete
-                                        </button> */}
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleDeleteLead(lead.id)}
+                      >
+                        <i className="fas fa-trash" />
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <div className="total-records">
+  <p>Total Records on Current Page: <strong>{currentRecords.length}</strong></p>
+  <p>Total Records Overall: <strong>{leads.length}</strong></p>
+</div>
+
           <nav aria-label="Page navigation">
             <ul className="pagination">
               {pageNumbers.map((number, index) => (
