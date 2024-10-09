@@ -6,34 +6,37 @@ import "./LeadList.css";
 import "./../../App.css";
 import moment from 'moment';
 import {jwtDecode} from 'jwt-decode';
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
 
 const LeadList = () => {
     const [leads, setLeads] = useState([]);
     const [error, setError] = useState(null);
     const [employees, setEmployees] = useState([]);
     const [selectedLeads, setSelectedLeads] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [filters, setFilters] = useState({
         name: '',
         date: '',
         id: '',
         status: ''
     });
-    const [selectAll, setSelectAll] = useState(false); // State for "Select All"
+    const [selectAll, setSelectAll] = useState(false);
     const navigate = useNavigate();
+    const recordsPerPage = 30;
+    const maxPageNumbers = 3;
 
     useEffect(() => {
-        // Fetch leads data on component mount
         fetchLeads();
         fetchEmployees();
     }, []);
 
     const fetchLeads = async () => {
         try {
-            const response = await axios.get('/lead/');
+            const response = await axios.get('/lead');
             if (response.status === 200) {
                 setLeads(response.data.leads.map(lead => ({
                     ...lead,
-                    assignedTo: lead.assignedTo || "Not Assigned" // Ensure assignedTo is reflected correctly
+                    assignedTo: lead.assignedTo || "Not Assigned"
                 })));
             }
         } catch (error) {
@@ -53,7 +56,7 @@ const LeadList = () => {
 
     const handleDeleteLead = async (id) => {
         try {
-            const response = await axios.delete(`/lead/${id}`);
+            const response = await axios.delete(`/${id}`);
             if (response.status === 200) {
                 setLeads(prevLeads => prevLeads.filter(lead => lead.id !== id));
             } else {
@@ -64,96 +67,192 @@ const LeadList = () => {
         }
     };
     const handleAssignLeads = async (assignedTo) => {
+        console.log(assignedTo,"assignedTo")
         if (selectedLeads.length === 0) {
-            alert('Please select leads to assign.');
-            return;
+          alert("Please select leads to assign.");
+          return;
         }
-    
         if (!assignedTo) {
-            console.error('No user selected for assignment.');
-            return;
+          console.error("No user selected for assignment.");
+          return;
         }
-    
-        const confirmed = window.confirm(`Are you sure you want to assign the selected leads to this user?`);
+      
+        const confirmed = window.confirm(
+          `Are you sure you want to assign the selected leads to this user?`
+        );
         if (!confirmed) {
-            return; // Exit the function if the user cancels the action
+          return;
         }
-
-        let token = localStorage.getItem('token');
+      
+        let token = localStorage.getItem("token");
         let user;
-                const decodedToken = jwtDecode(token);
-                user = decodedToken.user;
-
-
-    
+        const decodedToken = jwtDecode(token);
+        user = decodedToken.user;
+      
         try {
-            // Send the request to assign leads
-            const response = await axios.post('/leadAssignment/assign', {
-                leadIds: selectedLeads,
-                assignedToUserId: assignedTo,
-                assignedBy: user.id
-            });
-    
-            if (response.status === 200) {
-                // Update local leads state after successful assignment
-                setLeads(prevLeads =>
-                    prevLeads.map(lead =>
-                        selectedLeads.includes(lead.id) ? { ...lead, assignedTo: response.data.assignedTo.name } : lead
-                    )
-                );
-                setSelectedLeads([]);
-            } else {
-                console.error('Failed to assign leads:', response.data.error || 'Unknown error');
-            }
+          const updateLeadIds = Array.isArray(selectedLeads) ? selectedLeads : [selectedLeads];
+          const [assignResponse, leadUpdateResponse] = await Promise.all([
+            axios.post("/leadAssignment/assign", {
+              leadIds: updateLeadIds,
+              assignedToUserId: assignedTo,
+              assignedBy: user.id,
+            }),
+            // axios.put("/lead/updateLeads", {
+            //   leadIds: updateLeadIds,
+            //   assignedTo: assignedTo,
+            // }),
+          ]);   
+           console.log(assignResponse, leadUpdateResponse,"assignResponse, leadUpdateResponse")
+          if (assignResponse.status === 200 || leadUpdateResponse.status === 200) {
+            setLeads((prevLeads) =>
+              prevLeads.map((lead) =>
+                selectedLeads.includes(lead.id)
+                  ? { ...lead, assignedTo: assignResponse.data.assignedTo.name }
+                  : lead
+              )
+            );
+            setSelectedLeads([]);
+          } else {
+            console.error(
+              "Failed to assign leads:",
+              assignResponse.data.error || "Unknown error"
+            );
+          }
         } catch (error) {
-            console.error('Error assigning leads:', error.message || 'Unknown error');
+          console.error("Error assigning leads:", error.message || "Unknown error");
         }
-    };
+      };
+      
+
+
+  
+    //   const handleFileUpload = async (e) => {
+    //     const file = e.target.files[0];
+    //     const reader = new FileReader();
     
-    // Handles file upload and processes data
-    const handleFileUpload = (e) => {
+    //     reader.onload = async (event) => {
+    //         try {
+    //             const data = new Uint8Array(event.target.result);
+    //             const workbook = XLSX.read(data, { type: 'array' });
+    //             const sheetName = workbook.SheetNames[0];
+    //             const worksheet = workbook.Sheets[sheetName];
+    
+    //             const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    //             console.log(jsonData, "jsonDatas");
+    
+    //             // Map JSON data to lead format based on your Excel file
+    //             const importedLeads = jsonData.map((item, index) => ({
+    //                 id: leads.length + index + 1,
+    //                 name: item.Name || 'N/A',  // Use the exact column name 'Name'
+    //                 email: item.Email || 'N/A',
+    //                 status: item.Status || 'N/A',
+    //                 leadSource: item.Source || 'N/A', 
+    //                 phone: item.mobile || 'N/A', 
+    //                 dob: item.dob || 'N/A',
+    //                 company: item.company || 'N/A',
+    //                 assignedDate: new Date().toISOString().split('T')[0],
+    //                 gender: item.gender || 'N/A', 
+    //                 city: item.city || 'N/A',
+    //                 country: item.country || 'N/A',
+    //                 tags: item.tags || 'N/A',
+    //                 leadOwner: item.leadOwner || 'N/A',
+    //                 assignedTo: item.assignedTo || 'N/A',
+    //                 dateImported: new Date().toISOString(),
+    //             }));
+    
+    //             console.log(importedLeads,"importedLeads")
+    //             const batchSize = 200;
+    //             for (let i = 0; i < importedLeads.length; i += batchSize) {
+    //                 const batch = importedLeads.slice(i, i + batchSize);
+    //                 try {
+    //                     const response = await axios.post(`/lead/bulk`, batch);
+    //                     console.log('Leads imported successfully:', response.data);
+    //                 } catch (err) {
+    //                     console.error('Error importing leads batch:', err);
+    //                 }
+    //             }
+    
+    //             // Update state with the imported leads
+    //             setLeads(prevLeads => [...prevLeads, ...importedLeads]);
+    //         } catch (err) {
+    //             console.error('Error processing the file:', err);
+    //         }
+    //     };
+    
+    //     reader.readAsArrayBuffer(file);
+    // };
+    const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
-
-        reader.onload = (event) => {
-            try {
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                const importedLeads = jsonData.map((item, index) => ({
-                    id: leads.length + index + 1, // Generate a unique ID
-                    name: item.name || item.Name || item.firstname + item.lastname || 'N/A',
-                    email: item.email || item.Email || 'N/A',
-                    status: item.status || item.Status || 'N/A',
-                    source: item.source || item.Source || item.leadSource||'N/A',
-                    phone: item.mobile || item.Mobile || item.Age || 'N/A',
-                    dob: item.dob || item.dateOfBirth || item.dateofBirth || 'N/A',
-                    company: item.company || item.organization || item.firm || 'N/A',
-                    assignedDate: item.AssignedDate || item.Date || new Date().toISOString().split('T')[0] || 'N/A',
-                    gender: item.Gender || item.gender || 'N/A',
-                    city: item.city || item.City || 'N/A',
-                    country: item.country || item.Country || 'N/A',
-                    tags: item.tags || item.Tags || item.tag || 'N/A',
-                    leadOwner: item.leadOwner || item.LeadOwner || 'N/A',
-                    leadSource: item.leadSource || item.LeadSource || 'N/A',
-                    assignedTo: item.assignedTo || 'N/A',
-                }));
-
-                setLeads(prevLeads => [...prevLeads, ...importedLeads]);
-            } catch (err) {
-                console.error('Error processing the file:', err);
+      
+        reader.onload = async (event) => {
+          try {
+            const data = new Uint8Array(event.target.result);
+            console.log(data,"excel sheet")
+            const workbook = XLSX.read(data, { type: 'array' });
+            console.log(workbook.Sheets[0],"workbook")
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          console.log(jsonData[0],"jsonData")
+          const importedLeads = jsonData.map((item, index) => ({
+            name: Object.keys(item).find(key => key.toLowerCase().includes('name')) 
+                  ? item[Object.keys(item).find(key => key.toLowerCase().includes('name'))] 
+                  : 'N/A',
+            
+            email: Object.keys(item).find(key => key.toLowerCase().includes('email')) 
+                  ? item[Object.keys(item).find(key => key.toLowerCase().includes('email'))] 
+                  : 'N/A',
+            
+                  leadSource: Object.keys(item).find(key => key.toLowerCase().includes('source')) 
+                  ? item[Object.keys(item).find(key => key.toLowerCase().includes('source'))] 
+                  : '',
+            
+            phone: Object.keys(item).find(key => key.toLowerCase().includes('mobile') || key.toLowerCase().includes('phone')) 
+                  ? item[Object.keys(item).find(key => key.toLowerCase().includes('mobile') || key.toLowerCase().includes('phone'))] 
+                  : 'N/A',
+                phone: item.mobile || 'N/A', 
+                dob: item.dob || 'N/A', 
+                company: item.company || 'N/A', 
+                assignedDate: new Date().toISOString().split('T')[0],
+                gender: item.gender || 'N/A',
+                city: item.city || 'N/A',
+                country: item.country || 'N/A',
+                tags: item.tags || 'N/A',
+                leadOwner: item.leadOwner || 'N/A',
+                assignedTo: item.assignedTo || 'N/A',
+                dateImported: new Date().toISOString(),
+          }));
+          
+      
+            const batchSize = 200;
+            for (let i = 0; i < importedLeads.length; i += batchSize) {
+              const batch = importedLeads.slice(i, i + batchSize);
+      
+              try {
+                const response = await axios.post(`/lead/bulk`, batch);
+                console.log('Leads imported successfully:', response.data);
+              } catch (err) {
+                console.error('Error importing leads batch:', err);
+              }
             }
+      
+            setLeads(prevLeads => [...prevLeads, ...importedLeads]);
+          } catch (err) {
+            console.error('Error processing the file:', err);
+          }
         };
-
+      
         reader.readAsArrayBuffer(file);
-    };
+      };
+      
 
     const handleViewLead = (lead) => {
         navigate('/lead-details', { state: { lead } });
     };
-
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
     const handleRevertAssignments = () => {
         setLeads(leads.map(lead =>
             selectedLeads.includes(lead.id) ? { ...lead, assignedTo: null } : lead
@@ -161,24 +260,53 @@ const LeadList = () => {
         setSelectedLeads([]);
     };
 
+    // const handleCheckboxChange = (id) => {
+    //     setSelectedLeads(prevSelected =>
+    //         prevSelected.includes(id)
+    //             ? prevSelected.filter(leadId => leadId !== id)
+    //             : [...prevSelected, id]
+    //     );
+    // };
     const handleCheckboxChange = (id) => {
-        setSelectedLeads(prevSelected =>
-            prevSelected.includes(id)
-                ? prevSelected.filter(leadId => leadId !== id)
-                : [...prevSelected, id]
-        );
+        if (currentRecords.some(lead => lead.id === id)) {
+            setSelectedLeads(prevSelected =>
+                prevSelected.includes(id)
+                    ? prevSelected.filter(leadId => leadId !== id)
+                    : [...prevSelected, id]
+            );
+        }
     };
-
+    
+      useEffect(() => {
+        const initialSelected = localStorage.getItem('selectedLeads');
+        if (initialSelected) {
+            try {
+                const parsedSelectedLeads = JSON.parse(initialSelected);
+                // Ensure the parsed data is an array and filter out invalid IDs
+                const validSelectedLeads = Array.isArray(parsedSelectedLeads) 
+                    ? parsedSelectedLeads.filter(id => leads.some(lead => lead.id === id))
+                    : [];
+                setSelectedLeads(validSelectedLeads);
+            } catch (error) {
+                console.error('Error parsing selected leads from localStorage:', error);
+                setSelectedLeads([]);
+            }
+        } else {
+            setSelectedLeads([]);
+        }
+    }, [leads]);
+    
+ 
     const handleSelectAll = (e) => {
         const isChecked = e.target.checked;
         setSelectAll(isChecked);
         if (isChecked) {
-            setSelectedLeads(leads.map(lead => lead.id));
+            setSelectedLeads(currentRecords.map(lead => lead.id)); // Select only current page leads
         } else {
             setSelectedLeads([]);
         }
     };
-
+    
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prevFilters => ({
@@ -186,54 +314,20 @@ const LeadList = () => {
             [name]: value
         }));
     };
-
-    const parseDate = (dateString) => {
-        if (!dateString || typeof dateString !== 'string') {
-            return null; // Return null for invalid inputs
-        }
-    
-        const parts = dateString.split('/');
-        if (parts.length !== 3) {
-            return null; // Return null for incorrect formats   
-        }
-    
-        const [day, month, year] = parts.map(part => parseInt(part, 10));
-        if (isNaN(day) || isNaN(month) || isNaN(year)) {
-            return null; // Return null for invalid date components
-        }
-    
-        // Check if the date is valid
-        const date = new Date(year, month - 1, day);
-        if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-            return null; // Return null for invalid dates
-        }
-    
-        return date;
-    };
-    
-
-    
-    
-    const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
-
-    
+  
     const filteredLeads = leads.filter(lead => {
-        const formattedAssignedDate = isValidDate(lead.assignedDate) 
-            ? parseDate(lead.assignedDate).toISOString().split('T')[0] 
-            : '';
-    
+        const formattedDate = lead.dateImported ? moment(lead.dateImported).format('YYYY-MM-DD') : '';
         return (
             (filters.name ? lead.name.toLowerCase().includes(filters.name.toLowerCase()) : true) &&
-            (filters.date ? formattedAssignedDate === filters.date : true) &&
+            (filters.date ? formattedDate === filters.date : true) &&
             (filters.id ? lead.id.toString() === filters.id : true) &&
-            (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true)
+            (filters.status ? lead.status.toLowerCase().includes(filters.status.toLowerCase()) : true) &&
+            (filters.phone ? lead.phone.includes(filters.phone) : true) &&
+            (filters.email ? lead.email.toLowerCase().includes(filters.email.toLowerCase()) : true)
         );
     });
-
-    // Sorting function to push inactive leads to the end
     const sortLeads = (leadsList) => {
         return leadsList.sort((a, b) => {
-            // Check if status is a valid string, default to empty string if not
             const statusA = a.status ? a.status.toLowerCase() : '';
             const statusB = b.status ? b.status.toLowerCase() : '';
     
@@ -247,11 +341,26 @@ const LeadList = () => {
             return 0;
         });
     };
-    
-
     const sortedLeads = sortLeads(filteredLeads);
 
+    const indexOfLastRecord = currentPage * recordsPerPage;
+    const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+    const currentRecords = sortedLeads.slice(indexOfFirstRecord, indexOfLastRecord);
+
+    const totalPages = Math.ceil(sortedLeads.length / recordsPerPage);
+    const pageNumbers = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+        if (i <= maxPageNumbers || (i > maxPageNumbers && i === totalPages) || (i >= currentPage - Math.floor(maxPageNumbers / 2) && i <= currentPage + Math.floor(maxPageNumbers / 2))) {
+            pageNumbers.push(i);
+        } else if (i === currentPage - Math.floor(maxPageNumbers / 2) - 1 || i === currentPage + Math.floor(maxPageNumbers / 2) + 1) {
+            pageNumbers.push('...');
+        }
+    }
+
     return (
+        <>
+        <AdminSidebar/>
         <div className="global-container">
             <div className="container">
                 <h1 className="text-left">Lead List</h1>
@@ -299,6 +408,27 @@ const LeadList = () => {
                                     onChange={handleFilterChange}
                                 />
                             </div>
+                            <p>&nbsp;</p>
+                            <div className="col-md-3">
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    className="form-control"
+                                    placeholder="Filter by Phone"
+                                    value={filters.phone}
+                                    onChange={handleFilterChange}
+                                />
+                            </div>
+                            <div className="col-md-3">
+                                <input
+                                    type="text"
+                                    name="email"
+                                    className="form-control"
+                                    placeholder="Filter by Email"
+                                    value={filters.email}
+                                    onChange={handleFilterChange}
+                                />
+                            </div>
                         </div>
                     </div>
                     {/* Bulk Actions Section */}
@@ -315,7 +445,7 @@ const LeadList = () => {
                                 ))}
                             </select>
                             <button
-                                className="btn btn-danger"
+                                className="btn btn-primary btn-sm"
                                 onClick={handleRevertAssignments}
                                 disabled={selectedLeads.length === 0}
                             >
@@ -373,14 +503,14 @@ const LeadList = () => {
                                 <th>Gender</th>
                                 <th>Status</th>
                                 <th>Lead Source</th>
-                                <th>Lead Owner</th>
+                                {/* <th>Lead Owner</th> */}
                                 <th>Imported On</th>
                                 <th>Assigned To</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedLeads.map((lead) => (
+                            {currentRecords.map((lead) => (
                                 <tr key={lead.id}>
                                     <td>
                                         <input
@@ -395,13 +525,13 @@ const LeadList = () => {
                                     <td>{lead.phone}</td>
                                     <td>{lead.gender}</td>
                                     <td>{lead.status}</td>
-                                    <td>{lead.leadSource}</td>
-                                    <td>{lead.leadOwner}</td>
+                                    <td>{lead.leadSource ||lead.Source || "NA"}</td>
+                                    {/* <td>{lead.leadOwner}</td> */}
                                  <td>{moment(lead.dateImported).format(" DD MMM, YYYY    ")}</td>
-                                    <td>{lead.assignedTo || "Not Assigned"}</td>
+                                    <td>{employees.id || "Not Assigned"}</td>
                                     <td>
                                         <button
-                                            className="btn btn-light btn-sm"
+                                            className="btn btn-primary btn-sm"
                                             onClick={() => handleViewLead(lead)}
                                         >
                                            <i className='fa fa-eye'/>
@@ -417,9 +547,29 @@ const LeadList = () => {
                             ))}
                         </tbody>
                     </table>
+                
                 </div>
+                <nav aria-label="Page navigation">
+                        <ul className="pagination">
+                            {pageNumbers.map((number, index) => (
+                                <li key={index} className={`page-item ${number === currentPage ? 'active' : ''}`}>
+                                    {number === '...' ? (
+                                        <span className="touchable-global">{number}</span>
+                                    ) : (
+                                        <button 
+                                            className="touchable-global" 
+                                            onClick={() => handlePageChange(number)}
+                                        >
+                                            {number}
+                                        </button>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
             </div>
         </div>
+        </>
     );
 };
 

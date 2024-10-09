@@ -464,7 +464,7 @@ const LeadList = () => {
                   <p>&nbsp;</p> */}
 
     <DatePicker
-      className="dropdownInTable"
+      className="datePicker"
       showTimeSelect
       dateFormat="Pp"
       selected={followUpDate ? new Date(followUpDate) : null}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect ,useMemo} from 'react';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import axios from './../../components/axios';
+import ManagerSidebar from '../../components/Sidebar/ManagerSidebar';
 export default function Settings() {
     const [formData, setFormData] = useState({
         name: '',
@@ -92,6 +93,8 @@ export default function Settings() {
     };
 
     return (
+        <>
+        <ManagerSidebar/>
         <div className='global-container'>
             <Container className="my-5">
                 <h2 className="text-center mb-4">Settings</h2>
@@ -209,5 +212,6 @@ export default function Settings() {
                 </Form>
             </Container>
         </div>
+        </>
     );
 }

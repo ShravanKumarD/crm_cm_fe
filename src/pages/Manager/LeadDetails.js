@@ -4,6 +4,7 @@ import { Form } from "react-bootstrap";
 import axios from "./../../components/axios";
 import { useNavigate } from "react-router-dom";
 import "./../../App.css";
+import ManagerSidebar from "../../components/Sidebar/ManagerSidebar";
 
 const LeadDetail = () => {
   const location = useLocation();
@@ -330,6 +331,8 @@ const LeadDetail = () => {
   };
 
   return (
+    <>
+    <ManagerSidebar/>
     <div className="global-container row">
       {/* <div className='col-sm-2'></div> */}
       <div className="col-sm-12">
@@ -353,6 +356,7 @@ const LeadDetail = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

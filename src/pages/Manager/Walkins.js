@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./../../App.css";
 import { useAuth } from './../../context/AuthContext';
+import ManagerSidebar from "../../components/Sidebar/ManagerSidebar";
 
 const Walkins = () => {
   const [leads, setLeads] = useState([]);
@@ -15,6 +16,7 @@ const Walkins = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState({ leadId: null, taskType: "", followUpDate: null });
   const [searchTerm, setSearchTerm] = useState(""); 
+  const [note,setNote]=useState("")
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user")) || {};
 
@@ -137,6 +139,8 @@ const Walkins = () => {
   );
 
   return (
+    <>
+    <ManagerSidebar/>
     <div className="global-container">
       <div className="container">
         <br />
@@ -164,7 +168,10 @@ const Walkins = () => {
                 <th>Lead Source</th>
                 <th>Status</th>
                 <th>Task Type</th>
+                <th>Login Date</th>
+                <th>Closing Date</th>
                 <th>Follow up date</th>
+                <th>Note</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -195,25 +202,58 @@ const Walkins = () => {
                       <option value="okay for the policy">Okay For the Policy</option>
                       <option value="not okay for the policy">Not Okay for the Policy</option>
                       <option value="think and get back">Think and get back</option>
-                      <option value="not possible">Not Possible</option>
+                      <option value="notPossible">Not Possible</option>
+                      <option value="processCompleted">Completed</option>
                     </Form.Select>
                   </td>
                   <td>
-                    <DatePicker
-                      className="dropdownInTable"
+                  <DatePicker
+                      className="touchable-global"
                       selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
-                      onChange={(date) => handleFollowUpDateChange(lead.id, date)}
+                      // onChange={(date) => handleFollowUpDateChange(lead.id, date)}
+                      placeholderText="select date"
                       showTimeSelect
                       dateFormat="dd-MM-yyyy HH:mm"
                       minDate={today}
                     />
                   </td>
                   <td>
+                  <DatePicker
+                      className="touchable-global"
+                      selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
+                      // onChange={(date) => handleFollowUpDateChange(lead.id, date)}
+                        placeholderText="select date"
+                      showTimeSelect
+                      dateFormat="dd-MM-yyyy HH:mm"
+                      minDate={today}
+                    />
+                  </td>
+                  <td>
+                    <DatePicker
+                      className="touchable-global"
+                      selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
+                      onChange={(date) => handleFollowUpDateChange(lead.id, date)}
+                        placeholderText="select date"
+                      showTimeSelect
+                      dateFormat="dd-MM-yyyy HH:mm"
+                      minDate={today}
+                    />
+                  </td>
+                  <td>
+                  <Form.Control
+        as="textarea"
+        rows={3}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Write here..."
+      />
+                  </td>
+                  <td>
                     <button
                       className="btn btn-primary btn-sm"
                       onClick={() => openModal(lead.id)}
                     >
-                      Update Task
+                      Update
                     </button>
                     <button
                       className="btn btn-secondary btn-sm"
@@ -248,6 +288,7 @@ const Walkins = () => {
         </Modal>
       </div>
     </div>
+    </>
   );
 };
 

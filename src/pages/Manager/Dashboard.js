@@ -13,10 +13,10 @@ import axios from "axios";
 import "./Dashboard.css";
 import "./../../App.css";
 import { Chart, ArcElement } from "chart.js";
+import ManagerSidebar from "../../components/Sidebar/ManagerSidebar";
 
 const Dashboard = () => {
   const [leadsData, setLeadsData] = useState([]);
-  const [employees, setEmployees] = useState([]);
   const [error, setError] = useState(null);
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -46,19 +46,8 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    fetchEmployee();
     fetchTasks();
   }, []);
-
-  const fetchEmployee = async () => {
-    try {
-      const response = await axios.get(`/user/${user.id}`);
-      setEmployees(response.data);
-    } catch (err) {
-      console.error("Failed to fetch employees:", err.message);
-      setError("Failed to fetch employees.");
-    }
-  };
   const fetchTasks = async () => {
     try {
       const response = await axios.get("/task/");
@@ -98,6 +87,8 @@ const Dashboard = () => {
   }).length;
 
   return (
+    <>
+    <ManagerSidebar/>
     <div className="global-container">
       <div className="container">
         <Row>
@@ -191,6 +182,7 @@ const Dashboard = () => {
         </Row>
       </div>
     </div>
+    </>
   );
 };
 

@@ -102,10 +102,13 @@ p{
   font-family: Poppins;
 }
 .dropdownInTable{
-  margin-right: 0px;
-  padding-right:0px ;
+  /* background-color: transparent; */
+  /* border-color: transparent; */
   font-family: Poppins;
   font-size: 11.50px;
+}
+.datePicker{
+  
 }
 .table th {
   background-color: #f4f4f4;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from './../../components/axios';
 import { Modal, Button } from 'react-bootstrap';
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
 
 export default function EmployeeAdd() {
     // State to manage form field values
@@ -52,6 +53,8 @@ export default function EmployeeAdd() {
     
 
     return (
+        <>
+        <AdminSidebar/>
       <div className="global-container">
         <div className="container my-5">
             <h2 className="text-center mb-4">Add Employee</h2>
@@ -243,6 +246,7 @@ export default function EmployeeAdd() {
             </Modal>
         </div>
         </div>
+        </>
 
     );
 }

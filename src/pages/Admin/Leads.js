@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Modal, Button, Alert } from 'react-bootstrap'; 
 import * as XLSX from 'xlsx';
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
+import ManagerSidebar from '../../components/Sidebar/ManagerSidebar';
 
 export default function Leads() {
     const [showModal, setShowModal] = useState(false);
@@ -91,6 +93,8 @@ export default function Leads() {
     };
 
     return (
+        <>
+        <AdminSidebar/>
         <div className="global-container">
             <div className='container'>
                 <p>&nbsp;</p>
@@ -128,5 +132,6 @@ export default function Leads() {
                 <p>&nbsp;</p>
             </div>
         </div>
+        </>
     );
 }

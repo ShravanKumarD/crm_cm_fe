@@ -6,13 +6,14 @@ import "./../../App.css";
 import DatePicker from "react-datepicker";
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
+import ManagerSidebar from "../../components/Sidebar/ManagerSidebar";
 
 
 export default function TaskForm({ leadData }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { lead } = location.state || leadData || {};
-
+  const user = JSON.parse(localStorage.getItem("user")) || {};
   const [task, setTask] = useState({
     description: "",
     status: "",
@@ -57,7 +58,7 @@ export default function TaskForm({ leadData }) {
 
   const [data, setData] = useState({ loanReports: [], creditReports: [] });
   const [loading, setLoading] = useState(true);
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -298,6 +299,8 @@ export default function TaskForm({ leadData }) {
   };
 
   return (
+    <>
+    <ManagerSidebar/>
     <div className="global-container">
       <div className="container mt-5">
         <h2 className="mb-4 text-center">Activity</h2>
@@ -434,7 +437,8 @@ export default function TaskForm({ leadData }) {
         <Form.Group controlId="formFollowup">
        
           <DatePicker
-            // className="dropdownInTable"
+            className="touchable-global"
+            placeholderText="please select"
             showTimeSelect
             dateFormat="Pp"
             name="followUp"
@@ -703,5 +707,6 @@ export default function TaskForm({ leadData }) {
         </Form>
       </div>
     </div>
+    </>
   );
 }

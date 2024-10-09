@@ -447,8 +447,9 @@ const LeadList = () => {
                   <p>&nbsp;</p>
 
     <DatePicker
-      className="dropdownInTable"
+      className="touchable-global"
       showTimeSelect
+      placeholderText="please select"
       dateFormat="Pp"
       selected={followUpDate ? new Date(followUpDate) : null}
       onChange={(date) => setFollowUpDate(date)}

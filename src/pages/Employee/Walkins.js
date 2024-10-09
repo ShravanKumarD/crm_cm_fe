@@ -187,7 +187,8 @@ const Walkins = () => {
                   </td>
                   <td>
                     <DatePicker
-                      className="dropdownInTable"
+                      className="touchable-global"
+                      placeholderText="please select"
                       selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
                       onChange={(date) => handleFollowUpDateChange(lead.id, date)}
                       showTimeSelect

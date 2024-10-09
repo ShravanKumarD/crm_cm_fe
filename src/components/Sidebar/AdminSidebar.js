@@ -5,27 +5,27 @@ import "./Sidebar.css";
 import logo from "./../../assets/samcint_logo_2.png"
 
 const AdminSidebar = ({}) => {
-  const [employee, setEmployee] = useState(null); 
+  // const [employee, setEmployee] = useState(null); 
   const [error, setError] = useState('');
   const user = JSON.parse(localStorage.getItem('user'));
 
-  useEffect(() => {
-    if (user && user.id) {  
-      fetchEmployee();
-    } else {
-      setError('User not found. Please log in.');
-    }
-  }, [user]);
+// useEffect(() => {
+  //   if (user && user.id) {  
+  //     fetchEmployee();
+  //   } else {
+  //     setError('User not found. Please log in.');
+  //   }
+  // }, [user]);
 
-  const fetchEmployee = async () => {
-    try {
-      const response = await axios.get(`/user/${user.id}`);
-      setEmployee(response.data);
-    } catch (err) {
-      setError('Failed to fetch employee data.');
-      console.error(err);
-    }
-  };
+  // const fetchEmployee = async () => {
+  //   try {
+  //     const response = await axios.get(`/user/${user.id}`);
+  //     setEmployee(response.data);
+  //   } catch (err) {
+  //     setError('Failed to fetch employee data.');
+  //     console.error(err);
+  //   }
+  // };
 
   return (
     <aside className="main-sidebar elevation-4 fixed">
@@ -33,7 +33,7 @@ const AdminSidebar = ({}) => {
         <img className="brand-image" src={logo} alt="Logo" />
         <h2 className="brand-text font-weight-light">
           <i className="nav-icon fas fa-user" style={{ margin: '5px', color: "#6c24248c" }} />
-          {employee ? employee.name.split(' ')[0] : error || "Guest"}
+          {user ? user.name.split(' ')[0] : error || "Guest"}
         </h2>
         <div className="sidebar-scroll">
           <nav className="mt-2">

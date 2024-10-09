@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import EmployeeSidebar from '../../components/Sidebar/EmployeeSidebar';
 
 const UpdateTaskForm = () => {
   const location = useLocation();
@@ -44,6 +45,8 @@ const UpdateTaskForm = () => {
   };
 
   return (
+    <>
+    <EmployeeSidebar/>
     <div className='global-container'>
       <Container>
         <Row className="justify-content-md-center">
@@ -141,6 +144,7 @@ const UpdateTaskForm = () => {
         </Row>
       </Container>
     </div>
+    </>
   );
 };
 

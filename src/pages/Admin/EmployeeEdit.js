@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from './../../components/axios';
 import { useParams } from 'react-router-dom';
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
 
 export default function EmployeeEdit() {
     const { id } = useParams();
@@ -64,6 +65,8 @@ export default function EmployeeEdit() {
     };
 
     return (
+        <>
+        <AdminSidebar/>
         <div className="global-container">
             <div className="container my-5">
                 <h2 className="text-center mb-4">Edit Employee</h2>
@@ -230,5 +233,6 @@ export default function EmployeeEdit() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

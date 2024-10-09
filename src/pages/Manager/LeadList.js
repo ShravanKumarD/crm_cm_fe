@@ -6,6 +6,8 @@ import "./LeadList.css";
 import "./../../App.css";
 import moment from 'moment';
 import {jwtDecode} from 'jwt-decode';
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
+import ManagerSidebar from '../../components/Sidebar/ManagerSidebar';
 
 const LeadList = () => {
     const [leads, setLeads] = useState([]);
@@ -20,7 +22,6 @@ const LeadList = () => {
     });
     const [selectAll, setSelectAll] = useState(false); // State for "Select All"
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user")) || {};
 
     useEffect(() => {
         // Fetch leads data on component mount
@@ -30,7 +31,7 @@ const LeadList = () => {
 
     const fetchLeads = async () => {
         try {
-            const response = await axios.get('/lead/');
+            const response = await axios.get('/lead');
             if (response.status === 200) {
                 setLeads(response.data.leads.map(lead => ({
                     ...lead,
@@ -64,52 +65,6 @@ const LeadList = () => {
             console.error('Error deleting lead:', error.message);
         }
     };
-    // const handleAssignLeads = async (assignedTo) => {
-    //     if (selectedLeads.length === 0) {
-    //         alert('Please select leads to assign.');
-    //         return;
-    //     }
-    //     if (!assignedTo) {
-    //         console.error('No user selected for assignment.');
-    //         return;
-    //     }
-    //     const confirmed = window.confirm(`Are you sure you want to assign the selected leads to this user?`);
-    //     if (!confirmed) {
-    //         return;
-    //     }
-    //     let token = localStorage.getItem('token');
-    //     let user;
-    //             const decodedToken = jwtDecode(token);
-    //             user = decodedToken.user;
-    //     try {
-    //         // Send the request to assign leads
-    //         const response = await axios.post('/leadAssignment/assign', {
-    //             leadIds: selectedLeads,
-    //             assignedToUserId: assignedTo,
-    //             assignedBy: user.id 
-    //         });
-    //         const leadUpdate = await axios.put(`/lead/update-leads`,{
-    //             leadIds: selectedLeads,
-    //             assignedTo:assignedTo,
-    //         })
-    //         if (response.status === 200) {
-    //             // Update local leads state after successful assignment
-    //             setLeads(prevLeads =>
-    //                 prevLeads.map(lead =>
-    //                     selectedLeads.includes(lead.id) ? { ...lead, assignedTo: response.data.assignedTo.name } : lead
-    //                 )
-    //             );
-    //             setSelectedLeads([]);
-    //         } else {
-    //             console.error('Failed to assign leads:', response.data.error || 'Unknown error');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error assigning leads:', error.message || 'Unknown error');
-    //     }
-    // };
-    
-    // Handles file upload and processes data
-    
     const handleAssignLeads = async (assignedTo) => {
         if (selectedLeads.length === 0) {
           alert("Please select leads to assign.");
@@ -127,7 +82,10 @@ const LeadList = () => {
           return;
         }
       
-  
+        let token = localStorage.getItem("token");
+        let user;
+        const decodedToken = jwtDecode(token);
+        user = decodedToken.user;
       
         try {
           const updateLeadIds = Array.isArray(selectedLeads) ? selectedLeads : [selectedLeads];
@@ -142,10 +100,8 @@ const LeadList = () => {
             //   assignedTo: assignedTo,
             // }),
           ]);   
-      
-          // Check if both requests were successful
-          if (assignResponse.status === 200 && leadUpdateResponse.status === 200) {
-            // Update local leads state after successful assignment
+           console.log(assignResponse, leadUpdateResponse,"assignResponse, leadUpdateResponse")
+          if (assignResponse.status === 200 || leadUpdateResponse.status === 200) {
             setLeads((prevLeads) =>
               prevLeads.map((lead) =>
                 selectedLeads.includes(lead.id)
@@ -153,7 +109,7 @@ const LeadList = () => {
                   : lead
               )
             );
-            setSelectedLeads([]); // Clear the selection after assignment
+            setSelectedLeads([]);
           } else {
             console.error(
               "Failed to assign leads:",
@@ -168,24 +124,26 @@ const LeadList = () => {
 
 
   
-    const handleFileUpload = (e) => {
+    const handleFileUpload = async(e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
 
-        reader.onload = (event) => {
+        reader.onload =async (event) => {
             try {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
+               
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                console.log(jsonData,"josnDatas")
                 const importedLeads = jsonData.map((item, index) => ({
                     id: leads.length + index + 1, // Generate a unique ID
                     name: item.name || item.Name || item.firstname + item.lastname || 'N/A',
                     email: item.email || item.Email || 'N/A',
                     status: item.status || item.Status || 'N/A',
-                    source: item.source || item.Source || item.leadSource||'N/A',
-                    phone: item.mobile || item.Mobile || item.Age || 'N/A',
+                    leadSource: item.source || item.Source || item.leadSource||item.source|| item.leadSource || item.LeadSource ||'N/A',
+                    phone: item.mobile || item.Mobile  || 'N/A',
                     dob: item.dob || item.dateOfBirth || item.dateofBirth || 'N/A',
                     company: item.company || item.organization || item.firm || 'N/A',
                     assignedDate: item.AssignedDate || item.Date || new Date().toISOString().split('T')[0] || 'N/A',
@@ -194,11 +152,18 @@ const LeadList = () => {
                     country: item.country || item.Country || 'N/A',
                     tags: item.tags || item.Tags || item.tag || 'N/A',
                     leadOwner: item.leadOwner || item.LeadOwner || 'N/A',
-                    leadSource: item.leadSource || item.LeadSource || 'N/A',
                     assignedTo: item.assignedTo || 'N/A',
                     dateImported: item.dateImported || new Date().toISOString(),
                 }));
-
+                console.log(importedLeads,"importedLeads")
+               await axios.post(`/lead/bulk`, importedLeads)
+                .then(response => {
+                    console.log(response.data);
+                    console.log('Leads imported successfully:', response.data);
+                })
+                .catch(err => {
+                    console.error('Error importing leads:', err);
+                });
                 setLeads(prevLeads => [...prevLeads, ...importedLeads]);
             } catch (err) {
                 console.error('Error processing the file:', err);
@@ -209,7 +174,7 @@ const LeadList = () => {
     };
 
     const handleViewLead = (lead) => {
-        navigate('/manager-lead-details', { state: { lead } });
+        navigate('/lead-details', { state: { lead } });
     };
 
     const handleRevertAssignments = () => {
@@ -244,37 +209,6 @@ const LeadList = () => {
             [name]: value
         }));
     };
-
-    const parseDate = (dateString) => {
-        if (!dateString || typeof dateString !== 'string') {
-            return null; // Return null for invalid inputs
-        }
-    
-        const parts = dateString.split('/');
-        if (parts.length !== 3) {
-            return null; // Return null for incorrect formats   
-        }
-    
-        const [day, month, year] = parts.map(part => parseInt(part, 10));
-        if (isNaN(day) || isNaN(month) || isNaN(year)) {
-            return null; // Return null for invalid date components
-        }
-    
-        // Check if the date is valid
-        const date = new Date(year, month - 1, day);
-        if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-            return null; // Return null for invalid dates
-        }
-    
-        return date;
-    };
-    
-
-    
-    
-    const isValidDate = (date) => date instanceof Date && !isNaN(date.getTime());
-
-  
   
     const filteredLeads = leads.filter(lead => {
         const formattedDate = lead.dateImported ? moment(lead.dateImported).format('YYYY-MM-DD') : '';
@@ -287,10 +221,8 @@ const LeadList = () => {
             (filters.email ? lead.email.toLowerCase().includes(filters.email.toLowerCase()) : true)
         );
     });
-    // Sorting function to push inactive leads to the end
     const sortLeads = (leadsList) => {
         return leadsList.sort((a, b) => {
-            // Check if status is a valid string, default to empty string if not
             const statusA = a.status ? a.status.toLowerCase() : '';
             const statusB = b.status ? b.status.toLowerCase() : '';
     
@@ -309,6 +241,8 @@ const LeadList = () => {
     const sortedLeads = sortLeads(filteredLeads);
 
     return (
+        <>
+        <ManagerSidebar/>
         <div className="global-container">
             <div className="container">
                 <h1 className="text-left">Lead List</h1>
@@ -393,7 +327,7 @@ const LeadList = () => {
                                 ))}
                             </select>
                             <button
-                                className="btn btn-danger"
+                                className="btn btn-primary btn-sm"
                                 onClick={handleRevertAssignments}
                                 disabled={selectedLeads.length === 0}
                             >
@@ -451,7 +385,7 @@ const LeadList = () => {
                                 <th>Gender</th>
                                 <th>Status</th>
                                 <th>Lead Source</th>
-                                <th>Lead Owner</th>
+                                {/* <th>Lead Owner</th> */}
                                 <th>Imported On</th>
                                 <th>Assigned To</th>
                                 <th>Actions</th>
@@ -473,13 +407,13 @@ const LeadList = () => {
                                     <td>{lead.phone}</td>
                                     <td>{lead.gender}</td>
                                     <td>{lead.status}</td>
-                                    <td>{lead.leadSource}</td>
-                                    <td>{lead.leadOwner}</td>
+                                    <td>{lead.leadSource ||lead.Source || "NA"}</td>
+                                    {/* <td>{lead.leadOwner}</td> */}
                                  <td>{moment(lead.dateImported).format(" DD MMM, YYYY    ")}</td>
                                     <td>{lead.assignedTo || "Not Assigned"}</td>
                                     <td>
                                         <button
-                                            className="btn btn-light btn-sm"
+                                            className="btn btn-primary btn-sm"
                                             onClick={() => handleViewLead(lead)}
                                         >
                                            <i className='fa fa-eye'/>
@@ -498,6 +432,7 @@ const LeadList = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

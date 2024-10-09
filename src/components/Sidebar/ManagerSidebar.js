@@ -5,27 +5,27 @@ import "./Sidebar.css";
 import logo from "./../../assets/samcint_logo_2.png"
 
 export default function ManagerSidebar() {
-  const [employee, setEmployee] = useState(null);
+  // const [employee, setEmployee] = useState(null);
   const [error, setError] = useState('');
   const user = JSON.parse(localStorage.getItem('user'));
 
-  useEffect(() => {
-    if (user && user.id) {
-      fetchEmployees();
-    } else {
-      setError('User ID not found.');
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user && user.id) {
+  //     fetchEmployees();
+  //   } else {
+  //     setError('User ID not found.');
+  //   }
+  // }, [user]);
 
-  const fetchEmployees = async () => {
-    try {
-      const response = await axios.get(`/user/${user.id}`);
-      setEmployee(response.data);
-    } catch (err) {
-      setError('Failed to fetch employee data.');
-      console.error(err);
-    }
-  };
+  // const fetchEmployees = async () => {
+  //   try {
+  //     const response = await axios.get(`/user/${user.id}`);
+  //     setEmployee(response.data);
+  //   } catch (err) {
+  //     setError('Failed to fetch employee data.');
+  //     console.error(err);
+  //   }
+  // };
 
   return (
     <aside className="main-sidebar elevation-4 fixed">
@@ -33,7 +33,7 @@ export default function ManagerSidebar() {
       <img className="brand-image" src={logo} alt="Logo" />
       <h2 className="brand-text font-weight-light">
             <i className="nav-icon fas fa-user" style={{margin:'5px'}}/>
-            {employee ? employee.name.split(' ')[0] : "Loading..."}
+            {user ? user.name.split(' ')[0] : "Loading..."}
           </h2>
         <nav className="mt-2">
         <ul className="nav nav-pills nav-sidebar flex-column" role="menu" data-accordion="false">
@@ -48,7 +48,7 @@ export default function ManagerSidebar() {
 
               {/* Leads Link */}
               <li className="nav-item has-treeview">
-                <NavLink to="/leadList" 
+                <NavLink to="/manager-leads" 
                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                 style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
                   <i className="nav-icon fas fa-rocket" style={{ marginRight: "8px" }} />
@@ -56,14 +56,14 @@ export default function ManagerSidebar() {
                 </NavLink>
               </li>
              
-              <li className="nav-item has-treeview">
+              {/* <li className="nav-item has-treeview">
                 <NavLink to="/manager-leads" 
                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                 style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
                   <i className="nav-icon fas fa-user" style={{ marginRight: "8px" }} />
                   <p>My Leads</p>
                 </NavLink>
-              </li>
+              </li> */}
               {/* Walkins */}
               <li className="nav-item has-treeview">
                 <NavLink to="/walkins-list-manager" 

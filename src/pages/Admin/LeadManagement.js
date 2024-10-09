@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from './../../components/axios'; 
 import { Modal, Button, Alert } from 'react-bootstrap'; 
+import AdminSidebar from '../../components/Sidebar/AdminSidebar';
 
 let user;
 export default function LeadManagement() {
@@ -11,11 +12,11 @@ export default function LeadManagement() {
     const [adminId, setAdminId] = useState();
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedLeads, setSelectedLeads] = useState(new Set()); // State to keep track of selected leads
-    const [showConfirmModal, setShowConfirmModal] = useState(false); // State for modal
-    const [leadToRevert, setLeadToRevert] = useState(null); // Store the lead ID to revert
+    const [selectedLeads, setSelectedLeads] = useState(new Set());
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [leadToRevert, setLeadToRevert] = useState(null);
 
-    const recordsPerPage = 10;
+    const recordsPerPage = 20;
     const maxPageNumbers = 5;
 
     useEffect(() => {
@@ -78,7 +79,7 @@ export default function LeadManagement() {
                 await axios.delete(`/leadAssignment/revertlead/${id}`);
             }
             fetchLeadAssignmentList();
-            setSelectedLeads(new Set()); // Clear selected leads after reverting
+            setSelectedLeads(new Set());
         } catch (err) {
             setError('Failed to revert lead assignments.');
             console.error(err);
@@ -116,21 +117,21 @@ export default function LeadManagement() {
     };
 
     const handleRevertClick = (id) => {
-        setLeadToRevert(id); // Store the lead ID
-        setShowConfirmModal(true); // Show confirmation modal
+        setLeadToRevert(id); 
+        setShowConfirmModal(true);
     };
 
     const handleConfirmRevert = async () => {
         if (leadToRevert) {
             await revertLeadAssigned(leadToRevert);
-            setShowConfirmModal(false); // Hide modal
-            setLeadToRevert(null); // Clear lead to revert
+            setShowConfirmModal(false); 
+            setLeadToRevert(null); 
         }
     };
 
     const handleCloseModal = () => {
         setShowConfirmModal(false);
-        setLeadToRevert(null); // Clear lead to revert if modal is closed
+        setLeadToRevert(null);
     };
 
     const filteredAssignments = leadAssignments.filter(assignment => {
@@ -161,6 +162,8 @@ export default function LeadManagement() {
     }
 
     return (
+        <>
+        <AdminSidebar/>
         <div className='global-container'>
             <div className="container">
                 <div className="lead-assignment">
@@ -260,5 +263,6 @@ export default function LeadManagement() {
                 </Modal.Footer>
             </Modal>
         </div>
+        </>
     );
 }

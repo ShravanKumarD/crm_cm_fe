@@ -6,6 +6,7 @@ import "./../../App.css";
 import DatePicker from "react-datepicker";
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
+import EmployeeSidebar from "../../components/Sidebar/EmployeeSidebar";
 
 
 export default function TaskForm({ leadData }) {
@@ -299,6 +300,8 @@ export default function TaskForm({ leadData }) {
   };
 
   return (
+    <>
+    <EmployeeSidebar/>
     <div className="global-container">
       <div className="container mt-5">
         <h2 className="mb-4 text-center">Activity</h2>
@@ -435,7 +438,7 @@ export default function TaskForm({ leadData }) {
         <Form.Group controlId="formFollowup">
        
           <DatePicker
-            // className="dropdownInTable"
+            className="touchable-global"
             showTimeSelect
             dateFormat="Pp"
             name="followUp"
@@ -705,5 +708,6 @@ export default function TaskForm({ leadData }) {
         </Form>
       </div>
     </div>
+    </>
   );
 }

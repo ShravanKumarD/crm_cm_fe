@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Table, Form, Button, Container, Row, Col, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import EmployeeSidebar from '../../components/Sidebar/EmployeeSidebar';
 
 export default function ScheduledTasks() {
     const [search, setSearch] = useState('');
@@ -50,6 +51,8 @@ export default function ScheduledTasks() {
     };
 
     return (
+        <>
+        <EmployeeSidebar/>
         <div className='global-container'>
             <Container>
                 <Row className="mb-4">
@@ -109,5 +112,6 @@ export default function ScheduledTasks() {
                 </Table>
             </Container>
         </div>
+        </>
     );
 }

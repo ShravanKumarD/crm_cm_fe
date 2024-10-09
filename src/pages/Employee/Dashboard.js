@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [walkins,setWalkins]=useState([]);
   const [totalLeads, setTotalLeads] = useState(0);
   const [completedTasks, setCompletedTasks] = useState(0);
   const [upcomingMeetings, setUpcomingMeetings] = useState(0);
@@ -69,6 +70,8 @@ const Dashboard = () => {
     try {
       const response = await axios.get("/task/");
       const filteredTasks = response.data.filter(task => task.userId === user.id);
+      console.log(filteredTasks,"filteredTasks")
+      setWalkins(filteredTasks.filter(task => task.status ==="customer walkin"))
       setTasks(filteredTasks.filter(task => task.status !== "Completed"));
       setCompletedTasks(filteredTasks.filter(task => task.status === "Completed").length);
       setUpcomingMeetings(filteredTasks.filter(task => task.status === "Walk-ins").length);
@@ -120,6 +123,10 @@ const Dashboard = () => {
   const handleAddTask = () => {
     navigate("/add-task-employee", { state: { leads } });
   };
+  const isFollowUpPast = (followUpDate) => {
+    const today = new Date();
+    return new Date(followUpDate) < today;
+  };
   return (
     <>
     <EmployeeSidebar/>
@@ -168,10 +175,79 @@ const Dashboard = () => {
               </Card.Body>
             </div>
           </Col>
-
-          <Col md={8} className="mb-4">
+         <Col md={8}>
+        <div> 
+        <h2 className="text-center">Walkins</h2>
+        {/* walkins */}
+        <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>Lead</th>
+                      <th>Phone</th>
+                      <th>Follow-up Date</th>
+                      <th>Note</th>
+                      <th>Lead Status</th>
+                      <th>Task Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {walkins.slice(0, 3).map(task => (
+                      <tr key={task.id}>
+                        
+                        <td>
+        {isFollowUpPast(task.followUp) && <div className="blinking-light"></div>}
+        {task.lead.name}
+      </td>
+                        <td>{task.lead.phone}</td>
+                        <td>
+                          {task.followUp
+                            ? new Date(task.followUp).toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })
+                            : "N/A"}
+                        </td>
+                        <td>{task.description}</td>
+                        <td>{task.lead.status || "N/A"}</td>  
+                        <td>
+                          <Form.Control
+                            as="select"
+                            value={task.status}
+                            onChange={e => handleTaskStatusChange(task.id, e.target.value)}
+                            className="dropdownText"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                          </Form.Control>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+        </div>
+         </Col>
+          <Col md={4} className="mb-4">
             <Card className="dashboard-card">
               <Card.Body>
+              <h2 className="text-center">Quick Actions</h2>
+                <ul className="quick-actions">
+                  <li>
+                    <Button variant="primary" onClick={handleAddTask}>
+                      Create New Task
+                    </Button>
+                  </li>
+                </ul>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        <Row>
+        <Col md={8} className="mb-4">
+              <div>
                 <h2 className="text-center">Recent Tasks</h2>
                 <Table striped bordered hover>
                   <thead>
@@ -266,23 +342,7 @@ const Dashboard = () => {
                     </tbody>
                   </Table>
                 )}
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col md={4} className="mb-4">
-            <Card className="dashboard-card">
-              <Card.Body>
-              <h2 className="text-center">Quick Actions</h2>
-                <ul className="quick-actions">
-                  <li>
-                    <Button variant="primary" onClick={handleAddTask}>
-                      Create New Task
-                    </Button>
-                  </li>
-                </ul>
-              </Card.Body>
-            </Card>
+              </div>
           </Col>
         </Row>
       </div>
