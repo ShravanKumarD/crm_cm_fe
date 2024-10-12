@@ -16,14 +16,17 @@ const Dashboard = () => {
   const [completedTasks, setCompletedTasks] = useState(0);
   const [upcomingMeetings, setUpcomingMeetings] = useState(0);
   const [leadsByDay, setLeadsByDay] = useState({});
-  const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
   const [leadsAssignedToday, setLeadsAssignedToday] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const user = JSON.parse(localStorage.getItem("user"));
-
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+ const [user,setUser]=useState('');
+  console.log(user,"user in emp dash")
 
   useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    setUser(userData)
     if (user) {
       fetchAssignedLeads();
       fetchEmployee();
@@ -57,7 +60,6 @@ const Dashboard = () => {
   const fetchLeads = async () => {
     try {
       const response = await axios.get("/lead");
-      console.log(response.data,"res")
       if (response.status === 200) {
         setLeads(response.data.leads)
       }
@@ -70,7 +72,6 @@ const Dashboard = () => {
     try {
       const response = await axios.get("/task/");
       const filteredTasks = response.data.filter(task => task.userId === user.id);
-      console.log(filteredTasks,"filteredTasks")
       setWalkins(filteredTasks.filter(task => task.status ==="customer walkin"))
       setTasks(filteredTasks.filter(task => task.status !== "Completed"));
       setCompletedTasks(filteredTasks.filter(task => task.status === "Completed").length);
@@ -80,7 +81,7 @@ const Dashboard = () => {
       setError("Failed to fetch tasks.");
     }
   };
-
+  const todayDate = new Date().toISOString().split("T")[0];
   const fetchAssignedLeads = async () => {
     try {
       const response = await axios.get(`/leadAssignment/user-leads/${user.id}`);
@@ -89,7 +90,7 @@ const Dashboard = () => {
         const today = new Date().toISOString().split("T")[0];
         const assignedToday = response.data.leads.filter(lead => {
           const assignedDate = new Date(lead.assignedDate).toISOString().split("T")[0];
-          return assignedDate === today;
+          return assignedDate === todayDate;
         });
         setLeadsAssignedToday(assignedToday.length);
         const leadIds = response.data.leads.map(lead => lead.leadId);
@@ -127,6 +128,18 @@ const Dashboard = () => {
     const today = new Date();
     return new Date(followUpDate) < today;
   };
+  const today = new Date().toISOString().split("T")[0];
+  const todayLeadsCount = leads.filter((lead) => {
+    const assignedDate = new Date(lead.dateImported)
+      .toISOString()
+      .split("T")[0];
+    return assignedDate === today;
+  }).length;
+  const todayFormatted = new Date().toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
   return (
     <>
     <EmployeeSidebar/>
@@ -154,8 +167,8 @@ const Dashboard = () => {
                     <Card className="metric-card">
                       <Card.Body>
                         <FaChartBar size={40} className="metric-icon" />
-                        <h3>{completedTasks}</h3>
-                        <p>Completed Tasks</p>
+                        <h3>{leadsAssignedToday}/{totalLeads}</h3>
+                        <p> Leads Today: {todayFormatted}</p>
                       </Card.Body>
                     </Card>
                     </Link>

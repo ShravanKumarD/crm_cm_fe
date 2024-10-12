@@ -38,7 +38,6 @@ const LoginPage = () => {
         sidebar = null;
         break;
     }
-    console.log(sidebar,role,"wfbfregyfwghufwehifg")
     return { sidebar, route };
   };
 
@@ -55,7 +54,7 @@ const LoginPage = () => {
         if (token && user) {
           login(token, user);
           const  {route}  = getDefaultRoute(user.role); 
-          console.log(route,"route")  
+
           navigate(route); 
         } else {
           setError("Login failed, invalid response from server.");

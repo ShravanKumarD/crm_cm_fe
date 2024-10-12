@@ -3,12 +3,15 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Card, Table } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./../../App.css";
-
-const user = JSON.parse(localStorage.getItem("user")) || {};
+import DatePicker from "react-datepicker";
+import jsPDF from "jspdf";
+import * as XLSX from "xlsx";
+import EmployeeSidebar from "../../components/Sidebar/EmployeeSidebar";
 
 export default function TaskForm({ leadData }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user")) || {};
   const { lead } = location.state || leadData || {};
 
   const [task, setTask] = useState({
@@ -40,6 +43,14 @@ export default function TaskForm({ leadData }) {
     userId: user.id || "",
     leadId: lead?.id || "",
   });
+  const [homeLoanReport, setHomeLoanReport] = useState({
+    bankName: "",
+    loanAmount: "",
+    emi: "",
+    outstanding: "",
+    userId: user.id || "",
+    leadId: lead?.id || "",
+  });
   const [creditReport, setCreditReport] = useState({
     creditCardName: "",
     totalOutstanding: "",
@@ -53,23 +64,24 @@ export default function TaskForm({ leadData }) {
   const [leads, setLeads] = useState([]);
   // const [selectedLead, setSelectedLead] = useState(null);
 
-  const [data, setData] = useState({ loanReports: [], creditReports: [] });
+  const [data, setData] = useState({
+    loanReports: [],
+    creditReports: [],
+    homeLoanReport: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchReports = async () => {
-      if (!user?.id) {
-        return; // If user.id is not available, exit early.
+      console.log(lead, "leadd");
+      if (!lead?.id) {
+        return;
       }
 
       try {
-        // No need to call .json(), Axios automatically parses JSON
-        const loanReportsPromise = axios.get(
-          `13.127.116.191/loans-reports/${user.id}`
-        );
-        const creditReportsPromise = axios.get(
-          `13.127.116.191/credit-reports/${user.id}`
-        );
+        const loanReportsPromise = axios.get(`/loans-reports/${lead?.id}`);
+
+        const creditReportsPromise = axios.get(`/credit-reports/`);
         const [loanReportsResponse, creditReportsResponse] = await Promise.all([
           loanReportsPromise,
           creditReportsPromise,
@@ -140,6 +152,14 @@ export default function TaskForm({ leadData }) {
       [name]: value,
     }));
   };
+  const hanldehomeLoanReportChange = (e) => {
+    const { name, value } = e.target;
+
+    setHomeLoanReport((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
   const creditReportChange = (e) => {
     const { name, value } = e.target;
     setCreditReport((prevData) => ({
@@ -149,15 +169,33 @@ export default function TaskForm({ leadData }) {
   };
   const postLoanReport = async () => {
     try {
-      await axios.post("13.127.116.191/loans-reports/", loanReport);
+      console.log(loanReport, "loanReport");
+      let x = await axios.post(
+        `http://localhost:3000/loans-reports/`,
+        loanReport
+      );
+      console.log(x, "dlkhgy");
       alert("Loan report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the loan report!", error);
     }
   };
+  const postHomeLoanReport = async () => {
+    try {
+      console.log(homeLoanReport, "homeLoanReport");
+      let x = await axios.post(
+        `http://localhost:3000/home-loans-reports
+        /`,
+        homeLoanReport
+      );
+    } catch (error) {
+      console.error("There was an error posting the loan report!", error);
+    }
+  };
+
   const postCreditReport = async () => {
     try {
-      await axios.post("13.127.116.191/credit-reports/", creditReport);
+      await axios.post(`/credit-reports`, creditReport);
       alert("Credit report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the credit report!", error);
@@ -173,7 +211,7 @@ export default function TaskForm({ leadData }) {
     };
 
     try {
-      await axios.post("13.127.116.191/task/", combinedData);
+      await axios.post("/task/", combinedData);
       alert("Task added successfully");
       navigate(-1);
     } catch (error) {
@@ -204,9 +242,7 @@ export default function TaskForm({ leadData }) {
 
   const fetchAssignedLeads = async () => {
     try {
-      const response = await axios.get(
-        `13.127.116.191/leadAssignment/user-leads/${user.id}`
-      );
+      const response = await axios.get(`/leadAssignment/user-leads/${user.id}`);
       if (response.status === 200) {
         const leadIds = response.data.leads.map((lead) => lead.leadId);
         fetchLeadDetails(leadIds);
@@ -218,7 +254,7 @@ export default function TaskForm({ leadData }) {
   };
   const fetchLeadDetails = async (leadIds) => {
     try {
-      const response = await axios.get("13.127.116.191/lead/");
+      const response = await axios.get("/lead/");
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) =>
           leadIds.includes(lead.id)
@@ -230,398 +266,527 @@ export default function TaskForm({ leadData }) {
       setError("Failed to fetch lead details.");
     }
   };
-
   const filteredLeads = leads.filter((lead) =>
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (lead.name?.toLowerCase() ?? "").includes(searchTerm.toLowerCase())
   );
-  // const handleLeadSelect = (e) => {
-  //   const selectedLeadId = e.target.value;
-  //   const selected = leads.find((lead) => lead.id === selectedLeadId);
-  //   setSelectedLead(selected);
 
-  //   if (selected) {
-  //     setFormData({
-  //       name: selected.name,
-  //       email: selected.email,
-  //       phone: selected.phone,
-  //       city: selected.city,
-  //       company: selected.company,
-  //       salary: selected.salary,
-  //     });
-  //     setTask((prevTask) => ({
-  //       ...prevTask,
-  //       leadId: selected.id,
-  //     }));
-  //   }
-  // };
+  const handleDownload = (e) => {
+    const format = e.target.value;
+    if (format === "pdf") {
+      downloadAsPDF();
+    } else if (format === "excel") {
+      downloadAsExcel();
+    }
+  };
+  const downloadAsPDF = () => {
+    const doc = new jsPDF();
+
+    // Loan Report Section
+    doc.text("Loan Report", 10, 10);
+    data.loanReports.forEach((loan, index) => {
+      doc.text(`Bank: ${loan.bankName}`, 10, 20 + index * 10);
+      doc.text(`Amount: ${loan.loanAmount}`, 60, 20 + index * 10);
+      doc.text(`EMI: ${loan.emi}`, 110, 20 + index * 10);
+      doc.text(`Outstanding: ${loan.outstanding}`, 150, 20 + index * 10);
+    });
+
+    // Credit Report Section
+    doc.text("Credit Report", 10, 60);
+    data.creditReports.forEach((credit, index) => {
+      doc.text(`Card: ${credit.creditCardName}`, 10, 70 + index * 10);
+      doc.text(`Outstanding: ${credit.totalOutstanding}`, 60, 70 + index * 10);
+    });
+
+    doc.save("report.pdf");
+  };
+
+  // Function to download reports as Excel
+  const downloadAsExcel = () => {
+    const loanReportData = data.loanReports.map((loan) => ({
+      "Bank Name": loan.bankName,
+      "Loan Amount": loan.loanAmount,
+      EMI: loan.emi,
+      Outstanding: loan.outstanding,
+    }));
+
+    const creditReportData = data.creditReports.map((credit) => ({
+      "Credit Card Name": credit.creditCardName,
+      "Total Outstanding": credit.totalOutstanding,
+    }));
+
+    const ws1 = XLSX.utils.json_to_sheet(loanReportData);
+    const ws2 = XLSX.utils.json_to_sheet(creditReportData);
+    const wb = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(wb, ws1, "Loan Report");
+    XLSX.utils.book_append_sheet(wb, ws2, "Credit Report");
+
+    XLSX.writeFile(wb, "report.xlsx");
+  };
 
   return (
-    <div className="global-container">
-      <div className="container mt-5">
-        <h2 className="mb-4 text-center">Activity</h2>
-        <Form onSubmit={handleSubmit}>
-          <h4>Personal Information</h4>
-          <Row>
-            <Col md={6} className="mb-3">
-              <Form.Group controlId="formLeadId">
-                <Form.Label>Lead Name</Form.Label>
-                <Form.Control
-                  as="select"
-                  name="leadId"
-                  value={task.leadId}
-                  onChange={handleChange}
-                  className="mt-2"
-                >
-                  <option value="">Select a lead</option>
-                  {filteredLeads.length > 0 ? (
-                    filteredLeads.map((lead) => (
-                      <option key={lead.id} value={lead.id}>
-                        {lead.id} - {lead.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">No leads found</option>
-                  )}
-                </Form.Control>
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group controlId="formEmail">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Enter email"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={6}>
-              <Form.Group controlId="formPhone">
-                <Form.Label>Phone</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="Enter phone number"
-                  readOnly
-                />
-              </Form.Group>
-            </Col>
-
-            <Col md={6}>
-              <Form.Group controlId="formCity">
-                <Form.Label>City</Form.Label>
-                <div className="input-with-icon">
+    <>
+      <EmployeeSidebar />
+      <div className="global-container">
+        <div className="container mt-5">
+          <h2 className="mb-4 text-center">Activity</h2>
+          <Form onSubmit={handleSubmit}>
+            <h4>Personal Information</h4>
+            <Row>
+              <Col md={6} className="mb-3">
+                <Form.Group controlId="formLeadId">
+                  <Form.Label>Lead Name</Form.Label>
+                  <Form.Control
+                    as="select"
+                    name="leadId"
+                    value={task.leadId}
+                    onChange={handleChange}
+                    className="mt-2"
+                  >
+                    <option value="">Select a lead</option>
+                    {filteredLeads.length > 0 ? (
+                      filteredLeads.map((lead) => (
+                        <option key={lead.id} value={lead.id}>
+                          {lead.id} - {lead.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="">No leads found</option>
+                    )}
+                  </Form.Control>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formEmail">
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter email"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6}>
+                <Form.Group controlId="formPhone">
+                  <Form.Label>Phone</Form.Label>
                   <Form.Control
                     type="text"
-                    name="city"
-                    value={formData.city}
+                    name="phone"
+                    value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="Enter city"
+                    placeholder="Enter phone number"
+                    readOnly
                   />
-                  <i className="fas fa-pen"></i>
-                </div>
-              </Form.Group>
-            </Col>
-          </Row>
+                </Form.Group>
+              </Col>
 
-          <Row>
-            <Col md={6}>
-              <Form.Group controlId="formCompany">
-                <Form.Label>Company</Form.Label>
-                <div className="input-with-icon">
-                  <Form.Control
-                    type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    placeholder="Enter company name"
-                  />
-                  <i className="fas fa-pen"></i>
-                </div>
-              </Form.Group>
-            </Col>
-
-            <Col md={6}>
-              <Form.Group controlId="formSalary">
-                <Form.Label>Salary</Form.Label>
-                <div className="input-with-icon">
-                  <Form.Control
-                    type="text"
-                    name="salary"
-                    value={formData.salary}
-                    onChange={handleInputChange}
-                    placeholder="Enter salary"
-                  />
-                  <i className="fas fa-pen"></i>
-                </div>
-              </Form.Group>
-            </Col>
-          </Row>
-          <p>&nbsp;</p>
-          <Card className="mb-4">
-            <Card.Body>
-              <Row>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="formActionType">
-                    <Form.Label>Create Task</Form.Label>
+              <Col md={6}>
+                <Form.Group controlId="formCity">
+                  <Form.Label>City</Form.Label>
+                  <div className="input-with-icon">
                     <Form.Control
-                      as="select"
-                      name="actionType"
-                      value={task.actionType}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select an action</option>
-                      <option value="message">Message</option>
-                      <option value="email">Email</option>
-                      <option value="Call Back">Call Back</option>
-                      <option value="schedule appointment with manager">
-                        Schedule Appointment with Manager
-                      </option>
-                      <option value="customer walkin">Customer walkin</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                  <Form.Group controlId="formFollowup">
-                    <Form.Label>Arrange for a follow-up</Form.Label>
-                    <Form.Control
-                      type="datetime-local"
-                      name="followUp"
-                      value={task.followUp}
-                      onChange={handleChange}
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      placeholder="Enter city"
                     />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+                    <i className="fas fa-pen"></i>
+                  </div>
+                </Form.Group>
+              </Col>
+            </Row>
 
-          <Form.Group controlId="formDescription" className="mb-3">
-            <Form.Label>Add Note</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="description"
-              value={task.description}
-              onChange={handleChange}
-              placeholder="Write here..."
-            />
-          </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group controlId="formCompany">
+                  <Form.Label>Company</Form.Label>
+                  <div className="input-with-icon">
+                    <Form.Control
+                      type="text"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleInputChange}
+                      placeholder="Enter company name"
+                    />
+                    <i className="fas fa-pen"></i>
+                  </div>
+                </Form.Group>
+              </Col>
 
-          <Form.Group>
-            <Form.Label>Are all documents collected?</Form.Label>
-            <Form.Check
-              type="radio"
-              id="documentsCollectedYes"
-              name="documentsCollected"
-              label="Yes"
-              value="yes"
-              checked={documentsCollected === "yes"}
-              onChange={handleOptionChange}
-              className="me-3"
-              required
-            />
-            <Form.Check
-              type="radio"
-              id="documentsCollectedNo"
-              name="documentsCollected"
-              label="No"
-              value="no"
-              checked={documentsCollected === "no"}
-              onChange={handleOptionChange}
-              required
-            />
-          </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formSalary">
+                  <Form.Label>Salary</Form.Label>
+                  <div className="input-with-icon">
+                    <Form.Control
+                      type="text"
+                      name="salary"
+                      value={formData.salary}
+                      onChange={handleInputChange}
+                      placeholder="Enter salary"
+                    />
+                    <i className="fas fa-pen"></i>
+                  </div>
+                </Form.Group>
+              </Col>
+            </Row>
+            <p>&nbsp;</p>
+            <Card className="mb-4">
+              <Card.Body>
+                <Row>
+                  <Col md={6} className="mb-3">
+                    <Form.Group controlId="formActionType">
+                      <Form.Label>Create Task</Form.Label>
+                      <Form.Control
+                        as="select"
+                        name="actionType"
+                        value={task.actionType}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select an action</option>
+                        <option value="message">Message</option>
+                        <option value="email">Email</option>
+                        <option value="Call Back">Call Back</option>
+                        <option value="schedule appointment with manager">
+                          Schedule Appointment with Manager
+                        </option>
+                        <option value="customer walkin">Customer walkin</option>
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6} className="mb-3">
+                    <Form.Label>Arrange for a follow-up</Form.Label>
+                    <Form.Group controlId="formFollowup">
+                      <DatePicker
+                        className="touchable-global"
+                        showTimeSelect
+                        dateFormat="Pp"
+                        name="followUp"
+                        placeholderText="select date"
+                        selected={
+                          task.followUp ? new Date(task.followUp) : null
+                        }
+                        onChange={(date) => {
+                          handleChange({
+                            target: {
+                              name: "followUp",
+                              value: date,
+                            },
+                          });
+                        }}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
 
-          {documentsCollected === "yes" && (
-            <>
-              <h5>Loans Report</h5>
-              <div className="row mb-3">
-                <div className="col">
-                  <label htmlFor="bankName">Bank Name:</label>
-                  <input
-                    type="text"
-                    id="bankName"
-                    name="bankName"
-                    className="form-control"
-                    value={loanReport.bankName}
-                    onChange={handleLoanReportChange}
-                    
-                  />
-                </div>
-                <div className="col">
-                  <label htmlFor="loanAmount">Loan Amount:</label>
-                  <input
-                    type="number"
-                    id="loanAmount"
-                    name="loanAmount"
-                    className="form-control"
-                    value={loanReport.loanAmount}
-                    onChange={handleLoanReportChange}
-                  
-                  />
-                </div>
-                <div className="col">
-                  <label htmlFor="emi">EMI:</label>
-                  <input
-                    type="number"
-                    id="emi"
-                    name="emi"
-                    className="form-control"
-                    value={loanReport.emi}
-                    onChange={handleLoanReportChange}
-                    
-                  />
-                </div>
-                <div className="col">
-                  <label htmlFor="outstanding">Outstanding Amount:</label>
-                  <input
-                    type="number"
-                    id="outstanding"
-                    name="outstanding"
-                    className="form-control"
-                    value={loanReport.outstanding}
-                    onChange={handleLoanReportChange}
-                    
-                  />
-                </div>
-              </div>
+            <Form.Group controlId="formDescription" className="mb-3">
+              <Form.Label>Add Note</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                name="description"
+                value={task.description}
+                onChange={handleChange}
+                placeholder="Write here..."
+              />
+            </Form.Group>
 
-              <Button variant="secondary" onClick={postLoanReport}>
-                Add
-              </Button>
-              <br />
-              <br />
+            <Form.Group>
+              <Form.Label>Are all documents collected?</Form.Label>
+              <Form.Check
+                type="radio"
+                id="documentsCollectedYes"
+                name="documentsCollected"
+                label="Yes"
+                value="yes"
+                checked={documentsCollected === "yes"}
+                onChange={handleOptionChange}
+                className="me-3"
+                required
+              />
+              <Form.Check
+                type="radio"
+                id="documentsCollectedNo"
+                name="documentsCollected"
+                label="No"
+                value="no"
+                checked={documentsCollected === "no"}
+                onChange={handleOptionChange}
+                required
+              />
+            </Form.Group>
+
+            {documentsCollected === "yes" && (
               <>
-                <h5>Credit Report</h5>
+                <Form.Group>
+                  <Form.Label>Download Reports</Form.Label>
+                  <Form.Control as="select" onChange={handleDownload}>
+                    <option value="">Select Format</option>
+                    <option value="pdf">Download as PDF</option>
+                    <option value="excel">Download as Excel</option>
+                  </Form.Control>
+                </Form.Group>
+
+                <h5>Loans Report</h5>
                 <div className="row mb-3">
                   <div className="col">
-                    <label htmlFor="creditCardName">Credit Card Name:</label>
+                    <label htmlFor="bankName">Bank Name:</label>
                     <input
                       type="text"
-                      id="creditCardName"
-                      name="creditCardName"
+                      id="bankName"
+                      name="bankName"
                       className="form-control"
-                      value={creditReport.creditCardName}
-                      onChange={creditReportChange}
-                      
+                      value={loanReport.bankName}
+                      onChange={handleLoanReportChange}
                     />
                   </div>
                   <div className="col">
-                    <label htmlFor="totalOutstanding">
-                      Total Outstanding Amount:
-                    </label>
+                    <label htmlFor="loanAmount">Loan Amount:</label>
+                    <input
+                      type="text"
+                      id="loanAmount"
+                      name="loanAmount"
+                      className="form-control"
+                      value={loanReport.loanAmount}
+                      onChange={handleLoanReportChange}
+                      maxLength={12}
+                    />
+                  </div>
+                  <div className="col">
+                    <label htmlFor="emi">EMI:</label>
                     <input
                       type="number"
-                      id="totalOutstanding"
-                      name="totalOutstanding"
+                      id="emi"
+                      name="emi"
                       className="form-control"
-                      value={creditReport.totalOutstanding}
-                      onChange={creditReportChange}
-                      
+                      value={loanReport.emi}
+                      onChange={handleLoanReportChange}
+                    />
+                  </div>
+                  <div className="col">
+                    <label htmlFor="outstanding">Outstanding Amount:</label>
+                    <input
+                      type="number"
+                      id="outstanding"
+                      name="outstanding"
+                      className="form-control"
+                      value={loanReport.outstanding}
+                      onChange={handleLoanReportChange}
                     />
                   </div>
                 </div>
 
-                <Button variant="secondary" onClick={postCreditReport}>
+                <Button variant="secondary" onClick={postLoanReport}>
                   Add
                 </Button>
-
                 <br />
                 <br />
-               
-                <div className="row">
-  <div className="col-sm-8">
-    <p><strong>Loan Report</strong></p>
-    <table className="table">
-      <thead>
-        <tr>
-          <th>Bank Name</th>
-          <th>Loan Amount</th>
-          <th>EMI</th>
-          <th>Outstanding</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.loanReports.map((loan) => (
-          <tr key={loan.id}>
-            <td>{loan.bankName}</td>
-            <td>{loan.loanAmount}</td>
-            <td>{loan.emi}</td>
-            <td>{loan.outstanding}</td>
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td><strong>Total</strong></td>
-          <td>
-            <strong>
-              {data.loanReports.reduce((total, loan) => Number(total) + Number(loan.loanAmount), 0)}
-            </strong>
-          </td>
-          <td>
-            <strong>
-              {data.loanReports.reduce((total, loan) => Number(total) + Number(loan.emi), 0)}
-            </strong>
-          </td>
-          <td>
-            <strong>
-              {data.loanReports.reduce((total, loan) => Number(total) + Number(loan.outstanding), 0)}
-            </strong>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+                <>
+                  <h5>Home Loan Report</h5>
+                  <div className="row mb-3">
+                    <div className="col">
+                      <label htmlFor="bankName">Bank Name:</label>
+                      <input
+                        type="text"
+                        id="bankName"
+                        name="bankName"
+                        className="form-control"
+                        value={homeLoanReport.bankName}
+                        onChange={hanldehomeLoanReportChange}
+                      />
+                    </div>
+                    <div className="col">
+                      <label htmlFor="loanAmount">Loan Amount:</label>
+                      <input
+                        type="text"
+                        id="loanAmount"
+                        name="loanAmount"
+                        className="form-control"
+                        value={homeLoanReport.loanAmount}
+                        onChange={hanldehomeLoanReportChange}
+                        maxLength={12}
+                      />
+                    </div>
+                    <div className="col">
+                      <label htmlFor="emi">EMI:</label>
+                      <input
+                        type="number"
+                        id="emi"
+                        name="emi"
+                        className="form-control"
+                        value={homeLoanReport.emi}
+                        onChange={hanldehomeLoanReportChange}
+                      />
+                    </div>
+                    <div className="col">
+                      <label htmlFor="outstanding">Outstanding Amount:</label>
+                      <input
+                        type="number"
+                        id="outstanding"
+                        name="outstanding"
+                        className="form-control"
+                        value={homeLoanReport.outstanding}
+                        onChange={hanldehomeLoanReportChange}
+                      />
+                    </div>
+                  </div>
 
-  <div className="col-sm-4">
-    <p><strong>Credit Reports</strong></p>
-    <table className="table">
-      <thead>
-        <tr>
-          <th>Credit Card Name</th>
-          <th>Total Outstanding</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.creditReports.map((credit) => (
-          <tr key={credit.id}>
-            <td>{credit.creditCardName}</td>
-            <td>{credit.totalOutstanding}</td>
-          </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td><strong>Total</strong></td>
-          <td>
-            <strong>
-              {data.creditReports.reduce((total, credit) => Number(total) + Number(credit.totalOutstanding), 0)}
-            </strong>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-</div>
+                  <Button variant="secondary" onClick={postHomeLoanReport}>
+                    Add
+                  </Button>
 
+                  <h5>Credit Report</h5>
+                  <div className="row mb-3">
+                    <div className="col">
+                      <label htmlFor="creditCardName">Credit Card Name:</label>
+                      <input
+                        type="text"
+                        id="creditCardName"
+                        name="creditCardName"
+                        className="form-control"
+                        value={creditReport.creditCardName}
+                        onChange={creditReportChange}
+                      />
+                    </div>
+                    <div className="col">
+                      <label htmlFor="totalOutstanding">
+                        Total Outstanding Amount:
+                      </label>
+                      <input
+                        type="number"
+                        id="totalOutstanding"
+                        name="totalOutstanding"
+                        className="form-control"
+                        value={creditReport.totalOutstanding}
+                        onChange={creditReportChange}
+                      />
+                    </div>
+                  </div>
+
+                  <Button variant="secondary" onClick={postCreditReport}>
+                    Add
+                  </Button>
+
+                  <br />
+                  <br />
+
+                  <div className="row">
+                    <div className="col-sm-8">
+                      <p>
+                        <strong>Loan Report</strong>
+                      </p>
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>Bank Name</th>
+                            <th>Loan Amount</th>
+                            <th>EMI</th>
+                            <th>Outstanding</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.loanReports.map((loan) => (
+                            <tr key={loan.id}>
+                              <td>{loan.bankName}</td>
+                              <td>{loan.loanAmount}</td>
+                              <td>{loan.emi}</td>
+                              <td>{loan.outstanding}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                            <td>
+                              <strong>Total</strong>
+                            </td>
+                            <td>
+                              <strong>
+                                {data.loanReports.reduce(
+                                  (total, loan) =>
+                                    Number(total) + Number(loan.loanAmount),
+                                  0
+                                )}
+                              </strong>
+                            </td>
+                            <td>
+                              <strong>
+                                {data.loanReports.reduce(
+                                  (total, loan) =>
+                                    Number(total) + Number(loan.emi),
+                                  0
+                                )}
+                              </strong>
+                            </td>
+                            <td>
+                              <strong>
+                                {data.loanReports.reduce(
+                                  (total, loan) =>
+                                    Number(total) + Number(loan.outstanding),
+                                  0
+                                )}
+                              </strong>
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+
+                    <div className="col-sm-4">
+                      <p>
+                        <strong>Credit Reports</strong>
+                      </p>
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>Credit Card Name</th>
+                            <th>Total Outstanding</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.creditReports.map((credit) => (
+                            <tr key={credit.id}>
+                              <td>{credit.creditCardName}</td>
+                              <td>{credit.totalOutstanding}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                            <td>
+                              <strong>Total</strong>
+                            </td>
+                            <td>
+                              <strong>
+                                {data.creditReports.reduce(
+                                  (total, credit) =>
+                                    Number(total) +
+                                    Number(credit.totalOutstanding),
+                                  0
+                                )}
+                              </strong>
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                </>
               </>
-            </>
-          )}
-          <br />
-          <br />
-          <Button variant="info" type="submit">
-            Submit
-          </Button>
-        </Form>
+            )}
+            <br />
+            <br />
+            <Button variant="info" type="submit">
+              Submit
+            </Button>
+          </Form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

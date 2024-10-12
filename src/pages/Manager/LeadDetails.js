@@ -78,7 +78,6 @@ const LeadDetail = () => {
         userId: user.id,
         leadId: task.leadId,
       });
-    console.log(response,"response")
       // Re-fetch the tasks to reflect the new status
       fetchActivity();
     } catch (error) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Form, Button, Table, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import axios from "./../../components/axios";
@@ -18,7 +19,7 @@ const LeadList = () => {
     name: "",
     date: "",
     id: "",
-    status: "",
+    leadStatus: "",
     phone: "",
     email: "",
     assignedEmployee: "",
@@ -374,7 +375,8 @@ const LeadList = () => {
       (filters.email ? lead.email.toLowerCase().includes(filters.email.toLowerCase()) : true) &&
       (filters.assignedEmployee
         ? assignedEmployee && assignedEmployee.name.toLowerCase().includes(filters.assignedEmployee.toLowerCase())
-        : true)
+        : true)&&
+        (filters.leadStatus === "" || lead.status === filters.leadStatus)     
     );
   });
   
@@ -463,15 +465,32 @@ const LeadList = () => {
                   />
                 </div>
                 <div className="col-md-3">
-                  <input
-                    type="text"
-                    name="status"
-                    className="form-control"
-                    placeholder="Filter by Status"
-                    value={filters.status}
-                    onChange={handleFilterChange}
-                  />
-                </div>
+              <Form.Control
+                as="select"
+                name="leadStatus"
+                className="form-control"
+                value={filters.leadStatus}
+                onChange={handleFilterChange}
+              >
+             <option value="">Filter by Status</option>
+                      <option value="Interested">Interested</option>
+                      <option value="Follow Up">Follow Up</option>
+                      <option value="Call Back">Call Back</option>
+                      <option value="RNR">RNR (Ring No Response)</option>
+                      <option value="Switch Off">Switched Off</option>
+                      <option value="Busy">Busy</option>
+                      <option value="Not Interested">Not Interested</option>
+                      <option value="Not Working/Not Reachable">
+                        Not Working / Not Reachable
+                      </option>
+                      <option value="message">Message</option>
+                      <option value="email">Email</option>
+                      <option value="schedule appointment with manager">
+                        Schedule Appointment with Manager
+                      </option>
+                      <option value="customer walkin">Customer Walk-in</option>
+              </Form.Control>
+            </div>
                 <p>&nbsp;</p>
                 <div className="col-md-3">
                   <input

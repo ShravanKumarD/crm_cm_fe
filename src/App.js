@@ -101,7 +101,7 @@ const App = () => {
             element={
               <div>
                 <Header />
-                {renderSidebar()}
+                {/* {renderSidebar()} */}
                 {/* <div className="content-wrapper"> */}
                 <Routes>
                   <Route path="/unauthorized" element={<Unauthorized />} />

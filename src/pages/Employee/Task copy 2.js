@@ -36,7 +36,6 @@ export default function TaskForm({ leadData }) {
   });
 
   const [loanReport, setLoanReport] = useState({
-    loanType: "",
     bankName: "",
     loanAmount: "",
     emi: "",
@@ -251,7 +250,6 @@ export default function TaskForm({ leadData }) {
     // Loan Report Section
     doc.text("Loan Report", 10, 10);
     data.loanReports.forEach((loan, index) => {
-      doc.text(`LoanType:${loan.loanType}`, 10, 20 + index * 10);
       doc.text(`Bank: ${loan.bankName}`, 10, 20 + index * 10);
       doc.text(`Amount: ${loan.loanAmount}`, 60, 20 + index * 10);
       doc.text(`EMI: ${loan.emi}`, 110, 20 + index * 10);
@@ -271,7 +269,6 @@ export default function TaskForm({ leadData }) {
   // Function to download reports as Excel
   const downloadAsExcel = () => {
     const loanReportData = data.loanReports.map((loan) => ({
-      "Loan Type": loan.loanType,
       "Bank Name": loan.bankName,
       "Loan Amount": loan.loanAmount,
       EMI: loan.emi,
@@ -504,22 +501,6 @@ export default function TaskForm({ leadData }) {
 
                 <h5>Loan Report</h5>
                 <div className="row mb-3">
-                  {/* loanType */}
-                  <div className="col">
-                    <label htmlFor="loanType">Loan Type</label>
-                    <select
-                      id="loanType"
-                      name="loanType"
-                      className="form-control"
-                      value={loanReport.loanType}
-                      onChange={handleLoanReportChange}
-                    >
-                      <option value="">Select Loan Type</option>
-                      <option value="personal">Personal Loan</option>
-                      <option value="home">Home Loan</option>
-                    </select>
-                  </div>
-
                   <div className="col">
                     <label htmlFor="bankName">Bank Name:</label>
                     <input
@@ -616,30 +597,24 @@ export default function TaskForm({ leadData }) {
                       <table className="table">
                         <thead>
                           <tr>
-                            <th>Loan Type</th>
                             <th>Bank Name</th>
                             <th>Loan Amount</th>
                             <th>EMI</th>
                             <th>Outstanding</th>
-                          
                           </tr>
                         </thead>
                         <tbody>
                           {data.loanReports.map((loan) => (
                             <tr key={loan.id}>
-                              <td>{loan.loanType}</td>
                               <td>{loan.bankName}</td>
                               <td>{loan.loanAmount}</td>
                               <td>{loan.emi}</td>
-                              <td>{loan.outstanding}</td> 
+                              <td>{loan.outstanding}</td>
                             </tr>
                           ))}
                         </tbody>
                         <tfoot>
                           <tr>
-                            <td>
-                              
-                            </td>
                             <td>
                               <strong>Total</strong>
                             </td>

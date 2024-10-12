@@ -20,6 +20,7 @@ const LeadList = () => {
     phone: "",
     leadStatus: "",
     source: "",
+    docsCollected: "",
   });
   const [leadStatuses, setLeadStatuses] = useState({});
   const [selectAll, setSelectAll] = useState(false);
@@ -207,7 +208,8 @@ const LeadList = () => {
               : lead
       ));
 
-
+      fetchAssignedLeads();
+      fetchEmployee();
         closeModal();
       }
     } catch (error) {
@@ -241,6 +243,7 @@ const LeadList = () => {
     }
   };
   const filteredLeads = leads.filter((lead) => {
+    const leadDocsStatus = docsCollected.find((doc) => doc.id === lead.id)?.docsCollected || "No";
     return (
       (filters.name === "" ||
         lead.name.toLowerCase().includes(filters.name.toLowerCase())) &&
@@ -252,7 +255,7 @@ const LeadList = () => {
       (filters.leadStatus === "" || lead.status === filters.leadStatus) &&
       (filters.source === "" ||
         lead.leadSource.toLowerCase().includes(filters.source.toLowerCase()))
-      // (filters.source === "" || lead.leadSource === filters.source)
+    &&  (filters.docsCollected === "" || leadDocsStatus === filters.docsCollected)
     );
   });
 
@@ -306,17 +309,23 @@ const LeadList = () => {
                 value={filters.leadStatus}
                 onChange={handleFilterChange}
               >
-                <option value="">Filter by Lead Status</option>
-                <option value="RNR">RNR</option>
-                <option value="Switch Off">Switch Off</option>
-                <option value="Busy">Busy</option>
-                <option value="Call Back">Call Back</option>
-                <option value="Interested">Interested</option>
-                <option value="Not Interested">Not Interested</option>
-                <option value="Not Working/Not Reachable">
-                  Not Working/Not Reachable
-                </option>
-                <option value="Follow Up">Follow Up</option>
+             <option value="">Filter by Status</option>
+                      <option value="Interested">Interested</option>
+                      <option value="Follow Up">Follow Up</option>
+                      <option value="Call Back">Call Back</option>
+                      <option value="RNR">RNR (Ring No Response)</option>
+                      <option value="Switch Off">Switched Off</option>
+                      <option value="Busy">Busy</option>
+                      <option value="Not Interested">Not Interested</option>
+                      <option value="Not Working/Not Reachable">
+                        Not Working / Not Reachable
+                      </option>
+                      <option value="message">Message</option>
+                      <option value="email">Email</option>
+                      <option value="schedule appointment with manager">
+                        Schedule Appointment with Manager
+                      </option>
+                      <option value="customer walkin">Customer Walk-in</option>
               </Form.Control>
             </div>
             <p>&nbsp;</p>
@@ -330,6 +339,19 @@ const LeadList = () => {
                 onChange={handleFilterChange}
               />
             </div>
+            <div className="col-md-3">
+  <Form.Control
+    as="select"
+    name="docsCollected"
+    className="form-control"
+    value={filters.docsCollected}
+    onChange={handleFilterChange}
+  >
+    <option value="">Filter by Docs Collected</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </Form.Control>
+</div> 
           </div>
         </div>
         <br />
@@ -432,39 +454,9 @@ const LeadList = () => {
     handleClose={closeModal}
     title="Add Follow-Up"
   >
-                    {/* <Form.Control
-                      as="select"
-                      name="status"
-                      className="dropdownInTable"
-                      value={
-                        leadStatuses[lead.id] || lead.status || "Task Created"
-                      }
-                      onChange={(e) =>
-                        handleStatusChange(currentLead, e.target.value)
-                      }
-                    >
-                      <option value="">Select Status</option>
-                      <option value="Interested">Interested</option>
-                      <option value="Follow Up">Follow Up</option>
-                      <option value="Call Back">Call Back</option>
-                      <option value="RNR">RNR (Ring No Response)</option>
-                      <option value="Switch Off">Switched Off</option>
-                      <option value="Busy">Busy</option>
-                      <option value="Not Interested">Not Interested</option>
-                      <option value="Not Working/Not Reachable">
-                        Not Working / Not Reachable
-                      </option>
-                      <option value="message">Message</option>
-                      <option value="email">Email</option>
-                      <option value="schedule appointment with manager">
-                        Schedule Appointment with Manager
-                      </option>
-                      <option value="customer walkin">Customer Walk-in</option>
-                    </Form.Control>
-                  <p>&nbsp;</p> */}
-
     <DatePicker
       className="datePicker"
+      placeholderText="select date"
       showTimeSelect
       dateFormat="Pp"
       selected={followUpDate ? new Date(followUpDate) : null}

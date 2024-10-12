@@ -5,69 +5,44 @@ import "./AdminDashboard.css";
 import AdminSidebar from "../../components/Sidebar/AdminSidebar";
 
 const AdminDashboard = () => {
-  const [leadsData, setLeadsData] = useState([]);
-  const [error, setError] = useState(null);
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [totalLeads, setTotalLeads] = useState(0);
+  const [error, setError] = useState(null);
   const [showAllLeads, setShowAllLeads] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user")) || {};
   const [dailyLeadsCount, setDailyLeadsCount] = useState({});
+  const [totalLeads, setTotalLeads] = useState(0);
+  const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     const fetchLeadsData = async () => {
       try {
-        const response = await axios.get("/lead/");
+        const response = await axios.get("/lead");
         if (response.status === 200) {
-          const processedData = processLeadsData(response.data.leads);
-          setLeadsData(processedData);
-          setLeads(response.data.leads);
-          setTotalLeads(response.data.leads.length);
-          const dailyCount = countLeadsByDate(response.data.leads);
-          setDailyLeadsCount(dailyCount);
-        } else {
-          console.error("Error: Response not OK", response.status);
+          const leadsData = response.data.leads;
+          setLeads(leadsData);
+          setTotalLeads(leadsData.length);
+          setDailyLeadsCount(countLeadsByDate(leadsData));
         }
-      } catch (error) {
+      } catch (err) {
         setError("Error fetching leads data");
-        console.error("Error fetching leads data:", error);
+        console.error("Error fetching leads data:", err);
       }
     };
-    fetchLeadsData();
-  }, []);
 
-  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get("/task/");
+        setTasks(response.data.sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate)));
+      } catch (err) {
+        setError("Failed to fetch tasks");
+        console.error("Failed to fetch tasks:", err.message);
+      }
+    };
+
+    fetchLeadsData();
     fetchTasks();
   }, []);
-  if (error) {
-    return <p>{error}</p>;
-  }
-  const fetchTasks = async () => {
-    try {
-      const response = await axios.get("/task/");
-      const sortedTasks = response.data.sort((a, b) => {
-        const dateA = new Date(a.createdDate || 0);
-        const dateB = new Date(b.createdDate || 0);
-        return dateA - dateB;
-      });
-      setTasks(sortedTasks);
-    } catch (err) {
-      setError("Failed to fetch tasks.");
-      console.error("Failed to fetch tasks:", err.message);
-    }
-  };
 
-  const processLeadsData = (data) => {
-    const statusCounts = data.reduce((acc, lead) => {
-      acc[lead.status] = (acc[lead.status] || 0) + 1;
-      return acc;
-    }, {});
-
-    return Object.keys(statusCounts).map((status) => ({
-      name: status,
-      value: statusCounts[status],
-    }));
-  };
   const countLeadsByDate = (data) => {
     return data.reduce((acc, lead) => {
       const date = new Date(lead.dateImported).toISOString().split("T")[0];
@@ -76,29 +51,24 @@ const AdminDashboard = () => {
     }, {});
   };
 
-  const today = new Date().toISOString().split("T")[0];
-  const newLeadsCount = leads.filter((lead) => {
-    const assignedDate = new Date(lead.dateImported)
-      .toISOString()
-      .split("T")[0];
-    return assignedDate === today && lead.status === "New";
-  }).length;
+  const todayLeadsCount = leads.filter(
+    (lead) => new Date(lead.dateImported).toISOString().split("T")[0] === today
+  ).length;
+
   const displayedTasks = showAllLeads ? tasks : tasks.slice(0, 3);
-  const todayLeadsCount = leads.filter((lead) => {
-    const assignedDate = new Date(lead.dateImported)
-      .toISOString()
-      .split("T")[0];
-    return assignedDate === today;
-  }).length;
-  const todayFormatted = new Date().toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
+
+  const todayFormatted = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
-  
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   return (
     <>
-      {" "}
       <AdminSidebar />
       <div className="global-container">
         <Container fluid>
@@ -151,15 +121,12 @@ const AdminDashboard = () => {
                         <td>{task.lead.status || "N/A"}</td>
                         <td>{task.lead.phone}</td>
                         <td>
-                          {new Date(task.createdDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              weekday: "long",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )}
+                          {new Date(task.createdDate).toLocaleDateString("en-US", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
                         </td>
                         <td>{task.description || "N/A"}</td>
                         <td>{task.followUp || "N/A"}</td>
@@ -167,10 +134,7 @@ const AdminDashboard = () => {
                     ))}
                   </tbody>
                 </Table>
-                <Button
-                  variant="touchable-global"
-                  onClick={() => setShowAllLeads(!showAllLeads)}
-                >
+                <Button variant="touchable-global" onClick={() => setShowAllLeads(!showAllLeads)}>
                   <h2>{showAllLeads ? "Show Less" : "Show More..."}</h2>
                 </Button>
               </Card.Body>

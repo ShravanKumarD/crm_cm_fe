@@ -4,7 +4,6 @@ body {
   height: 100vh; 
 }
   .auth-container {
-    /* position: fixed; */
     background-color: #c7e3eb49; 
     min-height: 100vh;
     display: flex;
@@ -126,4 +125,9 @@ width: 25vw;
     pointer-events: all;
     opacity: 1;
   }
-  
+  .alert-danger{
+    font-family: Poppins;
+    font-size: 12px;
+    padding: 0;
+    text-align: center;
+  }

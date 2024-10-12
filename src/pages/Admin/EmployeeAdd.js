@@ -11,9 +11,9 @@ export default function EmployeeAdd() {
         email: '',
         mobile:'',
         address: '',
-        password: '',
+        password: 1122,
         designation: '',
-        otp: '',
+        otp:1122,
         department: '',
         workingMode: '',
         role: '',
@@ -152,7 +152,7 @@ export default function EmployeeAdd() {
                                 required
                             />
                         </div>
-                        <div className="form-group mb-3">
+                        {/* <div className="form-group mb-3">
                             <label htmlFor="otp">OTP</label>
                             <input
                                 type="text"
@@ -164,7 +164,7 @@ export default function EmployeeAdd() {
                                 onChange={handleChange}
                                 required
                             />
-                        </div>
+                        </div> */}
                         <div className="form-group mb-3">
                             <label htmlFor="department">Department</label>
                             <input

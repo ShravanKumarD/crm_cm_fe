@@ -20,9 +20,9 @@ export default function LeadManagement() {
         name: "",
         date: "",
         id: "",
-        status: "",
-        phone: "",
-        email: "",
+        // status: "",
+        // phone: "",
+        // email: "",
         assignedEmployee: "",
     });
     
@@ -197,7 +197,7 @@ export default function LeadManagement() {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Select</th>
+                                    {/* <th>Select</th> */}
                                     <th>Lead ID</th>
                                     <th>Lead Name</th>
                                     <th>Assigned To</th>
@@ -210,13 +210,13 @@ export default function LeadManagement() {
                                 {currentRecords.length > 0 ? (
                                     currentRecords.map(assignment => (
                                         <tr key={assignment.id}>
-                                            <td>
+                                            {/* <td>
                                                 <input 
                                                     type="checkbox" 
                                                     checked={selectedLeads.has(assignment.id)}
                                                     onChange={() => handleCheckboxChange(assignment.id)}
                                                 />
-                                            </td>
+                                            </td> */}
                                             <td>{assignment.leadId}</td>
                                             <td>{getLeadNameById(assignment.leadId) || 'N/A'}</td>
                                             <td>{getUserNameById(assignment.assignedToUserId) || 'N/A'}</td>

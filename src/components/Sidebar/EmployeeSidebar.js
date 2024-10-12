@@ -33,7 +33,7 @@ export default function EmployeeSidebar() {
       <img className="brand-image" src={logo} alt="Logo" />
         {/* <a  className="brand-link"> */}
           <h2 className="brand-text font-weight-light">
-            <i className="nav-icon fas fa-user" style={{margin:'5px'}}/>
+          <i className="nav-icon fas fa-user" style={{ margin: '5px', color: "#6c24248c" }} />
             {employee ? employee.name.split(' ')[0] : "Loading..."}
           </h2>
         {/* </a> */}

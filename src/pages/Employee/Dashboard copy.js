@@ -55,7 +55,6 @@ const Dashboard = () => {
   const fetchLeads = async () => {
     try {
       const response = await axios.get("/lead");
-      console.log(response.data,"res")
       if (response.status === 200) {
         setLeads(response.data.leads)
       }

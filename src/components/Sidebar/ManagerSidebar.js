@@ -51,7 +51,7 @@ export default function ManagerSidebar() {
                 <NavLink to="/manager-leads" 
                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
                 style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-                  <i className="nav-icon fas fa-rocket" style={{ marginRight: "8px" }} />
+                      <i className="nav-icon fas fa-user" style={{ margin: '5px', color: "#6c24248c" }} />
                   <p>Leads</p>
                 </NavLink>
               </li>
