@@ -61,33 +61,33 @@ export default function TaskForm({ leadData }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReports = async () => {
-      console.log(lead, "leadd");
-      if (!lead?.id) {
-        return;
-      }
-
-      try {
-        const loanReportsPromise = axios.get(`/loans-reports/${lead?.id}`);
-        const creditReportsPromise = axios.get(`/credit-reports/`);
-        const [loanReportsResponse, creditReportsResponse] = await Promise.all([
-          loanReportsPromise,
-          creditReportsPromise,
-        ]);
-        // Set the fetched data
-        setData({
-          loanReports: loanReportsResponse.data,
-          creditReports: creditReportsResponse.data,
-        });
-      } catch (err) {
-        setError("Error fetching data");
-        console.error("Error fetching reports:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchReports();
   }, [user?.id]);
+  const fetchReports = async () => {
+    console.log(lead, "leadd");
+    if (!lead?.id) {
+      return;
+    }
+
+    try {
+      const loanReportsPromise = axios.get(`/loans-reports/${lead?.id}`);
+      const creditReportsPromise = axios.get(`/credit-reports/`);
+      const [loanReportsResponse, creditReportsResponse] = await Promise.all([
+        loanReportsPromise,
+        creditReportsPromise,
+      ]);
+      // Set the fetched data
+      setData({
+        loanReports: loanReportsResponse.data,
+        creditReports: creditReportsResponse.data,
+      });
+    } catch (err) {
+      setError("Error fetching data");
+      console.error("Error fetching reports:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user.id && !lead?.id) {
@@ -154,7 +154,7 @@ export default function TaskForm({ leadData }) {
         `http://localhost:3000/loans-reports/`,
         loanReport
       );
-      console.log(x, "dlkhgy");
+      fetchReports();
       alert("Loan report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the loan report!", error);
@@ -163,6 +163,7 @@ export default function TaskForm({ leadData }) {
   const postCreditReport = async () => {
     try {
       await axios.post(`/credit-reports`, creditReport);
+      fetchReports();
       alert("Credit report submitted successfully");
     } catch (error) {
       console.error("There was an error posting the credit report!", error);
@@ -298,7 +299,7 @@ export default function TaskForm({ leadData }) {
       <EmployeeSidebar />
       <div className="global-container">
         <div className="container mt-5">
-          <h2 className="mb-4 text-center">Activity</h2>
+          <h2 className="mb-4 text-center"><strong>Activity</strong></h2>
           <Form onSubmit={handleSubmit}>
             <h4>Personal Information</h4>
             <Row>
@@ -638,7 +639,7 @@ export default function TaskForm({ leadData }) {
                         <tfoot>
                           <tr>
                             <td>
-                              
+
                             </td>
                             <td>
                               <strong>Total</strong>
