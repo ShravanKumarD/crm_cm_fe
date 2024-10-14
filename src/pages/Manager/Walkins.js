@@ -14,9 +14,9 @@ const Walkins = () => {
   const [selectedLeads, setSelectedLeads] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState({ leadId: null, taskType: "", followUpDate: null });
+  const [selectedTask, setSelectedTask] = useState({ leadId: null, taskType: "", followUpDate: null, closingDate: null, loginDate: null });
   const [searchTerm, setSearchTerm] = useState(""); 
-  const [note,setNote]=useState("")
+  const [note, setNote] = useState("");
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user")) || {};
 
@@ -95,27 +95,28 @@ const Walkins = () => {
     setSelectedTask((prevTask) => ({ ...prevTask, leadId, taskType }));
   };
 
-  const handleFollowUpDateChange = (leadId, date) => {
-    setSelectedTask((prevTask) => ({ ...prevTask, leadId, followUpDate: date }));
+  const handleFollowUpDateChange = (leadId, field, date) => {
+    setSelectedTask((prevTask) => ({ ...prevTask, leadId, [field]: date }));
   };
 
   const handleSubmitTask = async () => {
     try {
-      const { leadId, taskType, followUpDate } = selectedTask;
+      const { leadId, taskType, followUpDate, closingDate, loginDate } = selectedTask;
       const taskData = {
         leadId,
         actionType: taskType,
         status: taskType,
         followUp: followUpDate,
+        closingDate,
+        loginDate,
         userId: user.id,
+        note
       };
-      await axios.put(`/lead/${leadId}`, {
-        status: taskType,
-        userId: user.id,
-      });
+      await axios.put(`/lead/${leadId}`, { status: taskType, userId: user.id });
       await axios.post("/task/", taskData);
       alert("Task created successfully!");
       setShowModal(false);
+      setNote(""); // Clear the note after submission
     } catch (error) {
       console.error("Error posting task:", error.message);
     }
@@ -133,161 +134,147 @@ const Walkins = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Filter leads based on search term
   const filteredLeads = leads.filter(lead => 
     lead.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <>
-    <ManagerSidebar/>
-    <div className="global-container">
-      <div className="container">
-        <br />
-        {/* Search Input Field */}
-        <Form.Group controlId="search">
-          <Form.Control 
-            type="text" 
-            placeholder="Search by name..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)} 
-          />
-        </Form.Group>
-        <br />
-        <div className="table-responsive">
-          <Table striped>
-            <thead>
-              <tr>
-                <th>
-                  <input type="checkbox" checked={selectAll} onChange={handleSelectAll} />
-                </th>
-                <th>Lead Id</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Lead Source</th>
-                <th>Status</th>
-                <th>Task Type</th>
-                <th>Login Date</th>
-                <th>Closing Date</th>
-                <th>Follow up date</th>
-                <th>Note</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeads.map((lead) => (
-                <tr key={lead.id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedLeads.includes(lead.id)}
-                      onChange={() => handleCheckboxChange(lead.id)}
-                    />
-                  </td>
-                  <td>{lead.id}</td>
-                  <td>{lead.name}</td>
-                  <td>{lead.email}</td>
-                  <td>{lead.phone}</td>
-                  <td>{lead.leadSource || "NA"}</td>
-                  <td>{lead.status}</td>
-                  <td>
-                    <Form.Select
-                      className="dropdownInTable"
-                      value={selectedTask.leadId === lead.id ? selectedTask.taskType : ""}
-                      onChange={(e) => handleTaskTypeChange(lead.id, e.target.value)}
-                    >
-                      <option value="">{lead.tasks[0]?.actionType || "Select Task"}</option>
-                      <option value="customer reschedule appointment">Customer Reschedule Appointment</option>
-                      <option value="okay for the policy">Okay For the Policy</option>
-                      <option value="not okay for the policy">Not Okay for the Policy</option>
-                      <option value="think and get back">Think and get back</option>
-                      <option value="notPossible">Not Possible</option>
-                      <option value="processCompleted">Completed</option>
-                    </Form.Select>
-                  </td>
-                  <td>
-                  <DatePicker
-                      className="touchable-global"
-                      selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
-                      // onChange={(date) => handleFollowUpDateChange(lead.id, date)}
-                      placeholderText="select date"
-                      showTimeSelect
-                      dateFormat="dd-MM-yyyy HH:mm"
-                      minDate={today}
-                    />
-                  </td>
-                  <td>
-                  <DatePicker
-                      className="touchable-global"
-                      selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
-                      // onChange={(date) => handleFollowUpDateChange(lead.id, date)}
-                        placeholderText="select date"
-                      showTimeSelect
-                      dateFormat="dd-MM-yyyy HH:mm"
-                      minDate={today}
-                    />
-                  </td>
-                  <td>
-                    <DatePicker
-                      className="touchable-global"
-                      selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
-                      onChange={(date) => handleFollowUpDateChange(lead.id, date)}
-                        placeholderText="select date"
-                      showTimeSelect
-                      dateFormat="dd-MM-yyyy HH:mm"
-                      minDate={today}
-                    />
-                  </td>
-                  <td>
-                  <Form.Control
-        as="textarea"
-        rows={3}
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="Write here..."
-      />
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => openModal(lead.id)}
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleViewLead(lead)}
-                    >
-                      View
-                    </button>
-                  </td>
+      <ManagerSidebar/>
+      <div className="global-container">
+        <div className="container">
+          <br />
+          <Form.Group controlId="search">
+            <Form.Control 
+              type="text" 
+              placeholder="Search by name..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)} 
+            />
+          </Form.Group>
+          <br />
+          <div className="table-responsive">
+            <Table striped>
+              <thead>
+                <tr>
+                  <th>
+                    <input type="checkbox" checked={selectAll} onChange={handleSelectAll} />
+                  </th>
+                  <th>Lead Id</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Lead Source</th>
+                  <th>Status</th>
+                  <th>Task Type</th>
+                  <th>Login Date</th>
+                  <th>Closing Date</th>
+                  <th>Follow up date</th>
+                  <th>Note</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {filteredLeads.map((lead) => (
+                  <tr key={lead.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedLeads.includes(lead.id)}
+                        onChange={() => handleCheckboxChange(lead.id)}
+                      />
+                    </td>
+                    <td>{lead.id}</td>
+                    <td>{lead.name}</td>
+                    <td>{lead.email}</td>
+                    <td>{lead.phone}</td>
+                    <td>{lead.leadSource || "NA"}</td>
+                    <td>{lead.status}</td>
+                    <td>
+                      <Form.Select
+                        className="dropdownInTable"
+                        value={selectedTask.leadId === lead.id ? selectedTask.taskType : ""}
+                        onChange={(e) => handleTaskTypeChange(lead.id, e.target.value)}
+                      >
+                        <option value="">{lead.tasks[0]?.actionType || "Select Task"}</option>
+                        <option value="customer reschedule appointment">Customer Reschedule Appointment</option>
+                        <option value="okay for the policy">Okay For the Policy</option>
+                        <option value="not okay for the policy">Not Okay for the Policy</option>
+                        <option value="think and get back">Think and get back</option>
+                        <option value="notPossible">Not Possible</option>
+                        <option value="processCompleted">Completed</option>
+                      </Form.Select>
+                    </td>
+                    <td>
+                      <DatePicker
+                        className="touchable-global"
+                        selected={selectedTask.leadId === lead.id ? selectedTask.loginDate : null}
+                        onChange={(date) => handleFollowUpDateChange(lead.id, "loginDate", date)}
+                        placeholderText="Select date"
+                        showTimeSelect
+                        dateFormat="dd-MM-yyyy HH:mm"
+                        minDate={today}
+                      />
+                    </td>
+                    <td>
+                      <DatePicker
+                        className="touchable-global"
+                        selected={selectedTask.leadId === lead.id ? selectedTask.closingDate : null}
+                        onChange={(date) => handleFollowUpDateChange(lead.id, "closingDate", date)}
+                        placeholderText="Select date"
+                        showTimeSelect
+                        dateFormat="dd-MM-yyyy HH:mm"
+                        minDate={today}
+                      />
+                    </td>
+                    <td>
+                      <DatePicker
+                        className="touchable-global"
+                        selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
+                        onChange={(date) => handleFollowUpDateChange(lead.id, "followUpDate", date)}
+                        placeholderText="Select date"
+                        showTimeSelect
+                        dateFormat="dd-MM-yyyy HH:mm"
+                        minDate={today}
+                      />
+                    </td>
+                    <td>
+                      <Form.Control
+                        type="text"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Add a note"
+                      />
+                    </td>
+                    <td>
+                      <Button className="btn btn-primary" onClick={() => openModal(lead.id)}>
+                        Submit
+                      </Button>
+                      <Button className="btn btn-secondary" onClick={() => handleViewLead(lead)}>
+                        View
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Task Creation</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>Are you sure you want to create this task?</Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal(false)} className="cancelButton">
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleSubmitTask} className="confirmButton">
+                Confirm
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
-
-        {/* Modal for Confirmation */}
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <div><h2>Confirm Task Creation</h2></div>
-          </Modal.Header>
-          <Modal.Body>
-            <p>
-            Are you sure you want to create this task for lead ID {selectedTask.leadId}?</p>
-          </Modal.Body>
-          <Modal.Footer>
-            <button classname="btn btn-primary" onClick={() => setShowModal(false)}>
-              Cancel
-            </button>
-            <button   classname="btn btn-primary"  onClick={handleSubmitTask}>
-              Confirm
-            </button>
-          </Modal.Footer>
-        </Modal>
       </div>
-    </div>
     </>
   );
 };

@@ -174,7 +174,7 @@ const LeadList = () => {
     };
 
     const handleViewLead = (lead) => {
-        navigate('/lead-details', { state: { lead } });
+        navigate('/manager-lead-details', { state: { lead } });
     };
 
     const handleRevertAssignments = () => {

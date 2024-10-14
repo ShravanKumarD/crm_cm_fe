@@ -19,6 +19,7 @@ const Walkins = () => {
   const user = JSON.parse(localStorage.getItem("user")) || {};
 
   useEffect(() => {
+    console.log(leads,"leads")
     fetchAssignedLeads();
   }, []);
 
@@ -37,34 +38,28 @@ const Walkins = () => {
 
   const fetchLeadDetails = async (leadIds) => {
     try {
-      const response = await axios.get("/lead/");
+      const response = await axios.get("/lead");
       if (response.status === 200) {
         const filteredLeads = response.data.leads.filter((lead) => leadIds.includes(lead.id));
-        const fetchTasks = async () => {
-          try {
-            const taskResponse = await axios.get(`/task/${user.id}`);
-            if (taskResponse && taskResponse.data) {
-              const tasks = taskResponse.data.reverse();
-              const combinedLeadsWithTasks = filteredLeads.map((lead) => ({
-                ...lead,
-                tasks: tasks.filter((task) => task.leadId === lead.id),
-              }));
-              console.log(combinedLeadsWithTasks,"combinedLeadsWithTasks")
-              const relevantLeads = combinedLeadsWithTasks.filter((lead) => {
-                const recentTask = lead.tasks[0]?.actionType;
-                return (
-                  lead.status === "customer walkin" ||
-                  lead.status === "schedule appointment with manager" ||
-                  lead.status === "walkin"
-                );
-              });
-              setLeads(relevantLeads);
-            }
-          } catch (error) {
-            console.error("Error fetching task data:", error.message);
-          }
-        };
-        fetchTasks();
+        const taskResponse = await axios.get(`/task/${user.id}`);
+        if (taskResponse && taskResponse.data) {
+          const tasks = taskResponse.data.reverse();
+          const combinedLeadsWithTasks = filteredLeads.map((lead) => ({
+            ...lead,
+            tasks: tasks.filter((task) => task.leadId === lead.id),
+          }));
+          const relevantLeads = combinedLeadsWithTasks.filter((lead) => [
+            "customer walkin",
+            "schedule appointment with manager",
+            "walkin",
+            "customer reschedule appointment",
+            "okay for the policy",
+            "not okay for the policy",
+            "think and get back",
+            "not possible",
+          ].includes(lead.status));
+          setLeads(relevantLeads);
+        }
       }
     } catch (error) {
       console.error("Error fetching lead details:", error.message);
@@ -104,16 +99,17 @@ const Walkins = () => {
       const taskData = {
         leadId,
         actionType: taskType,
-        status:taskType,
+        status: taskType,
         followUp: followUpDate,
         userId: user.id,
       };
-     await axios.put(`/lead/${leadId}`, {
-        status: taskType,
-        userId: user.id,
-      });
+      // await axios.put(`/lead/${leadId}`, {
+      //   status: taskType,
+      //   userId: user.id,
+      // });
       await axios.post("/task/", taskData);
       alert("Task created successfully!");
+      fetchLeadDetails();
       setShowModal(false);
     } catch (error) {
       console.error("Error posting task:", error.message);
@@ -125,116 +121,86 @@ const Walkins = () => {
     setShowModal(true);
   };
 
-  const handleCreateTask = (lead) => {
-    navigate("/add-task-employee", { state: { lead } });
-  };
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   return (
     <>
-    <EmployeeSidebar/>
-    <div className="global-container">
-      <div className="container">
-        <br />
-        <div className="table-responsive">
-          <Table striped>
-            <thead>
-              <tr>
-                <th>
-                  <input type="checkbox" checked={selectAll} onChange={handleSelectAll} />
-                </th>
-                <th>Lead Id</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Lead Source</th>
-                <th>status</th>
-                <th>Task Type</th>
-                <th>Follow up date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leads.map((lead) => (
-                <tr key={lead.id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedLeads.includes(lead.id)}
-                      onChange={() => handleCheckboxChange(lead.id)}
-                    />
-                  </td>
-                  <td>{lead.id}</td>
-                  <td>{lead.name}</td>
-                  <td>{lead.email}</td>
-                  <td>{lead.phone}</td>
-                  <td>{lead.leadSource || "NA"}</td>
-                  <td>{lead.status}</td>
-                  <td>
-                    <Form.Select
-                      className="dropdownInTable"
-                      value={selectedTask.leadId === lead.id ? selectedTask.taskType : ""}
-                      onChange={(e) => handleTaskTypeChange(lead.id, e.target.value)}
-                    >
-                      <option value="">{lead.tasks[0]?.actionType || "Select Task"}</option>
-                      <option value="customer reschedule appointment">Customer Reschedule Appointment</option>
-                      <option value="okay for the policy">Okay For the Policy</option>
-                      <option value="not okay for the policy">Not Okay for the Policy</option>
-                      <option value="think and get back">Think and get back</option>
-                      <option value="not possible">Not Possible</option>
-                    </Form.Select>
-                  </td>
-                  <td>
-                    <DatePicker
-                      className="touchable-global"
-                      placeholderText="please select"
-                      selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null}
-                      onChange={(date) => handleFollowUpDateChange(lead.id, date)}
-                      showTimeSelect
-                      dateFormat="dd-MM-yyyy HH:mm"
-                      minDate={today}
-                    />
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => openModal(lead.id)}
-                    >
-                      Update Task
-                    </button>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleViewLead(lead)}
-                    >
-                      View
-                    </button>
-                  </td>
+      <EmployeeSidebar />
+      <div className="global-container">
+        <div className="container">
+          <br />
+          <div className="table-responsive">
+            <Table striped>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" checked={selectAll} onChange={handleSelectAll} /></th>
+                  <th>Lead Id</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Lead Source</th>
+                  <th>Status</th>
+                  <th>Task Type</th>
+                  <th>Follow up date</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+              </thead>
+              <tbody>
+                {leads.map((lead) => (
+                  <tr key={lead.id}>
+                    <td><input type="checkbox" checked={selectedLeads.includes(lead.id)} onChange={() => handleCheckboxChange(lead.id)} /></td>
+                    <td>{lead.id}</td>
+                    <td>{lead.name}</td>
+                    <td>{lead.email}</td>
+                    <td>{lead.phone}</td>
+                    <td>{lead.leadSource || "NA"}</td>
+                    <td>{lead.status}</td>
+                    <td>
+                      <Form.Select
+                        className="dropdownInTable"
+                        value={selectedTask.leadId === lead.id ? selectedTask.taskType : ""}
+                        onChange={(e) => handleTaskTypeChange(lead.id, e.target.value)}
+                      >
+                        <option value="">{lead.tasks[0]?.actionType || "Select Task"}</option>
+                        <option value="customer reschedule appointment">Customer Reschedule Appointment</option>
+                        <option value="okay for the policy">Okay For the Policy</option>
+                        <option value="not okay for the policy">Not Okay for the Policy</option>
+                        <option value="think and get back">Think and get back</option>
+                        <option value="not possible">Not Possible</option>
+                      </Form.Select>
+                    </td>
+                    <td>
+  <DatePicker
+    className="touchable-global"
+    placeholderText="please select"
+    selected={selectedTask.leadId === lead.id ? selectedTask.followUpDate : null} 
+    onChange={(date) => handleFollowUpDateChange(lead.id, date)}
+    showTimeSelect
+    dateFormat="dd-MM-yyyy HH:mm"
+    minDate={today}
+  />
+</td>
 
-        {/* Modal for Confirmation */}
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <div><h2>Confirm Task Creation</h2></div>
-          </Modal.Header>
-          <Modal.Body>
-           <p> Are you sure you want to create this task for lead ID {selectedTask.leadId}?</p>
-          </Modal.Body>
-          <Modal.Footer>
-            <button className="btn btn-primary" onClick={() => setShowModal(false)}>
-              Cancel
-            </button>
-            <button className="btn btn-primary"onClick={handleSubmitTask}>
-              Confirm
-            </button>
-          </Modal.Footer>
-        </Modal>
+                    <td>
+                      <button className="btn btn-primary btn-sm" onClick={() => openModal(lead.id)}>Update Task</button>
+                      <button className="btn btn-secondary btn-sm" onClick={() => handleViewLead(lead)}>View</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton><h2>Confirm Task Creation</h2></Modal.Header>
+            <Modal.Body>Are you sure you want to create this task for lead ID {selectedTask.leadId}?</Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button variant="primary" onClick={handleSubmitTask}>Confirm</Button>
+            </Modal.Footer>
+          </Modal>
+        </div>
       </div>
-    </div>
     </>
   );
 };

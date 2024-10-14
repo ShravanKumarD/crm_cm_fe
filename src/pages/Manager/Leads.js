@@ -102,9 +102,9 @@ export default function Leads() {
                     <h1>Manage Leads</h1>
                 </div>
                 <div className='mb-3'>
-                    <Button className="btn btn-primary btn-md" onClick={handleShow}>Add Leads</Button>
-                    <Button className='btn  btn-primary btn-md ms-2' onClick={handleNavigate}>View Leads</Button>
-                    <Button className='btn  btn-primary btn-md ms-2' onClick={handleNavigateManagement}>Manage Leads</Button>
+                    {/* <Button className="btn btn-primary btn-md" onClick={handleShow}>Add Leads</Button> */}
+                <Button className='btn  btn-primary btn-md ms-2' onClick={handleNavigate}>Go To Leads</Button>
+                    {/* <Button className='btn  btn-primary btn-md ms-2' onClick={handleNavigateManagement}>Manage Leads</Button> */}
                 </div>
 
 
